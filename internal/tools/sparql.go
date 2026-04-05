@@ -47,8 +47,19 @@ func sparqlHandlerFactory(store *rdfstore.Store) handlerFunc {
 }
 
 // isUpdate detects SPARQL Update operations by checking for UPDATE keywords.
+// Skips PREFIX/BASE declarations at the start to find the actual operation.
 func isUpdate(query string) bool {
 	upper := strings.ToUpper(strings.TrimSpace(query))
+	// Skip PREFIX and BASE declarations to find the actual operation keyword.
+	for strings.HasPrefix(upper, "PREFIX") || strings.HasPrefix(upper, "BASE") {
+		// Skip to end of line or next keyword.
+		idx := strings.Index(upper, "\n")
+		if idx < 0 {
+			// Single line with only PREFIX — not an update.
+			return false
+		}
+		upper = strings.TrimSpace(upper[idx+1:])
+	}
 	for _, kw := range []string{"INSERT", "DELETE", "LOAD", "CLEAR", "DROP", "CREATE", "COPY", "MOVE", "ADD"} {
 		if strings.HasPrefix(upper, kw) {
 			return true
