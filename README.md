@@ -1,8 +1,12 @@
+<p align="center">
+  <img src="docs/logo-sm.png" alt="Hippocamp Logo" width="200">
+</p>
+
 # hippocamp
 
-RDF MCP server — exposes an in-memory knowledge graph to LLMs via three tools: `triple`, `sparql`, `graph`.
+RDF knowledge graph for LLMs — an MCP server that gives any AI agent a structured, queryable memory via four tools: `triple`, `sparql`, `graph`, `search`.
 
-Built with [mark3labs/mcp-go](https://github.com/mark3labs/mcp-go) and [tggo/goRDFlib](https://github.com/tggo/goRDFlib).
+Plug it into any project as a persistent brain. Use the built-in ontology for code analysis, research notes, API documentation, or any structured knowledge. Includes a Claude Code skill (`/project-analyze`) and hooks for automatic graph queries.
 
 ## Install
 
@@ -107,6 +111,87 @@ Returns JSON bindings for SELECT, `"true"`/`"false"` for ASK, `"ok"` for updates
 {"action":"prefix_list"}
 {"action":"prefix_remove","prefix":"ex"}
 ```
+
+---
+
+### `search` — semantic keyword search
+
+```
+{"query": "authentication"}
+{"query": "Store", "type": "https://hippocamp.dev/ontology#Struct"}
+{"query": "middleware", "scope": "project:myapp", "limit": 5}
+```
+
+| Parameter | Notes |
+|---|---|
+| `query` | Search keywords (required, case-insensitive) |
+| `type` | Filter by `rdf:type` URI |
+| `scope` | Named graph to search in (omit for all graphs) |
+| `limit` | Max results (default: 20) |
+
+Searches across `rdfs:label`, `hippo:summary`, `hippo:filePath`, `hippo:signature`, `hippo:content`, `hippo:url`, and subject URIs. Returns JSON array of matching resources with type, label, summary, and properties.
+
+---
+
+## CLI query mode
+
+For scripts and hooks, run a one-shot search without starting the MCP server:
+
+```bash
+hippocamp --config config.yaml --query "search terms"
+hippocamp --config config.yaml --query "auth" --type "https://hippocamp.dev/ontology#Function" --limit 5
+```
+
+Loads the persisted graph, runs the search, prints pretty-printed JSON, and exits.
+
+## Ontology
+
+Hippocamp includes a lightweight RDF ontology (`ontology/hippo.ttl`) with two layers:
+
+**Base layer** (any domain):
+- `hippo:Topic` — subject areas, themes
+- `hippo:Entity` — people, orgs, products, APIs, datasets
+- `hippo:Note` — free-form observations
+- `hippo:Source` — articles, papers, URLs, books
+- `hippo:Decision` — recorded decisions with rationale
+- `hippo:Question` — open questions
+- `hippo:Tag` — lightweight labels
+
+**Code layer** (software projects):
+- `hippo:Project`, `hippo:Module`, `hippo:File`
+- `hippo:Function`, `hippo:Struct`, `hippo:Interface`, `hippo:Class`
+- `hippo:Dependency`, `hippo:Concept`
+
+The ontology is open-world — extend with your own classes and properties.
+
+## Claude Code integration
+
+### Skill: `/project-analyze`
+
+Copy `.claude/skills/project-analyze.md` to your project. Run `/project-analyze` to scan the codebase and build a knowledge graph with files, symbols, dependencies, and architectural concepts.
+
+### Hooks
+
+Copy `.claude/hooks/` to your project and configure in `.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      { "command": ".claude/hooks/hippocamp-pre-query.sh \"$PROMPT\"" }
+    ],
+    "PostToolUse": [
+      {
+        "command": ".claude/hooks/hippocamp-post-edit.sh \"$TOOL_NAME\" \"$FILE_PATH\"",
+        "matcher": "Edit|Write"
+      }
+    ]
+  }
+}
+```
+
+- **Pre-query hook**: Before each prompt, queries the graph for relevant context
+- **Post-edit hook**: After file edits, tracks which files need re-indexing
 
 ## Configuration
 
