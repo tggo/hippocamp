@@ -38,7 +38,7 @@ archives:
 checksum:
   name_template: "checksums.txt"
 
-brews:
+homebrew_casks:
   - name: hippocamp
     repository:
       owner: tggo
