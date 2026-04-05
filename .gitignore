@@ -5,3 +5,5 @@ certs/
 *.cer
 *.p12
 .claude/.hippocamp-stale
+.claude/settings.json
+hippocamp
