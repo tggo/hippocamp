@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>hippocamp — RDF MCP Server</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=JetBrains+Mono:wght@400;500&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #FAF7F2;
+      --bg-warm:   #F4EFE6;
+      --bg-card:   #FFFDFB;
+      --ink:       #1C1815;
+      --ink-light: #5C5550;
+      --ink-faint: #A09890;
+      --terra:     #B85C38;
+      --terra-dim: #D4856A;
+      --forest:    #3D6B52;
+      --forest-dim:#5E9476;
+      --rule:      #E2DAD0;
+      --code-bg:   #F0EBE3;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Lora', Georgia, serif;
+      font-size: 17px;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── TYPOGRAPHY ── */
+    h1, h2, h3 {
+      font-family: 'Cormorant Garamond', 'Times New Roman', serif;
+      font-weight: 400;
+      letter-spacing: -0.01em;
+    }
+
+    code, pre, .mono {
+      font-family: 'JetBrains Mono', 'Courier New', monospace;
+      font-size: 0.82em;
+    }
+
+    /* ── LAYOUT ── */
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(250, 247, 242, 0.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--rule);
+    }
+    .nav-inner {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 32px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.25rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      color: var(--ink);
+      text-decoration: none;
+    }
+    .nav-logo span { color: var(--terra); }
+    .nav-links {
+      display: flex;
+      gap: 28px;
+      list-style: none;
+    }
+    .nav-links a {
+      color: var(--ink-light);
+      text-decoration: none;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--terra); }
+    .nav-gh {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--ink);
+      color: var(--bg) !important;
+      padding: 6px 14px;
+      border-radius: 3px;
+      transition: background 0.2s !important;
+    }
+    .nav-gh:hover { background: var(--terra) !important; color: white !important; }
+
+    /* ── HERO ── */
+    #hero {
+      padding-top: 56px;
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      gap: 64px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-left {
+      padding: 80px 0 80px;
+      opacity: 0;
+      transform: translateY(24px);
+      animation: fadeUp 0.8s ease forwards 0.2s;
+    }
+    .hero-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--terra);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .hero-eyebrow::before {
+      content: '';
+      display: block;
+      width: 28px;
+      height: 1px;
+      background: var(--terra);
+    }
+    h1.hero-title {
+      font-size: clamp(4rem, 8vw, 7rem);
+      line-height: 1;
+      letter-spacing: -0.03em;
+      margin-bottom: 24px;
+      color: var(--ink);
+    }
+    h1.hero-title em {
+      font-style: italic;
+      color: var(--terra);
+    }
+    .hero-sub {
+      font-size: 1.15rem;
+      color: var(--ink-light);
+      line-height: 1.6;
+      margin-bottom: 40px;
+      max-width: 440px;
+    }
+    .hero-install {
+      display: inline-flex;
+      align-items: center;
+      gap: 0;
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+      overflow: hidden;
+      background: var(--bg-card);
+      box-shadow: 0 2px 12px rgba(28,24,21,0.06);
+    }
+    .hero-install-label {
+      background: var(--code-bg);
+      padding: 10px 14px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--ink-faint);
+      letter-spacing: 0.06em;
+      border-right: 1px solid var(--rule);
+      white-space: nowrap;
+    }
+    .hero-install-cmd {
+      padding: 10px 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      color: var(--forest);
+    }
+    .hero-install-copy {
+      padding: 10px 14px;
+      background: none;
+      border: none;
+      border-left: 1px solid var(--rule);
+      cursor: pointer;
+      color: var(--ink-faint);
+      transition: color 0.2s;
+      font-size: 0.9rem;
+    }
+    .hero-install-copy:hover { color: var(--terra); }
+
+    /* Graph SVG hero */
+    .hero-graph {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      animation: fadeIn 1s ease forwards 0.6s;
+    }
+
+    /* ── GRAPH SVG STYLES ── */
+    .graph-svg { width: 100%; max-width: 480px; height: auto; }
+    .g-edge {
+      stroke: var(--rule);
+      stroke-width: 1.5;
+      fill: none;
+      stroke-dasharray: 200;
+      stroke-dashoffset: 200;
+    }
+    .g-edge.draw-1 { animation: drawEdge 0.8s ease forwards 1s; }
+    .g-edge.draw-2 { animation: drawEdge 0.8s ease forwards 1.3s; }
+    .g-edge.draw-3 { animation: drawEdge 0.8s ease forwards 1.6s; }
+    .g-edge.draw-4 { animation: drawEdge 0.8s ease forwards 1.9s; }
+    .g-edge.draw-5 { animation: drawEdge 0.8s ease forwards 2.2s; }
+    .g-edge.draw-6 { animation: drawEdge 0.8s ease forwards 2.5s; }
+
+    .g-node-circle {
+      fill: var(--bg-card);
+      stroke: var(--rule);
+      stroke-width: 1.5;
+    }
+    .g-node-circle.primary {
+      stroke: var(--terra);
+      stroke-width: 2;
+    }
+    .g-node-circle.secondary {
+      stroke: var(--forest);
+      stroke-width: 1.5;
+    }
+    .g-node {
+      opacity: 0;
+    }
+    .g-node.appear-1 { animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards 0.8s; }
+    .g-node.appear-2 { animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards 1.1s; }
+    .g-node.appear-3 { animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards 1.4s; }
+    .g-node.appear-4 { animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards 1.7s; }
+    .g-node.appear-5 { animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards 2.0s; }
+    .g-node.appear-6 { animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards 2.3s; }
+    .g-node.appear-7 { animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards 2.6s; }
+
+    .g-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      fill: var(--ink-light);
+    }
+    .g-label.uri { fill: var(--forest); }
+    .g-label.pred { fill: var(--terra); font-size: 8px; }
+    .g-edge-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 7.5px;
+      fill: var(--ink-faint);
+    }
+
+    /* ── SECTION BASE ── */
+    section { padding: 100px 0; }
+    .section-rule {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+    .section-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--ink-faint);
+      letter-spacing: 0.1em;
+      min-width: 28px;
+    }
+    .section-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 400;
+      color: var(--ink);
+    }
+    .section-rule::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--rule);
+    }
+
+    /* ── WHAT IS IT ── */
+    #what { background: var(--bg); }
+    .what-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: start;
+    }
+    .what-text p { color: var(--ink-light); margin-bottom: 16px; }
+    .what-text p strong { color: var(--ink); font-weight: 500; }
+
+    .triple-diagram {
+      background: var(--bg-card);
+      border: 1px solid var(--rule);
+      border-radius: 8px;
+      padding: 36px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .triple-diagram-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      margin-bottom: 8px;
+    }
+    .triple-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .triple-node {
+      padding: 6px 12px;
+      border-radius: 3px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      border: 1px solid transparent;
+    }
+    .triple-node.subj { background: rgba(184,92,56,0.08); border-color: rgba(184,92,56,0.25); color: var(--terra); }
+    .triple-node.pred { background: rgba(61,107,82,0.08); border-color: rgba(61,107,82,0.25); color: var(--forest); }
+    .triple-node.obj  { background: var(--code-bg); border-color: var(--rule); color: var(--ink); }
+    .triple-arrow {
+      font-size: 0.8rem;
+      color: var(--ink-faint);
+    }
+    .triple-divider { height: 1px; background: var(--rule); }
+
+    /* ── TOOLS ── */
+    #tools { background: var(--bg-warm); }
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .tool-card {
+      background: var(--bg-card);
+      border: 1px solid var(--rule);
+      border-radius: 6px;
+      padding: 36px 32px;
+      position: relative;
+      transition: box-shadow 0.25s, border-color 0.25s;
+    }
+    .tool-card:hover {
+      box-shadow: 0 8px 32px rgba(28,24,21,0.08);
+      border-color: var(--terra-dim);
+    }
+    .tool-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 3.5rem;
+      font-weight: 300;
+      font-style: italic;
+      color: var(--rule);
+      line-height: 1;
+      margin-bottom: 16px;
+    }
+    .tool-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.1rem;
+      color: var(--terra);
+      margin-bottom: 8px;
+    }
+    .tool-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 16px 0;
+    }
+    .tool-action {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      background: var(--code-bg);
+      border: 1px solid var(--rule);
+      padding: 3px 8px;
+      border-radius: 2px;
+      color: var(--forest);
+    }
+    .tool-desc {
+      font-size: 0.9rem;
+      color: var(--ink-light);
+      line-height: 1.6;
+    }
+    .tool-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 3px;
+      height: 0;
+      background: var(--terra);
+      border-radius: 6px 0 0 6px;
+      transition: height 0.3s ease;
+    }
+    .tool-card:hover::after { height: 100%; }
+
+    /* ── CODE EXAMPLES ── */
+    #examples { background: var(--bg); }
+    .examples-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--rule);
+      margin-bottom: 0;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      padding: 10px 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      color: var(--ink-faint);
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: -1px;
+    }
+    .tab-btn.active {
+      color: var(--terra);
+      border-bottom-color: var(--terra);
+    }
+    .tab-btn:hover { color: var(--ink); }
+
+    .code-panel {
+      display: none;
+      background: var(--bg-card);
+      border: 1px solid var(--rule);
+      border-top: none;
+      border-radius: 0 0 6px 6px;
+    }
+    .code-panel.active { display: block; }
+    .code-panel-inner {
+      padding: 28px 32px;
+      overflow-x: auto;
+    }
+    pre {
+      margin: 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.7;
+      color: var(--ink);
+    }
+    .kw  { color: var(--terra); }
+    .str { color: var(--forest); }
+    .cm  { color: var(--ink-faint); font-style: italic; }
+    .key { color: var(--ink); }
+    .val { color: var(--forest); }
+    .op  { color: var(--terra-dim); }
+
+    /* ── INSTALL / SETUP ── */
+    #install { background: var(--bg-warm); }
+    .install-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+    }
+    .install-card {
+      background: var(--bg-card);
+      border: 1px solid var(--rule);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .install-card-head {
+      padding: 16px 24px;
+      background: var(--code-bg);
+      border-bottom: 1px solid var(--rule);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .install-card-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-light);
+    }
+    .install-card-body { padding: 24px; }
+    .install-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .install-step:last-child { margin-bottom: 0; }
+    .step-n {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.4rem;
+      font-style: italic;
+      color: var(--terra-dim);
+      min-width: 24px;
+      line-height: 1;
+      padding-top: 2px;
+    }
+    .step-body {}
+    .step-label {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+    .step-cmd {
+      background: var(--code-bg);
+      border: 1px solid var(--rule);
+      border-radius: 3px;
+      padding: 8px 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--forest);
+    }
+
+    /* ── FEATURES ── */
+    #features { background: var(--bg); }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--rule);
+      border: 1px solid var(--rule);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .feature-cell {
+      background: var(--bg-card);
+      padding: 32px 28px;
+    }
+    .feature-icon {
+      font-size: 1.4rem;
+      margin-bottom: 12px;
+    }
+    .feature-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.25rem;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+    .feature-desc {
+      font-size: 0.85rem;
+      color: var(--ink-light);
+      line-height: 1.5;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--rule);
+      padding: 48px 0;
+    }
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .footer-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: var(--ink-light);
+    }
+    .footer-logo span { color: var(--terra); }
+    .footer-links { display: flex; gap: 24px; list-style: none; }
+    .footer-links a {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.06em;
+      color: var(--ink-faint);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--terra); }
+    .footer-copy {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--ink-faint);
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+    @keyframes drawEdge {
+      to { stroke-dashoffset: 0; }
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.6); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    /* ── SCROLL REVEAL ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: none;
+    }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      #hero { grid-template-columns: 1fr; min-height: auto; padding: 100px 0 60px; }
+      .hero-graph { display: none; }
+      .what-grid, .install-grid { grid-template-columns: 1fr; }
+      .tools-grid { grid-template-columns: 1fr; }
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+      .nav-links { display: none; }
+    }
+
+    /* ── COPY BUTTON STATE ── */
+    .copied { color: var(--forest) !important; }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="#hero" class="nav-logo">hippo<span>camp</span></a>
+    <ul class="nav-links">
+      <li><a href="#what">About</a></li>
+      <li><a href="#tools">Tools</a></li>
+      <li><a href="#examples">Examples</a></li>
+      <li><a href="#install">Install</a></li>
+      <li><a href="https://github.com/tggo/hippocamp" class="nav-gh" target="_blank">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+        GitHub
+      </a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="container" style="display:contents;">
+    <div style="padding-left:32px; max-width:540px;">
+      <div class="hero-left">
+        <div class="hero-eyebrow">MCP Server</div>
+        <h1 class="hero-title">hippo<em>camp</em></h1>
+        <p class="hero-sub">
+          An RDF knowledge graph server for LLMs.
+          Query, build, and persist semantic graphs — through Claude's tool calls.
+        </p>
+        <div class="hero-install">
+          <span class="hero-install-label">brew</span>
+          <span class="hero-install-cmd">brew install tggo/tap/hippocamp</span>
+          <button class="hero-install-copy" onclick="copyInstall(this)" title="Copy">⎘</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-graph" style="padding-right:32px;">
+      <svg class="graph-svg" viewBox="0 0 480 380" xmlns="http://www.w3.org/2000/svg">
+        <!-- Edges -->
+        <path class="g-edge draw-1" d="M 180 120 Q 240 100 300 150"/>
+        <path class="g-edge draw-2" d="M 180 120 Q 140 180 120 240"/>
+        <path class="g-edge draw-3" d="M 300 150 Q 330 200 320 270"/>
+        <path class="g-edge draw-4" d="M 120 240 Q 180 290 240 300"/>
+        <path class="g-edge draw-5" d="M 320 270 Q 280 290 240 300"/>
+        <path class="g-edge draw-6" d="M 300 150 Q 380 170 400 240"/>
+
+        <!-- Edge labels -->
+        <text class="g-edge-label" x="237" y="95">ex:knows</text>
+        <text class="g-edge-label" x="123" y="175">rdf:type</text>
+        <text class="g-edge-label" x="330" y="210">ex:name</text>
+        <text class="g-edge-label" x="355" y="195">ex:age</text>
+
+        <!-- Nodes -->
+        <g class="g-node appear-1" transform="translate(180,120)">
+          <circle class="g-node-circle primary" cx="0" cy="0" r="28"/>
+          <text class="g-label uri" text-anchor="middle" dy="1">ex:Alice</text>
+          <text class="g-label" text-anchor="middle" dy="13" style="fill:#A09890;font-size:7px">subject</text>
+        </g>
+
+        <g class="g-node appear-2" transform="translate(300,150)">
+          <circle class="g-node-circle primary" cx="0" cy="0" r="28"/>
+          <text class="g-label uri" text-anchor="middle" dy="1">ex:Bob</text>
+          <text class="g-label" text-anchor="middle" dy="13" style="fill:#A09890;font-size:7px">subject</text>
+        </g>
+
+        <g class="g-node appear-3" transform="translate(120,240)">
+          <circle class="g-node-circle secondary" cx="0" cy="0" r="26"/>
+          <text class="g-label pred" text-anchor="middle" dy="1">Person</text>
+          <text class="g-label" text-anchor="middle" dy="13" style="fill:#A09890;font-size:7px">class</text>
+        </g>
+
+        <g class="g-node appear-4" transform="translate(240,300)">
+          <circle class="g-node-circle" cx="0" cy="0" r="32" style="fill:#F4EFE6;"/>
+          <text class="g-label" text-anchor="middle" dy="-4" style="fill:#5C5550;">ex:email</text>
+          <text class="g-label" text-anchor="middle" dy="9" style="fill:#A09890;font-size:7px">predicate</text>
+        </g>
+
+        <g class="g-node appear-5" transform="translate(320,270)">
+          <circle class="g-node-circle" cx="0" cy="0" r="26" style="fill:#F4EFE6;"/>
+          <text class="g-label" text-anchor="middle" dy="1" style="fill:#5C5550;">"Bob"</text>
+          <text class="g-label" text-anchor="middle" dy="13" style="fill:#A09890;font-size:7px">literal</text>
+        </g>
+
+        <g class="g-node appear-6" transform="translate(400,240)">
+          <circle class="g-node-circle" cx="0" cy="0" r="24" style="fill:#F4EFE6;"/>
+          <text class="g-label" text-anchor="middle" dy="1" style="fill:#5C5550;">42</text>
+          <text class="g-label" text-anchor="middle" dy="13" style="fill:#A09890;font-size:7px">xsd:int</text>
+        </g>
+
+        <g class="g-node appear-7" transform="translate(240,50)">
+          <rect x="-52" y="-16" width="104" height="30" rx="4" fill="#FAF7F2" stroke="#E2DAD0" stroke-width="1.5"/>
+          <text class="g-label pred" text-anchor="middle" dy="5">ex:people</text>
+        </g>
+        <!-- named graph label -->
+        <text x="240" y="32" text-anchor="middle" style="font-family:'JetBrains Mono',monospace;font-size:7px;fill:#A09890;letter-spacing:0.08em;">NAMED GRAPH</text>
+
+        <!-- Floating dots -->
+        <circle cx="60" cy="80" r="3" fill="#E2DAD0" opacity="0.6"/>
+        <circle cx="440" cy="100" r="2" fill="#E2DAD0" opacity="0.5"/>
+        <circle cx="50" cy="320" r="4" fill="#E2DAD0" opacity="0.4"/>
+        <circle cx="430" cy="340" r="3" fill="#E2DAD0" opacity="0.5"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT IS IT -->
+<section id="what">
+  <div class="container">
+    <div class="section-rule reveal">
+      <span class="section-num">01</span>
+      <h2 class="section-title">What is it?</h2>
+    </div>
+
+    <div class="what-grid">
+      <div class="what-text reveal">
+        <p>
+          <strong>Hippocamp</strong> is an MCP server that gives Claude a persistent, queryable RDF knowledge graph.
+          Named after the brain's memory center — it gives LLMs a structured place to store and recall knowledge.
+        </p>
+        <p>
+          RDF represents facts as <strong>triples</strong>: Subject → Predicate → Object.
+          Graphs of triples form a semantic web of knowledge that Claude can build,
+          query with SPARQL, and persist across sessions.
+        </p>
+        <p>
+          Backed by <strong>BadgerDB</strong> in-memory with full named graph support.
+          Data is serialized in <strong>TriG format</strong> — auto-loaded on startup,
+          auto-saved on shutdown.
+        </p>
+      </div>
+
+      <div class="triple-diagram reveal reveal-delay-1">
+        <div class="triple-diagram-title">RDF Triples</div>
+
+        <div class="triple-row">
+          <div class="triple-node subj">ex:Alice</div>
+          <div class="triple-arrow">→</div>
+          <div class="triple-node pred">ex:name</div>
+          <div class="triple-arrow">→</div>
+          <div class="triple-node obj">"Alice"</div>
+        </div>
+        <div class="triple-divider"></div>
+        <div class="triple-row">
+          <div class="triple-node subj">ex:Alice</div>
+          <div class="triple-arrow">→</div>
+          <div class="triple-node pred">rdf:type</div>
+          <div class="triple-arrow">→</div>
+          <div class="triple-node obj">ex:Person</div>
+        </div>
+        <div class="triple-divider"></div>
+        <div class="triple-row">
+          <div class="triple-node subj">ex:Alice</div>
+          <div class="triple-arrow">→</div>
+          <div class="triple-node pred">ex:knows</div>
+          <div class="triple-arrow">→</div>
+          <div class="triple-node obj">ex:Bob</div>
+        </div>
+        <div class="triple-divider"></div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:var(--ink-faint);letter-spacing:0.08em;">graph</div>
+          <div class="triple-arrow">→</div>
+          <div class="triple-node pred" style="font-size:0.72rem;">ex:people</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TOOLS -->
+<section id="tools">
+  <div class="container">
+    <div class="section-rule reveal">
+      <span class="section-num">02</span>
+      <h2 class="section-title">Three tools</h2>
+    </div>
+
+    <div class="tools-grid">
+      <div class="tool-card reveal">
+        <div class="tool-num">i</div>
+        <div class="tool-name">triple</div>
+        <div class="tool-actions">
+          <span class="tool-action">add</span>
+          <span class="tool-action">remove</span>
+          <span class="tool-action">list</span>
+        </div>
+        <p class="tool-desc">
+          CRUD operations on individual triples. Add URIs, literals, or blank nodes.
+          List with wildcard pattern matching on subject, predicate, or object.
+          Supports language tags and XSD datatypes.
+        </p>
+      </div>
+
+      <div class="tool-card reveal reveal-delay-1">
+        <div class="tool-num">ii</div>
+        <div class="tool-name">sparql</div>
+        <div class="tool-actions">
+          <span class="tool-action">SELECT</span>
+          <span class="tool-action">ASK</span>
+          <span class="tool-action">CONSTRUCT</span>
+          <span class="tool-action">UPDATE</span>
+        </div>
+        <p class="tool-desc">
+          Full SPARQL 1.1 query and update engine. Write expressive graph queries,
+          perform pattern matching, aggregations. Update operations auto-detected
+          by keyword (INSERT, DELETE, LOAD…).
+        </p>
+      </div>
+
+      <div class="tool-card reveal reveal-delay-2">
+        <div class="tool-num">iii</div>
+        <div class="tool-name">graph</div>
+        <div class="tool-actions">
+          <span class="tool-action">create</span>
+          <span class="tool-action">delete</span>
+          <span class="tool-action">list</span>
+          <span class="tool-action">dump</span>
+          <span class="tool-action">load</span>
+          <span class="tool-action">prefix_*</span>
+        </div>
+        <p class="tool-desc">
+          Named graph lifecycle management. Save and load graphs from TriG files.
+          Register namespace prefixes. Get stats on any named graph.
+          Clear graphs without deleting them.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CODE EXAMPLES -->
+<section id="examples">
+  <div class="container">
+    <div class="section-rule reveal">
+      <span class="section-num">03</span>
+      <h2 class="section-title">Examples</h2>
+    </div>
+
+    <div class="reveal">
+      <div class="examples-tabs">
+        <button class="tab-btn active" onclick="switchTab('triple')">triple</button>
+        <button class="tab-btn" onclick="switchTab('sparql')">sparql</button>
+        <button class="tab-btn" onclick="switchTab('graph')">graph</button>
+        <button class="tab-btn" onclick="switchTab('config')">config</button>
+      </div>
+
+      <div id="tab-triple" class="code-panel active">
+        <div class="code-panel-inner">
+<pre><span class="cm">// Add a literal with language tag</span>
+{
+  <span class="key">"action"</span>: <span class="str">"add"</span>,
+  <span class="key">"subject"</span>:   <span class="str">"http://example.org/Alice"</span>,
+  <span class="key">"predicate"</span>: <span class="str">"http://example.org/name"</span>,
+  <span class="key">"object"</span>:    <span class="str">"Alice"</span>,
+  <span class="key">"object_type"</span>: <span class="str">"literal"</span>,
+  <span class="key">"lang"</span>: <span class="str">"en"</span>
+}
+
+<span class="cm">// Add to a named graph</span>
+{
+  <span class="key">"action"</span>: <span class="str">"add"</span>,
+  <span class="key">"graph"</span>:     <span class="str">"http://example.org/people"</span>,
+  <span class="key">"subject"</span>:   <span class="str">"http://example.org/Alice"</span>,
+  <span class="key">"predicate"</span>: <span class="str">"rdf:type"</span>,
+  <span class="key">"object"</span>:    <span class="str">"http://example.org/Person"</span>
+}
+
+<span class="cm">// List all triples for a subject (wildcard)</span>
+{
+  <span class="key">"action"</span>: <span class="str">"list"</span>,
+  <span class="key">"subject"</span>: <span class="str">"http://example.org/Alice"</span>
+}</pre>
+        </div>
+      </div>
+
+      <div id="tab-sparql" class="code-panel">
+        <div class="code-panel-inner">
+<pre><span class="cm">// SELECT — returns JSON bindings</span>
+{
+  <span class="key">"query"</span>: <span class="str">"SELECT ?s ?name WHERE { ?s &lt;http://example.org/name&gt; ?name } LIMIT 10"</span>
+}
+
+<span class="cm">// ASK — returns "true" or "false"</span>
+{
+  <span class="key">"query"</span>: <span class="str">"ASK { &lt;http://example.org/Alice&gt; a &lt;http://example.org/Person&gt; }"</span>
+}
+
+<span class="cm">// INSERT DATA (auto-detected as update)</span>
+{
+  <span class="key">"query"</span>: <span class="str">"INSERT DATA { &lt;http://example.org/Alice&gt; &lt;http://example.org/age&gt; 30 }"</span>
+}
+
+<span class="cm">// Query a specific named graph</span>
+{
+  <span class="key">"query"</span>: <span class="str">"SELECT ?s WHERE { ?s ?p ?o }"</span>,
+  <span class="key">"graph"</span>: <span class="str">"http://example.org/people"</span>
+}</pre>
+        </div>
+      </div>
+
+      <div id="tab-graph" class="code-panel">
+        <div class="code-panel-inner">
+<pre><span class="cm">// Create a named graph</span>
+{ <span class="key">"action"</span>: <span class="str">"create"</span>, <span class="key">"name"</span>: <span class="str">"http://example.org/people"</span> }
+
+<span class="cm">// Save everything to disk</span>
+{ <span class="key">"action"</span>: <span class="str">"dump"</span>, <span class="key">"file"</span>: <span class="str">"./backup.trig"</span> }
+
+<span class="cm">// Load from file (merges with existing)</span>
+{ <span class="key">"action"</span>: <span class="str">"load"</span>, <span class="key">"file"</span>: <span class="str">"./backup.trig"</span> }
+
+<span class="cm">// Register a namespace prefix</span>
+{ <span class="key">"action"</span>: <span class="str">"prefix_add"</span>, <span class="key">"prefix"</span>: <span class="str">"ex"</span>, <span class="key">"uri"</span>: <span class="str">"http://example.org/"</span> }
+
+<span class="cm">// Stats for a graph</span>
+{ <span class="key">"action"</span>: <span class="str">"stats"</span>, <span class="key">"name"</span>: <span class="str">"http://example.org/people"</span> }
+<span class="cm">// → {"triples": 42}</span></pre>
+        </div>
+      </div>
+
+      <div id="tab-config" class="code-panel">
+        <div class="code-panel-inner">
+<pre><span class="cm"># config.yaml</span>
+<span class="key">store</span>:
+  <span class="key">default_file</span>: <span class="str">"./data/default.trig"</span>
+  <span class="key">auto_load</span>: <span class="val">true</span>
+  <span class="key">format</span>: <span class="str">"trig"</span>
+
+<span class="key">prefixes</span>:
+  <span class="key">ex</span>:     <span class="str">"http://example.org/"</span>
+  <span class="key">schema</span>: <span class="str">"http://schema.org/"</span>
+
+<span class="cm">---</span>
+
+<span class="cm"># Claude Code / Desktop config</span>
+{
+  <span class="key">"mcpServers"</span>: {
+    <span class="key">"hippocamp"</span>: {
+      <span class="key">"command"</span>: <span class="str">"hippocamp"</span>,
+      <span class="key">"args"</span>: [<span class="str">"--config"</span>, <span class="str">"/path/to/config.yaml"</span>]
+    }
+  }
+}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INSTALL -->
+<section id="install">
+  <div class="container">
+    <div class="section-rule reveal">
+      <span class="section-num">04</span>
+      <h2 class="section-title">Get started</h2>
+    </div>
+
+    <div class="install-grid">
+      <div class="install-card reveal">
+        <div class="install-card-head">
+          <div class="install-card-title">Homebrew (recommended)</div>
+        </div>
+        <div class="install-card-body">
+          <div class="install-step">
+            <div class="step-n">1</div>
+            <div class="step-body">
+              <div class="step-label">Install</div>
+              <div class="step-cmd">brew install tggo/tap/hippocamp</div>
+            </div>
+          </div>
+          <div class="install-step">
+            <div class="step-n">2</div>
+            <div class="step-body">
+              <div class="step-label">Add to Claude config</div>
+              <div class="step-cmd">{ "command": "hippocamp" }</div>
+            </div>
+          </div>
+          <div class="install-step">
+            <div class="step-n">3</div>
+            <div class="step-body">
+              <div class="step-label">Done — ask Claude about it</div>
+              <div class="step-cmd">list my RDF graphs</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="install-card reveal reveal-delay-1">
+        <div class="install-card-head">
+          <div class="install-card-title">Direct download</div>
+        </div>
+        <div class="install-card-body">
+          <div class="install-step">
+            <div class="step-n">↓</div>
+            <div class="step-body">
+              <div class="step-label">macOS Apple Silicon</div>
+              <div class="step-cmd">hippocamp_darwin_arm64.tar.gz</div>
+            </div>
+          </div>
+          <div class="install-step">
+            <div class="step-n">↓</div>
+            <div class="step-body">
+              <div class="step-label">macOS Intel</div>
+              <div class="step-cmd">hippocamp_darwin_amd64.tar.gz</div>
+            </div>
+          </div>
+          <div class="install-step">
+            <div class="step-n">↓</div>
+            <div class="step-body">
+              <div class="step-label">Linux / Windows</div>
+              <div class="step-cmd" style="color:var(--terra);">→ github.com/tggo/hippocamp/releases</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="container">
+    <div class="section-rule reveal">
+      <span class="section-num">05</span>
+      <h2 class="section-title">Under the hood</h2>
+    </div>
+
+    <div class="features-grid reveal">
+      <div class="feature-cell">
+        <div class="feature-icon">◈</div>
+        <div class="feature-name">Named graphs</div>
+        <p class="feature-desc">Multiple isolated named graphs in a single store. Each graph is independently queryable.</p>
+      </div>
+      <div class="feature-cell">
+        <div class="feature-icon">◉</div>
+        <div class="feature-name">BadgerDB</div>
+        <p class="feature-desc">Context-aware in-memory store with ACID transactions. Proper graph isolation — no shared state.</p>
+      </div>
+      <div class="feature-cell">
+        <div class="feature-icon">◎</div>
+        <div class="feature-name">TriG format</div>
+        <p class="feature-desc">Persistence in TriG — a Turtle superset that preserves named graph boundaries across sessions.</p>
+      </div>
+      <div class="feature-cell">
+        <div class="feature-icon">◌</div>
+        <div class="feature-name">SPARQL 1.1</div>
+        <p class="feature-desc">Full W3C-conformant query engine. SELECT, ASK, CONSTRUCT, and all UPDATE operations.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-logo">hippo<span>camp</span></div>
+      <ul class="footer-links">
+        <li><a href="https://github.com/tggo/hippocamp" target="_blank">GitHub</a></li>
+        <li><a href="https://github.com/tggo/hippocamp/releases" target="_blank">Releases</a></li>
+        <li><a href="https://github.com/tggo/hippocamp/blob/main/CLAUDE.md" target="_blank">Docs</a></li>
+      </ul>
+      <div class="footer-copy">v0.0.1 · MIT</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Tab switching
+  function switchTab(name) {
+    document.querySelectorAll('.code-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  // Copy install command
+  function copyInstall(btn) {
+    navigator.clipboard.writeText('brew install tggo/tap/hippocamp');
+    btn.textContent = '✓';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '⎘'; btn.classList.remove('copied'); }, 1800);
+  }
+
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
