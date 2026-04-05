@@ -206,25 +206,52 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      opacity: 0;
+      animation: fadeIn 0.8s ease forwards 0.4s;
     }
 
     /* ── GRAPH SVG STYLES ── */
-    .graph-svg { width: 100%; max-width: 480px; height: auto; }
+    .graph-svg { width: 100%; max-width: 520px; height: auto; }
+
     .g-edge {
       stroke: #C5BDB5;
       stroke-width: 1.5;
       fill: none;
+      stroke-dasharray: 200;
+      stroke-dashoffset: 200;
     }
+    .g-edge.draw-1 { animation: drawEdge 0.7s ease forwards 0.9s; }
+    .g-edge.draw-2 { animation: drawEdge 0.7s ease forwards 1.2s; }
+    .g-edge.draw-3 { animation: drawEdge 0.7s ease forwards 1.5s; }
+    .g-edge.draw-4 { animation: drawEdge 0.7s ease forwards 1.8s; }
+
+    .g-node {
+      opacity: 0;
+    }
+    .g-node.appear-1 { animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards 0.6s; }
+    .g-node.appear-2 { animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards 0.9s; }
+    .g-node.appear-3 { animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards 1.2s; }
+    .g-node.appear-4 { animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards 1.5s; }
+    .g-node.appear-5 { animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards 1.8s; }
+
     .g-label {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 9px;
+      font-size: 10px;
       fill: var(--ink-light);
     }
-    .g-label.uri { fill: var(--forest); }
+    .g-label.uri { fill: var(--forest); font-weight: 500; }
     .g-edge-label {
       font-family: 'JetBrains Mono', monospace;
       font-size: 8px;
       fill: var(--ink-faint);
+    }
+    .g-graph-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8px;
+      fill: var(--ink-faint);
+      letter-spacing: 0.08em;
+      opacity: 0;
+      animation: fadeIn 0.6s ease forwards 2.2s;
     }
 
     /* ── SECTION BASE ── */
@@ -630,83 +657,85 @@
       </div>
     </div>
 
-    <div class="hero-graph" style="padding-right:32px;">
-      <svg class="graph-svg" viewBox="0 0 480 360" xmlns="http://www.w3.org/2000/svg">
+    <div class="hero-graph" style="padding-right:16px;">
+      <svg class="graph-svg" viewBox="0 0 520 420" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <marker id="arr" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-            <path d="M0,0 L0,6 L8,3 z" fill="#C5BDB5"/>
+          <marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <path d="M0,0 L0,7 L10,3.5 z" fill="#C5BDB5"/>
           </marker>
-          <marker id="arr-terra" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-            <path d="M0,0 L0,6 L8,3 z" fill="#B85C38"/>
-          </marker>
-          <marker id="arr-forest" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-            <path d="M0,0 L0,6 L8,3 z" fill="#3D6B52"/>
-          </marker>
+          <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="2.5" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id="shadow" x="-20%" y="-10%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#1C1815" flood-opacity="0.06"/>
+          </filter>
         </defs>
 
         <!-- Named graph dashed border -->
-        <rect x="44" y="38" width="392" height="300" rx="10"
-              fill="none" stroke="#DDD6CC" stroke-width="1" stroke-dasharray="5,4"/>
-        <text x="60" y="31" style="font-family:'JetBrains Mono',monospace;font-size:8px;fill:#A09890;letter-spacing:0.08em;">NAMED GRAPH · ex:people</text>
+        <rect x="32" y="40" width="456" height="350" rx="12"
+              fill="none" stroke="#DDD6CC" stroke-width="1.2" stroke-dasharray="6,5"/>
+        <text class="g-graph-label" x="50" y="32">NAMED GRAPH · ex:people</text>
 
-        <!-- ── Edges (drawn before nodes so nodes appear on top) ── -->
-        <!-- Alice → ex:knows → Bob -->
-        <line class="g-edge" x1="226" y1="150" x2="304" y2="130" marker-end="url(#arr)"/>
-        <!-- Alice → rdf:type → foaf:Person -->
-        <line class="g-edge" x1="172" y1="178" x2="126" y2="248" marker-end="url(#arr-forest)"/>
-        <!-- Bob → ex:name → "Bob" -->
-        <line class="g-edge" x1="338" y1="162" x2="352" y2="232" marker-end="url(#arr)"/>
-        <!-- Alice → ex:age → 30 -->
-        <line class="g-edge" x1="196" y1="180" x2="192" y2="252" marker-end="url(#arr)"/>
+        <!-- ── Edges ── -->
+        <line class="g-edge draw-1" x1="240" y1="146" x2="360" y2="106" marker-end="url(#arr)"/>
+        <line class="g-edge draw-2" x1="180" y1="188" x2="128" y2="268" marker-end="url(#arr)"/>
+        <line class="g-edge draw-3" x1="236" y1="198" x2="243" y2="280" marker-end="url(#arr)"/>
+        <line class="g-edge draw-4" x1="290" y1="188" x2="380" y2="272" marker-end="url(#arr)"/>
 
-        <!-- Edge labels -->
-        <text class="g-edge-label" text-anchor="middle" x="272" y="131">ex:knows</text>
-        <text class="g-edge-label" text-anchor="end"    x="156" y="218">rdf:type</text>
-        <text class="g-edge-label" text-anchor="start"  x="358" y="200">ex:name</text>
-        <text class="g-edge-label" text-anchor="end"    x="186" y="222">ex:age</text>
+        <!-- Edge labels (positioned along edges) -->
+        <text class="g-edge-label" x="308" y="118" text-anchor="middle"
+              transform="rotate(-12,308,118)">ex:knows</text>
+        <text class="g-edge-label" x="140" y="232" text-anchor="middle"
+              transform="rotate(57,140,232)">rdf:type</text>
+        <text class="g-edge-label" x="227" y="244" text-anchor="end">ex:age</text>
+        <text class="g-edge-label" x="348" y="236" text-anchor="middle"
+              transform="rotate(42,348,236)">ex:name</text>
 
         <!-- ── Nodes ── -->
-        <!-- ex:Alice — primary subject (terracotta ring) -->
-        <g transform="translate(200,158)">
+
+        <!-- ex:Alice — central subject -->
+        <g class="g-node appear-1" transform="translate(210,170)" filter="url(#shadow)">
+          <circle r="40" fill="#FFFDFB" stroke="#B85C38" stroke-width="2.5"/>
+          <text class="g-label uri" text-anchor="middle" dy="-4">ex:Alice</text>
+          <text class="g-label" text-anchor="middle" dy="12" style="font-size:7.5px;fill:#A09890;">subject</text>
+        </g>
+
+        <!-- ex:Bob — connected subject -->
+        <g class="g-node appear-2" transform="translate(395,90)" filter="url(#shadow)">
           <circle r="34" fill="#FFFDFB" stroke="#B85C38" stroke-width="2"/>
-          <text text-anchor="middle" dy="-5" style="font-family:'JetBrains Mono',monospace;font-size:9px;fill:#3D6B52;font-weight:500;">ex:Alice</text>
-          <text text-anchor="middle" dy="9"  style="font-family:'JetBrains Mono',monospace;font-size:7px;fill:#A09890;">subject</text>
+          <text class="g-label uri" text-anchor="middle" dy="-4">ex:Bob</text>
+          <text class="g-label" text-anchor="middle" dy="12" style="font-size:7.5px;fill:#A09890;">subject</text>
         </g>
 
-        <!-- ex:Bob — primary subject (terracotta ring) -->
-        <g transform="translate(336,118)">
-          <circle r="30" fill="#FFFDFB" stroke="#B85C38" stroke-width="2"/>
-          <text text-anchor="middle" dy="-5" style="font-family:'JetBrains Mono',monospace;font-size:9px;fill:#3D6B52;font-weight:500;">ex:Bob</text>
-          <text text-anchor="middle" dy="9"  style="font-family:'JetBrains Mono',monospace;font-size:7px;fill:#A09890;">subject</text>
+        <!-- foaf:Person — class node -->
+        <g class="g-node appear-3" transform="translate(105,300)" filter="url(#shadow)">
+          <circle r="34" fill="#FFFDFB" stroke="#3D6B52" stroke-width="2"/>
+          <text class="g-label" text-anchor="middle" dy="-4" style="fill:#3D6B52;font-size:9px;">foaf:Person</text>
+          <text class="g-label" text-anchor="middle" dy="12" style="font-size:7.5px;fill:#A09890;">class</text>
         </g>
 
-        <!-- foaf:Person — class node (forest ring) -->
-        <g transform="translate(112,272)">
-          <circle r="30" fill="#FFFDFB" stroke="#3D6B52" stroke-width="1.5"/>
-          <text text-anchor="middle" dy="-5" style="font-family:'JetBrains Mono',monospace;font-size:8px;fill:#3D6B52;">foaf:Person</text>
-          <text text-anchor="middle" dy="9"  style="font-family:'JetBrains Mono',monospace;font-size:7px;fill:#A09890;">class</text>
+        <!-- 30 — integer literal -->
+        <g class="g-node appear-4" transform="translate(248,310)">
+          <rect x="-32" y="-24" width="64" height="48" rx="6"
+                fill="#F4EFE6" stroke="#D4CFC6" stroke-width="1.5"/>
+          <text class="g-label" text-anchor="middle" dy="-4" style="fill:#5C5550;font-weight:500;">30</text>
+          <text class="g-label" text-anchor="middle" dy="12" style="font-size:7.5px;fill:#A09890;">xsd:integer</text>
         </g>
 
-        <!-- "Bob" — literal (rounded rect) -->
-        <g transform="translate(362,266)">
-          <rect x="-34" y="-22" width="68" height="44" rx="5"
-                fill="#F4EFE6" stroke="#C5BDB5" stroke-width="1.5"/>
-          <text text-anchor="middle" dy="-5" style="font-family:'JetBrains Mono',monospace;font-size:9px;fill:#5C5550;">"Bob"</text>
-          <text text-anchor="middle" dy="9"  style="font-family:'JetBrains Mono',monospace;font-size:7px;fill:#A09890;">literal</text>
+        <!-- "Bob" — string literal -->
+        <g class="g-node appear-5" transform="translate(408,305)">
+          <rect x="-38" y="-24" width="76" height="48" rx="6"
+                fill="#F4EFE6" stroke="#D4CFC6" stroke-width="1.5"/>
+          <text class="g-label" text-anchor="middle" dy="-4" style="fill:#5C5550;font-weight:500;">"Bob"</text>
+          <text class="g-label" text-anchor="middle" dy="12" style="font-size:7.5px;fill:#A09890;">literal</text>
         </g>
 
-        <!-- 30 — integer literal (rounded rect) -->
-        <g transform="translate(188,278)">
-          <rect x="-26" y="-20" width="52" height="40" rx="5"
-                fill="#F4EFE6" stroke="#C5BDB5" stroke-width="1.5"/>
-          <text text-anchor="middle" dy="-4" style="font-family:'JetBrains Mono',monospace;font-size:9px;fill:#5C5550;">30</text>
-          <text text-anchor="middle" dy="10" style="font-family:'JetBrains Mono',monospace;font-size:7px;fill:#A09890;">xsd:int</text>
-        </g>
-
-        <!-- Accent dots -->
-        <circle cx="58"  cy="64"  r="2.5" fill="#E2DAD0" opacity="0.7"/>
-        <circle cx="426" cy="52"  r="2"   fill="#E2DAD0" opacity="0.5"/>
-        <circle cx="436" cy="312" r="3"   fill="#E2DAD0" opacity="0.4"/>
+        <!-- Decorative dots -->
+        <circle cx="52"  cy="68"  r="2.5" fill="#E2DAD0" opacity="0.6"/>
+        <circle cx="480" cy="56"  r="2"   fill="#E2DAD0" opacity="0.4"/>
+        <circle cx="470" cy="370" r="3"   fill="#E2DAD0" opacity="0.5"/>
+        <circle cx="60"  cy="380" r="2"   fill="#E2DAD0" opacity="0.4"/>
       </svg>
     </div>
   </div>
