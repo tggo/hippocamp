@@ -22,11 +22,12 @@ Examples:
   {"action":"stats","name":"http://example.org/myGraph"}
   {"action":"dump","file":"./backup.trig"}
   {"action":"load","file":"./backup.trig"}
+  {"action":"import","data":"@prefix ex: ... ex:Alice ex:knows ex:Bob ."}
   {"action":"prefix_add","prefix":"ex","uri":"http://example.org/"}`),
 		mcp.WithString("action",
 			mcp.Required(),
-			mcp.Description("Operation: create|delete|list|stats|clear|load|dump|prefix_add|prefix_list|prefix_remove"),
-			mcp.Enum("create", "delete", "list", "stats", "clear", "load", "dump",
+			mcp.Description("Operation: create|delete|list|stats|clear|load|dump|import|prefix_add|prefix_list|prefix_remove"),
+			mcp.Enum("create", "delete", "list", "stats", "clear", "load", "dump", "import",
 				"prefix_add", "prefix_list", "prefix_remove"),
 		),
 		mcp.WithString("name",
@@ -34,6 +35,9 @@ Examples:
 		),
 		mcp.WithString("file",
 			mcp.Description("File path for load/dump operations"),
+		),
+		mcp.WithString("data",
+			mcp.Description("TriG/Turtle data string for import action (bulk load without writing to file)"),
 		),
 		mcp.WithString("format",
 			mcp.Description("Serialization format: trig (default) | turtle | nt | nq"),
@@ -70,6 +74,8 @@ func graphHandlerFactory(store *rdfstore.Store) handlerFunc {
 			return handleGraphDump(store, req)
 		case "load":
 			return handleGraphLoad(store, req)
+		case "import":
+			return handleGraphImport(store, req)
 		case "prefix_add":
 			return handlePrefixAdd(store, req)
 		case "prefix_list":
@@ -170,4 +176,18 @@ func handlePrefixRemove(store *rdfstore.Store, req mcp.CallToolRequest) (*mcp.Ca
 	}
 	store.RemovePrefix(prefix)
 	return mcp.NewToolResultText(fmt.Sprintf("removed prefix %q", prefix)), nil
+}
+
+func handleGraphImport(store *rdfstore.Store, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	data := req.GetString("data", "")
+	if data == "" {
+		return mcp.NewToolResultError("import requires: data (TriG/Turtle string)"), nil
+	}
+
+	count, err := store.Import(data)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("import error: %v", err)), nil
+	}
+
+	return mcp.NewToolResultText(fmt.Sprintf("imported %d triples", count)), nil
 }

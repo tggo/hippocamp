@@ -2,6 +2,8 @@ package rdfstore
 
 import (
 	"fmt"
+	"io"
+	"strings"
 	"sync"
 
 	rdf "github.com/tggo/goRDFlib"
@@ -9,6 +11,7 @@ import (
 	"github.com/tggo/goRDFlib/sparql"
 	"github.com/tggo/goRDFlib/store/badgerstore"
 	"github.com/tggo/goRDFlib/term"
+	"github.com/tggo/goRDFlib/trig"
 )
 
 // DefaultGraphURI is the URI of the implicit default graph.
@@ -327,6 +330,53 @@ func (s *Store) SPARQLUpdate(defaultGraphName, update string) error {
 	}
 	s.dirty = true
 	return nil
+}
+
+// Import parses a TriG/Turtle string and adds all triples to the store.
+// Triples without an explicit named graph go into the default graph.
+func (s *Store) Import(data string) (int, error) {
+	// Parse into a temporary dataset.
+	tmpBg, err := badgerstore.New(badgerstore.WithInMemory())
+	if err != nil {
+		return 0, fmt.Errorf("import: create temp store: %w", err)
+	}
+	tmpDs := rdf.NewDataset(rdf.WithStore(tmpBg))
+
+	if err := trig.ParseDataset(tmpDs, io.Reader(strings.NewReader(data))); err != nil {
+		tmpBg.Close()
+		return 0, fmt.Errorf("import: parse: %w", err)
+	}
+
+	// Copy all triples from the temp dataset into our store.
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	count := 0
+	tmpDs.Graphs()(func(g *graph.Graph) bool {
+		// Determine target graph: named graphs keep their URI, default goes to our default.
+		var targetID string
+		if id := g.Identifier(); id != nil {
+			if _, ok := id.(term.BNode); ok {
+				targetID = "" // BNode = default context → our default graph
+			} else {
+				targetID = id.String()
+			}
+		}
+		target := s.getGraph(targetID)
+
+		g.Triples(nil, nil, nil)(func(t term.Triple) bool {
+			target.Add(t.Subject, t.Predicate, t.Object)
+			count++
+			return true
+		})
+		return true
+	})
+
+	if count > 0 {
+		s.dirty = true
+	}
+	tmpBg.Close()
+	return count, nil
 }
 
 // --- helpers ---

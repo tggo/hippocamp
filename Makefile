@@ -2,7 +2,7 @@ BIN := hippocamp
 CMD := ./cmd/hippocamp
 SIGN_ID := Developer ID Application: Ruslan Korennoy (4JV3A5SUSZ)
 
-.PHONY: build test lint tidy clean run sign release
+.PHONY: build test lint tidy clean run sign release replace
 
 build:
 	go build -ldflags "-X main.buildTime=$(shell date -u +%Y-%m-%dT%H:%M:%SZ)" -o $(BIN) $(CMD)
@@ -42,6 +42,15 @@ tidy:
 clean:
 	rm -f $(BIN)
 	rm -rf dist/
+
+replace: sign
+	@BREW_BIN=$$(ls /opt/homebrew/Caskroom/hippocamp/*/hippocamp 2>/dev/null | head -1); \
+	if [ -z "$$BREW_BIN" ]; then echo "Homebrew hippocamp not found"; exit 1; fi; \
+	cp ./$(BIN) "$$BREW_BIN"; \
+	xattr -cr "$$BREW_BIN"; \
+	codesign --force --sign "$(SIGN_ID)" --options runtime --timestamp "$$BREW_BIN"; \
+	codesign -vvv "$$BREW_BIN"; \
+	echo "Replaced $$BREW_BIN"
 
 run: build
 	./$(BIN) --config config.yaml
