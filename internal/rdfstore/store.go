@@ -208,6 +208,7 @@ func (s *Store) DeleteGraph(name string) error {
 }
 
 // ListGraphs returns the URIs of all named graphs.
+// Filters out internal BNode graphs created by goRDFlib's ConjunctiveGraph.
 func (s *Store) ListGraphs() []string {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
@@ -215,7 +216,12 @@ func (s *Store) ListGraphs() []string {
 	var names []string
 	s.ds.Graphs()(func(g *graph.Graph) bool {
 		if id := g.Identifier(); id != nil {
-			names = append(names, id.String())
+			uri := id.String()
+			// Skip BNode identifiers (internal goRDFlib default context).
+			if _, ok := id.(term.BNode); ok {
+				return true
+			}
+			names = append(names, uri)
 		}
 		return true
 	})
