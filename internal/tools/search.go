@@ -58,17 +58,21 @@ type SearchResult struct {
 
 func searchTool() mcp.Tool {
 	return mcp.NewTool("search",
-		mcp.WithDescription(`Semantic search over the RDF knowledge graph. Finds resources by keyword matching across labels, summaries, file paths, and signatures.
+		mcp.WithDescription(`Semantic search over the RDF knowledge graph. Finds resources by keyword matching across labels, summaries, aliases, file paths, and signatures.
+
+Supports multilingual search: add hippo:alias triples with language tags for synonyms and translations (e.g. hippo:alias "електрика"@uk). Aliases are searched with the same boost as summaries.
+
+Uses prefix matching: keywords sharing 4+ characters with stored words match even without exact substring (e.g. "електр" matches "електропостачання").
 
 Examples:
   {"query": "authentication"}
   {"query": "Store", "type": "https://hippocamp.dev/ontology#Struct"}
   {"query": "triple", "scope": "project:hippocamp", "limit": 5}
 
-Returns an array of matching resources with their type, label, summary, and properties.`),
+Returns an array of matching resources with their type, label, summary, and properties. Returns a hint object with suggestions when no results are found.`),
 		mcp.WithString("query",
 			mcp.Required(),
-			mcp.Description("Search keywords (matched case-insensitively against labels, summaries, file paths, signatures)"),
+			mcp.Description("Search keywords (matched case-insensitively against labels, summaries, aliases, file paths, signatures). Supports prefix matching for cross-language stems."),
 		),
 		mcp.WithString("type",
 			mcp.Description("Filter by rdf:type URI (e.g. https://hippocamp.dev/ontology#Function)"),

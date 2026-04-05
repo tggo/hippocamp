@@ -25,8 +25,9 @@ Use the `hippo:` namespace (`https://hippocamp.dev/ontology#`). Core types:
 **IMPORTANT: Use ONLY these types.** Do NOT invent custom types like `hippo:TomatoVariety`, `hippo:Person`, `hippo:Recipe`, `hippo:Contractor`. Instead, use `hippo:Entity` for ALL concrete things and add `hippo:hasTag` for sub-classification. For example, a tomato variety is `hippo:Entity` with `hippo:hasTag` → `tag/tomato-variety`.
 
 ### Key properties
-- `rdfs:label` — display name (always set)
+- `rdfs:label` — display name (always set). Use language tags for multilingual labels: `"Electrical"@en`, `"Електрика"@uk`
 - `rdf:type` — classification
+- `hippo:alias` — synonyms, abbreviations, colloquial terms, and translations. Searched with the same boost as summaries. Add aliases in the user's language if labels are in a different language (e.g. `hippo:alias "світло"@uk` for an English-labeled resource)
 - `hippo:summary` — one-sentence description
 - `hippo:content` — full text content (for notes, decisions)
 - `hippo:url` — web reference
@@ -174,6 +175,7 @@ Use lowercase kebab-case slugs derived from the label.
 ## Guidelines
 
 - Always set `rdfs:label` and `rdf:type` for every resource
+- If project documents use a different language than English, add `hippo:alias` with common terms in that language so search works in both languages
 - Add `hippo:summary` wherever a brief description is useful
 - Use `hippo:content` for longer text (notes, decision rationale)
 - Link entities to topics with `hippo:hasTopic`

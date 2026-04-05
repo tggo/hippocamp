@@ -25,8 +25,9 @@ Use the `hippo:` namespace (`https://hippocamp.dev/ontology#`). Core types:
 **IMPORTANT: Use ONLY these types.** Do NOT invent custom types like `hippo:TomatoVariety`, `hippo:Person`, `hippo:Recipe`, `hippo:Contractor`. Instead, use `hippo:Entity` for ALL concrete things and add `hippo:hasTag` for sub-classification. For example, a tomato variety is `hippo:Entity` with `hippo:hasTag` → `tag/tomato-variety`.
 
 ### Key properties
-- `rdfs:label` — display name (always set)
+- `rdfs:label` — display name (always set). Use language tags for multilingual labels: `"Electrical"@en`, `"Електрика"@uk`
 - `rdf:type` — classification
+- `hippo:alias` — synonyms, abbreviations, colloquial terms, and translations. Searched with the same boost as summaries. Add aliases in the user's language if labels are in a different language (e.g. `hippo:alias "світло"@uk` for an English-labeled resource)
 - `hippo:summary` — one-sentence description
 - `hippo:content` — full text content (for notes, decisions)
 - `hippo:url` — web reference
@@ -171,36 +172,15 @@ graph action=dump file=./data/default.trig
 
 Use lowercase kebab-case slugs derived from the label.
 
-## Batch import (IMPORTANT)
-
-**Do NOT call `triple action=add` many times.** The MCP connection may drop under rapid individual calls. Instead, build all triples as a single TriG string and use `graph action=import`:
-
-```
-graph action=import data="@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix hippo: <https://hippocamp.dev/ontology#> .
-
-<https://hippocamp.dev/project/myproject> rdf:type hippo:Entity ;
-    rdfs:label \"My Project\" ;
-    hippo:summary \"Project description\" .
-
-<https://hippocamp.dev/project/myproject/entity/alice> rdf:type hippo:Entity ;
-    rdfs:label \"Alice\" ;
-    hippo:summary \"Project lead\" ;
-    hippo:hasTopic <https://hippocamp.dev/project/myproject/topic/team> .
-"
-```
-
-This loads all triples in one call — no connection drops, much faster.
-
 ## Guidelines
 
 - Always set `rdfs:label` and `rdf:type` for every resource
+- If project documents use a different language than English, add `hippo:alias` with common terms in that language so search works in both languages
 - Add `hippo:summary` wherever a brief description is useful
 - Use `hippo:content` for longer text (notes, decision rationale)
 - Link entities to topics with `hippo:hasTopic`
 - Keep summaries concise (one sentence)
 - For large projects, prioritize the most important 50-100 entities
-- **Always use `graph action=import` for bulk loading** — never send 100+ individual `triple action=add` calls
+- Use SPARQL INSERT DATA for bulk operations when adding many triples at once
 - After populating the graph, run `validate` to check for non-standard types, missing labels, and decisions without rationale. Fix any warnings before finishing.
 - After analysis, report a summary: number of topics, entities, notes, decisions, questions, and sources indexed
