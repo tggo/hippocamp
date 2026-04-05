@@ -6,9 +6,11 @@
 
 # hippocamp
 
-RDF knowledge graph for LLMs — an MCP server that gives any AI agent a structured, queryable memory via four tools: `triple`, `sparql`, `graph`, `search`.
+RDF knowledge graph for LLMs — an MCP server that gives any AI agent a structured, queryable memory via five tools: `triple`, `sparql`, `graph`, `search`, `validate`.
 
-Plug it into any project as a persistent brain. Use the built-in ontology for code analysis, research notes, API documentation, or any structured knowledge. Includes a Claude Code skill (`/project-analyze`) and hooks for automatic graph queries.
+Plug it into any project as a persistent brain. Use the built-in ontology for research notes, construction planning, sales pipelines, recipe collections, or any structured knowledge. Includes a Claude Code skill (`/project-analyze`) and hooks for automatic graph queries.
+
+On first launch, Hippocamp automatically sets up Claude Code hooks and skills in your project — no manual configuration needed.
 
 ## Install
 
@@ -130,8 +132,31 @@ Returns JSON bindings for SELECT, `"true"`/`"false"` for ASK, `"ok"` for updates
 | `type` | Filter by `rdf:type` URI |
 | `scope` | Named graph to search in (omit for all graphs) |
 | `limit` | Max results (default: 20) |
+| `related` | Follow `hasTopic`, `references`, `partOf` links to include related resources (default: false) |
 
-Searches across `rdfs:label`, `hippo:summary`, `hippo:filePath`, `hippo:signature`, `hippo:content`, `hippo:url`, and subject URIs. Returns JSON array of matching resources with type, label, summary, and properties.
+Searches across `rdfs:label`, `hippo:summary`, `hippo:filePath`, `hippo:signature`, `hippo:content`, `hippo:url`, `hippo:rationale`, and subject URIs. Uses field boosting (label matches score highest), word boundary scoring, and score accumulation across predicates.
+
+With `related=true`, also returns resources that link TO direct matches via relationship predicates (1-hop graph traversal).
+
+---
+
+### `validate` — ontology compliance check
+
+```
+{}
+{"scope": "project:house-construction"}
+```
+
+| Parameter | Notes |
+|---|---|
+| `scope` | Named graph to validate (omit for all graphs) |
+
+Checks:
+- All `rdf:type` values are from the `hippo:` namespace
+- All typed resources have `rdfs:label`
+- All Decisions have `hippo:rationale`
+
+Returns JSON with `valid` (bool), `warnings` (array), and `stats`.
 
 ---
 
@@ -168,13 +193,17 @@ The ontology is open-world — extend with your own classes and properties.
 
 ## Claude Code integration
 
+### Auto-setup
+
+Hippocamp automatically writes hooks and skills to your project's `.claude/` directory on first launch. No manual copying needed. On subsequent launches, files are only updated if the binary is newer.
+
 ### Skill: `/project-analyze`
 
-Copy `.claude/skills/project-analyze.md` to your project. Run `/project-analyze` to scan the codebase and build a knowledge graph with files, symbols, dependencies, and architectural concepts.
+Run `/project-analyze` to scan your project and build a knowledge graph. Works for any domain — the skill extracts topics, entities, notes, decisions, questions, and sources from your documents.
 
 ### Hooks
 
-Copy `.claude/hooks/` to your project and configure in `.claude/settings.json`:
+Hooks are auto-installed. You can customize them in `.claude/settings.json`:
 
 ```json
 {

@@ -4,7 +4,7 @@ CMD := ./cmd/hippocamp
 .PHONY: build test lint tidy clean run
 
 build:
-	go build -o $(BIN) $(CMD)
+	go build -ldflags "-X main.buildTime=$(shell date -u +%Y-%m-%dT%H:%M:%SZ)" -o $(BIN) $(CMD)
 
 test:
 	go test ./...

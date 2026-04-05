@@ -1,21 +1,42 @@
 package main
 
 import (
+	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
 
+	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/ruslanmv/hippocamp/internal/config"
 	"github.com/ruslanmv/hippocamp/internal/rdfstore"
+	"github.com/ruslanmv/hippocamp/internal/setup"
 	"github.com/ruslanmv/hippocamp/internal/tools"
+)
+
+// Injected at build time via ldflags.
+var (
+	version   = "dev"
+	buildTime = "" // RFC 3339 timestamp
 )
 
 func main() {
 	configPath := flag.String("config", "config.yaml", "path to config file")
+	queryStr := flag.String("query", "", "one-shot search: query the persisted graph and exit")
+	queryType := flag.String("type", "", "filter search results by rdf:type URI")
+	queryScope := flag.String("scope", "", "named graph to search in")
+	queryLimit := flag.Int("limit", 20, "max search results")
 	flag.Parse()
+
+	// Auto-setup Claude Code integration files (hooks, skills).
+	if cwd, cwdErr := os.Getwd(); cwdErr == nil {
+		if setupErr := setup.Setup(cwd, buildTime); setupErr != nil {
+			fmt.Fprintf(os.Stderr, "hippocamp: setup: %v\n", setupErr)
+		}
+	}
 
 	cfg, err := config.Load(*configPath)
 	if err != nil {
@@ -42,6 +63,40 @@ func main() {
 		}
 	}
 
+	// One-shot query mode: search the graph and exit.
+	if *queryStr != "" {
+		handler := tools.HandlerFor(store, "search")
+		args := map[string]any{"query": *queryStr}
+		if *queryType != "" {
+			args["type"] = *queryType
+		}
+		if *queryScope != "" {
+			args["scope"] = *queryScope
+		}
+		if *queryLimit != 20 {
+			args["limit"] = float64(*queryLimit)
+		}
+		req := mcp.CallToolRequest{}
+		req.Params.Arguments = args
+		result, err := handler(context.Background(), req)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "hippocamp: query error: %v\n", err)
+			store.Close()
+			os.Exit(1)
+		}
+		text := tools.ResultText(result)
+		// Pretty-print JSON output.
+		var parsed any
+		if json.Unmarshal([]byte(text), &parsed) == nil {
+			pretty, _ := json.MarshalIndent(parsed, "", "  ")
+			fmt.Println(string(pretty))
+		} else {
+			fmt.Println(text)
+		}
+		store.Close()
+		return
+	}
+
 	// Register signal handler for graceful shutdown (auto-save on exit).
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
@@ -61,7 +116,7 @@ func main() {
 	// Create MCP server and register tools.
 	s := server.NewMCPServer(
 		"hippocamp",
-		"0.1.0",
+		version,
 		server.WithToolCapabilities(false),
 		server.WithRecovery(),
 	)

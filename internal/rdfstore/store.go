@@ -265,12 +265,33 @@ func (s *Store) ListPrefixes() map[string]string {
 }
 
 // SPARQLQuery executes a SPARQL SELECT/ASK/CONSTRUCT against the named graph.
-// Empty graphName queries the default graph.
-func (s *Store) SPARQLQuery(graphName, query string) (*sparql.Result, error) {
+// Empty graphName queries the default graph. All named graphs in the store
+// are made available for GRAPH { } clauses in the query.
+func (s *Store) SPARQLQuery(graphName, queryStr string) (*sparql.Result, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
+
 	g := s.getGraph(graphName)
-	return sparql.Query(g, query)
+
+	// Parse the query so we can inject named graphs for GRAPH clause support.
+	parsed, err := sparql.Parse(queryStr)
+	if err != nil {
+		return nil, fmt.Errorf("sparql parse: %w", err)
+	}
+
+	// Populate NamedGraphs from all graphs in the store so GRAPH <uri> { }
+	// clauses can resolve against them.
+	if parsed.NamedGraphs == nil {
+		parsed.NamedGraphs = make(map[string]*graph.Graph)
+	}
+	s.ds.Graphs()(func(ng *graph.Graph) bool {
+		if id := ng.Identifier(); id != nil {
+			parsed.NamedGraphs[id.String()] = ng
+		}
+		return true
+	})
+
+	return sparql.EvalQuery(g, parsed, nil)
 }
 
 // SPARQLUpdate executes a SPARQL Update against the store.

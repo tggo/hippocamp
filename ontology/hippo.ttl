@@ -1,0 +1,258 @@
+@prefix hippo: <https://hippocamp.dev/ontology#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+
+# ────────────────────────────────────────────────────────────
+# Hippocamp Ontology — knowledge representation for LLMs
+# ────────────────────────────────────────────────────────────
+#
+# A general-purpose ontology for building knowledge graphs.
+# The base layer works for any domain (research, notes, APIs,
+# business processes). The code layer adds software-specific
+# classes for project analysis.
+#
+# Users can extend with their own classes and properties —
+# RDF is open-world by design.
+# ────────────────────────────────────────────────────────────
+
+hippo: a owl:Ontology ;
+    rdfs:label "Hippocamp Ontology" ;
+    rdfs:comment "General-purpose ontology for LLM knowledge graphs. Base layer for any domain, with optional code-specific extensions." .
+
+# ══════════════════════════════════════════════════════════════
+# BASE LAYER — domain-agnostic knowledge representation
+# ══════════════════════════════════════════════════════════════
+
+hippo:Topic a rdfs:Class ;
+    rdfs:label "Topic" ;
+    rdfs:comment "A subject area or theme. Use as a top-level grouping for any kind of knowledge." .
+
+hippo:Entity a rdfs:Class ;
+    rdfs:label "Entity" ;
+    rdfs:comment "Any identifiable thing: person, organization, product, service, API, dataset." .
+
+hippo:Note a rdfs:Class ;
+    rdfs:label "Note" ;
+    rdfs:comment "A free-form note, observation, or annotation." .
+
+hippo:Source a rdfs:Class ;
+    rdfs:label "Source" ;
+    rdfs:comment "An information source: article, paper, URL, book, conversation." .
+
+hippo:Decision a rdfs:Class ;
+    rdfs:label "Decision" ;
+    rdfs:comment "A recorded decision with rationale and alternatives considered." .
+
+hippo:Question a rdfs:Class ;
+    rdfs:label "Question" ;
+    rdfs:comment "An open question or area of uncertainty." .
+
+hippo:Tag a rdfs:Class ;
+    rdfs:label "Tag" ;
+    rdfs:comment "A lightweight label for categorization." .
+
+# ══════════════════════════════════════════════════════════════
+# CODE LAYER — software project representation
+# ══════════════════════════════════════════════════════════════
+
+hippo:Project a rdfs:Class ;
+    rdfs:label "Project" ;
+    rdfs:comment "A software project or repository." .
+
+hippo:Module a rdfs:Class ;
+    rdfs:label "Module" ;
+    rdfs:comment "A package, module, or namespace within a project (Go package, Python module, JS module)." .
+
+hippo:File a rdfs:Class ;
+    rdfs:label "File" ;
+    rdfs:comment "A source file in the project." .
+
+hippo:Symbol a rdfs:Class ;
+    rdfs:label "Symbol" ;
+    rdfs:comment "A named code element: function, struct, class, interface, variable." .
+
+hippo:Function rdfs:subClassOf hippo:Symbol ;
+    rdfs:label "Function" ;
+    rdfs:comment "A function or method." .
+
+hippo:Struct rdfs:subClassOf hippo:Symbol ;
+    rdfs:label "Struct" ;
+    rdfs:comment "A struct or record type." .
+
+hippo:Interface rdfs:subClassOf hippo:Symbol ;
+    rdfs:label "Interface" ;
+    rdfs:comment "An interface or protocol type." .
+
+hippo:Class rdfs:subClassOf hippo:Symbol ;
+    rdfs:label "Class" ;
+    rdfs:comment "A class definition." .
+
+hippo:Dependency a rdfs:Class ;
+    rdfs:label "Dependency" ;
+    rdfs:comment "An external dependency (library, package)." .
+
+hippo:Concept a rdfs:Class ;
+    rdfs:label "Concept" ;
+    rdfs:comment "An architectural concept, pattern, or design decision." .
+
+# ── Properties ───────────────────────────────────────────────
+
+# Project properties
+hippo:language a rdf:Property ;
+    rdfs:label "language" ;
+    rdfs:comment "Primary programming language of the project." ;
+    rdfs:domain hippo:Project ;
+    rdfs:range xsd:string .
+
+hippo:rootPath a rdf:Property ;
+    rdfs:label "rootPath" ;
+    rdfs:comment "Filesystem root path of the project." ;
+    rdfs:domain hippo:Project ;
+    rdfs:range xsd:string .
+
+# File properties
+hippo:inProject a rdf:Property ;
+    rdfs:label "inProject" ;
+    rdfs:comment "Links a file or module to its parent project." ;
+    rdfs:domain hippo:File ;
+    rdfs:range hippo:Project .
+
+hippo:inModule a rdf:Property ;
+    rdfs:label "inModule" ;
+    rdfs:comment "Links a file to the module it belongs to." ;
+    rdfs:domain hippo:File ;
+    rdfs:range hippo:Module .
+
+hippo:filePath a rdf:Property ;
+    rdfs:label "filePath" ;
+    rdfs:comment "Relative file path from project root." ;
+    rdfs:domain hippo:File ;
+    rdfs:range xsd:string .
+
+hippo:imports a rdf:Property ;
+    rdfs:label "imports" ;
+    rdfs:comment "A file imports a module or package." ;
+    rdfs:domain hippo:File ;
+    rdfs:range hippo:Module .
+
+# Symbol properties
+hippo:defines a rdf:Property ;
+    rdfs:label "defines" ;
+    rdfs:comment "A file defines a symbol." ;
+    rdfs:domain hippo:File ;
+    rdfs:range hippo:Symbol .
+
+hippo:calls a rdf:Property ;
+    rdfs:label "calls" ;
+    rdfs:comment "A symbol calls another symbol." ;
+    rdfs:domain hippo:Symbol ;
+    rdfs:range hippo:Symbol .
+
+hippo:implements a rdf:Property ;
+    rdfs:label "implements" ;
+    rdfs:comment "A symbol implements an interface." ;
+    rdfs:domain hippo:Symbol ;
+    rdfs:range hippo:Interface .
+
+hippo:signature a rdf:Property ;
+    rdfs:label "signature" ;
+    rdfs:comment "Function or method signature." ;
+    rdfs:domain hippo:Symbol ;
+    rdfs:range xsd:string .
+
+hippo:lineNumber a rdf:Property ;
+    rdfs:label "lineNumber" ;
+    rdfs:comment "Line number where the symbol is defined." ;
+    rdfs:domain hippo:Symbol ;
+    rdfs:range xsd:integer .
+
+# Dependency properties
+hippo:dependsOn a rdf:Property ;
+    rdfs:label "dependsOn" ;
+    rdfs:comment "A project depends on an external dependency." ;
+    rdfs:domain hippo:Project ;
+    rdfs:range hippo:Dependency .
+
+hippo:version a rdf:Property ;
+    rdfs:label "version" ;
+    rdfs:comment "Version string of a dependency." ;
+    rdfs:domain hippo:Dependency ;
+    rdfs:range xsd:string .
+
+# Concept properties
+hippo:relatedTo a rdf:Property ;
+    rdfs:label "relatedTo" ;
+    rdfs:comment "Links related concepts." ;
+    rdfs:domain hippo:Concept ;
+    rdfs:range hippo:Concept .
+
+hippo:describes a rdf:Property ;
+    rdfs:label "describes" ;
+    rdfs:comment "A concept describes a resource." ;
+    rdfs:domain hippo:Concept ;
+    rdfs:range rdfs:Resource .
+
+# ══════════════════════════════════════════════════════════════
+# COMMON PROPERTIES — usable across all layers
+# ══════════════════════════════════════════════════════════════
+
+hippo:summary a rdf:Property ;
+    rdfs:label "summary" ;
+    rdfs:comment "Brief text summary of any resource." ;
+    rdfs:range xsd:string .
+
+hippo:content a rdf:Property ;
+    rdfs:label "content" ;
+    rdfs:comment "Full text content of a note, decision, or source." ;
+    rdfs:range xsd:string .
+
+hippo:url a rdf:Property ;
+    rdfs:label "url" ;
+    rdfs:comment "URL reference for a source, entity, or any web-addressable resource." ;
+    rdfs:range xsd:string .
+
+hippo:createdAt a rdf:Property ;
+    rdfs:label "createdAt" ;
+    rdfs:comment "ISO 8601 timestamp when the resource was created." ;
+    rdfs:range xsd:dateTime .
+
+hippo:updatedAt a rdf:Property ;
+    rdfs:label "updatedAt" ;
+    rdfs:comment "ISO 8601 timestamp when the resource was last updated." ;
+    rdfs:range xsd:dateTime .
+
+hippo:hasTopic a rdf:Property ;
+    rdfs:label "hasTopic" ;
+    rdfs:comment "Links any resource to a topic it belongs to." ;
+    rdfs:range hippo:Topic .
+
+hippo:hasTag a rdf:Property ;
+    rdfs:label "hasTag" ;
+    rdfs:comment "Links any resource to a tag." ;
+    rdfs:range hippo:Tag .
+
+hippo:references a rdf:Property ;
+    rdfs:label "references" ;
+    rdfs:comment "One resource references another (generic directed link)." .
+
+hippo:partOf a rdf:Property ;
+    rdfs:label "partOf" ;
+    rdfs:comment "Hierarchical containment: A is part of B." .
+
+hippo:rationale a rdf:Property ;
+    rdfs:label "rationale" ;
+    rdfs:comment "Why a decision was made or a concept exists." ;
+    rdfs:domain hippo:Decision ;
+    rdfs:range xsd:string .
+
+hippo:status a rdf:Property ;
+    rdfs:label "status" ;
+    rdfs:comment "Current status of a resource (open, resolved, deprecated, etc.)." ;
+    rdfs:range xsd:string .
+
+hippo:sourceOf a rdf:Property ;
+    rdfs:label "sourceOf" ;
+    rdfs:comment "Links a Source to the knowledge it produced." ;
+    rdfs:domain hippo:Source .

@@ -17,6 +17,8 @@ var handlers = map[string]func(*rdfstore.Store) handlerFunc{
 	"triple": tripleHandlerFactory,
 	"sparql": sparqlHandlerFactory,
 	"graph":  graphHandlerFactory,
+	"search":   searchHandlerFactory,
+	"validate": validateHandlerFactory,
 }
 
 // Register adds all MCP tools to the server.
@@ -24,6 +26,8 @@ func Register(s *server.MCPServer, store *rdfstore.Store) {
 	s.AddTool(tripleTool(), tripleHandlerFactory(store))
 	s.AddTool(sparqlTool(), sparqlHandlerFactory(store))
 	s.AddTool(graphTool(), graphHandlerFactory(store))
+	s.AddTool(searchTool(), searchHandlerFactory(store))
+	s.AddTool(validateTool(), validateHandlerFactory(store))
 }
 
 // HandlerFor returns a handler bound to the given store, for testing only.

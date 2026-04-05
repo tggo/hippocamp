@@ -190,6 +190,88 @@ func TestRemovePrefix(t *testing.T) {
 	}
 }
 
+// --- SPARQL Named Graph Tests ---
+
+func TestSPARQLQuery_NamedGraph(t *testing.T) {
+	s := rdfstore.NewStore()
+	defer s.Close()
+
+	_ = s.CreateGraph("http://test.org/g1")
+	_ = s.AddTriple("http://test.org/g1", "http://a.org/Alice", "http://a.org/name", "Alice", "literal", "", "")
+	_ = s.AddTriple("http://test.org/g1", "http://a.org/Bob", "http://a.org/name", "Bob", "literal", "", "")
+
+	result, err := s.SPARQLQuery("http://test.org/g1", "SELECT ?s ?name WHERE { ?s <http://a.org/name> ?name }")
+	if err != nil {
+		t.Fatalf("SPARQL query error: %v", err)
+	}
+	if len(result.Bindings) == 0 {
+		t.Fatal("expected non-empty results for named graph query")
+	}
+	if len(result.Bindings) != 2 {
+		t.Errorf("expected 2 results, got %d", len(result.Bindings))
+	}
+}
+
+func TestSPARQLQuery_NamedGraphIsolation(t *testing.T) {
+	s := rdfstore.NewStore()
+	defer s.Close()
+
+	_ = s.CreateGraph("http://test.org/g1")
+	_ = s.AddTriple("http://test.org/g1", "http://a.org/Alice", "http://a.org/name", "Alice", "literal", "", "")
+	_ = s.AddTriple("", "http://a.org/Bob", "http://a.org/name", "Bob", "literal", "", "")
+
+	// Query g1 — should only find Alice.
+	result, err := s.SPARQLQuery("http://test.org/g1", "SELECT ?name WHERE { ?s <http://a.org/name> ?name }")
+	if err != nil {
+		t.Fatalf("SPARQL query error: %v", err)
+	}
+	if len(result.Bindings) != 1 {
+		t.Errorf("expected 1 result from g1, got %d", len(result.Bindings))
+	}
+}
+
+func TestSPARQLQuery_GraphClause(t *testing.T) {
+	s := rdfstore.NewStore()
+	defer s.Close()
+
+	_ = s.CreateGraph("http://test.org/g1")
+	_ = s.AddTriple("http://test.org/g1", "http://a.org/Alice", "http://a.org/name", "Alice", "literal", "", "")
+
+	// Query with GRAPH clause from default graph.
+	result, err := s.SPARQLQuery("", "SELECT ?name WHERE { GRAPH <http://test.org/g1> { ?s <http://a.org/name> ?name } }")
+	if err != nil {
+		t.Fatalf("SPARQL query error: %v", err)
+	}
+	if len(result.Bindings) == 0 {
+		t.Fatal("expected results from GRAPH clause query")
+	}
+}
+
+func TestSPARQLQuery_CrossGraph(t *testing.T) {
+	s := rdfstore.NewStore()
+	defer s.Close()
+
+	_ = s.CreateGraph("http://test.org/g1")
+	_ = s.CreateGraph("http://test.org/g2")
+	_ = s.AddTriple("http://test.org/g1", "http://a.org/Alice", "http://a.org/name", "Alice", "literal", "", "")
+	_ = s.AddTriple("http://test.org/g2", "http://a.org/Bob", "http://a.org/name", "Bob", "literal", "", "")
+
+	// Query across both graphs.
+	result, err := s.SPARQLQuery("", `
+		SELECT ?name WHERE {
+			{ GRAPH <http://test.org/g1> { ?s <http://a.org/name> ?name } }
+			UNION
+			{ GRAPH <http://test.org/g2> { ?s <http://a.org/name> ?name } }
+		}
+	`)
+	if err != nil {
+		t.Fatalf("SPARQL query error: %v", err)
+	}
+	if len(result.Bindings) != 2 {
+		t.Errorf("expected 2 results from cross-graph query, got %d", len(result.Bindings))
+	}
+}
+
 func TestLiteralWithLang(t *testing.T) {
 	s := rdfstore.NewStore()
 

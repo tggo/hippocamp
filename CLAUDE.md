@@ -1,8 +1,10 @@
-# Hippocamp — RDF MCP Server
+# Hippocamp — RDF Knowledge Graph for LLMs
 
 ## Project overview
 
-An MCP server that exposes an in-memory RDF knowledge graph to LLMs via three tools: `triple`, `sparql`, `graph`. Built in Go using `mark3labs/mcp-go` for the MCP protocol and `tggo/goRDFlib` for RDF graph operations (SPARQL 1.1, named graphs, TriG serialization).
+An MCP server that exposes an in-memory RDF knowledge graph to LLMs via five tools: `triple`, `sparql`, `graph`, `search`, `validate`. Built in Go using `mark3labs/mcp-go` for the MCP protocol and `tggo/goRDFlib` for RDF graph operations (SPARQL 1.1, named graphs, TriG serialization).
+
+Hippocamp is a **general-purpose knowledge graph** — it works for code projects, research notes, API documentation, business processes, or any structured knowledge. The `hippo:` ontology has a domain-agnostic base layer (topics, entities, notes, sources, decisions) and an optional code layer (projects, files, symbols, dependencies).
 
 ## Commands
 
@@ -16,6 +18,9 @@ go build -o hippocamp ./cmd/hippocamp/
 # Run server (stdio transport)
 ./hippocamp --config config.yaml
 
+# One-shot query (for hooks/scripts)
+./hippocamp --config config.yaml --query "search terms" --limit 10
+
 # Tidy dependencies
 go mod tidy
 ```
@@ -23,14 +28,22 @@ go mod tidy
 ## Architecture
 
 ```
-cmd/hippocamp/main.go          — entry point: config load, store init, signal handler, ServeStdio
-internal/config/config.go      — YAML + ENV config loading
-internal/rdfstore/store.go     — Store struct: wraps graph.Dataset (BadgerDB in-memory), dirty tracking
+cmd/hippocamp/main.go            — entry point: config, store, auto-setup, signal handler, ServeStdio, --query CLI
+internal/config/config.go        — YAML + ENV config loading
+internal/rdfstore/store.go       — Store struct: wraps graph.Dataset (BadgerDB in-memory), dirty tracking
 internal/rdfstore/persistence.go — Save/Load/AutoLoad (TriG format via trig.SerializeDataset/ParseDataset)
-internal/tools/register.go     — MCP tool registration + HandlerFor() test helper
-internal/tools/triple.go       — triple tool: add / remove / list
-internal/tools/sparql.go       — sparql tool: SELECT / ASK / UPDATE (auto-detected)
-internal/tools/graph.go        — graph tool: create/delete/list/stats/clear/dump/load/prefix_*
+internal/tools/register.go       — MCP tool registration + HandlerFor() test helper
+internal/tools/triple.go         — triple tool: add / remove / list
+internal/tools/sparql.go         — sparql tool: SELECT / ASK / UPDATE (auto-detected)
+internal/tools/graph.go          — graph tool: create/delete/list/stats/clear/dump/load/prefix_*
+internal/tools/search.go         — search tool: keyword search with field boosting, word boundary scoring, graph traversal
+internal/tools/validate.go       — validate tool: checks ontology compliance (types, labels, rationale)
+internal/setup/setup.go          — auto-setup: embeds hooks+skills, writes to .claude/ on first launch
+internal/setup/embedded/         — canonical copies of hooks and skills (embedded in binary)
+ontology/hippo.ttl               — hippo: ontology (base layer + code layer)
+.claude/skills/project-analyze.md — Claude Code skill: scan any project → RDF triples (domain-agnostic)
+.claude/hooks/                   — Claude Code hook templates (pre-query, post-edit)
+testdata/                        — sample projects for integration tests (5 domains)
 ```
 
 ## Key design decisions
@@ -53,6 +66,43 @@ TriG extends Turtle with named graph blocks. It's the only text format that pres
 ### Tool grouping
 - **`triple`** and **`sparql`** are separate tools (frequent use, rich descriptions with examples)
 - **`graph`** groups infrequent operations: graph lifecycle, persistence, and prefix management
+- **`search`** is a standalone tool for keyword search across the graph (matches labels, summaries, file paths, signatures, content, URLs)
+
+### Search tool implementation
+`search` in `search.go` does text matching in Go (not SPARQL FILTER/REGEX) for reliability:
+- **Field boosting**: `rdfs:label` matches score 4x, `hippo:summary` 3x, `hippo:content` 1x
+- **Word boundary bonus**: keyword matching at the start of a word scores double
+- **Score accumulation**: scores from multiple matching predicates on the same subject are summed
+- **Graph-aware**: `related=true` parameter enables 1-hop traversal via `hippo:hasTopic`, `hippo:references`, `hippo:partOf`, `hippo:relatedTo` — finds resources linked to direct matches
+
+### Validate tool
+`validate` in `validate.go` checks graph compliance:
+- All `rdf:type` values must be from the `hippo:` namespace (no custom types)
+- All typed resources must have `rdfs:label`
+- All `hippo:Decision` resources must have `hippo:rationale`
+- Returns JSON with `valid` (bool), `warnings` (array), and `stats`
+
+### CLI query mode
+`--query` flag in `main.go` enables one-shot search: loads the persisted graph, runs a search, prints JSON results, and exits. Used by hooks and scripts.
+
+### Auto-setup mechanism
+On startup (before ServeStdio), the binary writes hooks and skills to `.claude/` in the working directory. Files are embedded in the binary via Go `//go:embed`. Logic:
+- First launch: creates `.claude/hooks/` and `.claude/skills/` with embedded files
+- Subsequent launches: compares binary build time vs file mtime; overwrites only if binary is newer
+- Dev builds (no buildTime injected): always overwrite
+- Non-fatal: setup errors are logged to stderr but don't block the MCP server
+
+Build time is injected via ldflags: `-X main.buildTime={{.Date}}` (GoReleaser) or `make build`.
+
+### Ontology design
+`ontology/hippo.ttl` has two layers:
+- **Base layer** (domain-agnostic): Topic, Entity, Note, Source, Decision, Question, Tag — usable for any knowledge domain
+- **Code layer** (software-specific): Project, Module, File, Symbol (Function, Struct, Interface, Class), Dependency, Concept
+
+This allows Hippocamp to be a general-purpose knowledge graph, not just a code analyzer.
+
+### SPARQL named graph support
+`SPARQLQuery()` in `store.go` uses `sparql.Parse()` + `sparql.EvalQuery()` (not the simpler `sparql.Query()`). This allows populating `ParsedQuery.NamedGraphs` with all store graphs so `GRAPH <uri> { }` clauses work correctly. Without this, goRDFlib's `Query()` function doesn't expose named graphs to the query engine.
 
 ### SPARQL update detection
 `isUpdate()` in `sparql.go` checks the first keyword of the query string (INSERT, DELETE, LOAD, etc.) to distinguish updates from queries. Updates go through `store.SPARQLUpdate()` which builds a `sparql.Dataset` struct from the store's named graphs.
@@ -90,3 +140,13 @@ ENV overrides: `HIPPOCAMP_STORE_DEFAULT_FILE`, `HIPPOCAMP_STORE_AUTO_LOAD`, `HIP
 - Tool handlers are tested via `tools.HandlerFor(store, "toolname")` — no MCP server needed
 - `tools.ResultText(result)` extracts the text payload from a `*mcp.CallToolResult`
 - Each test creates its own `rdfstore.NewStore()` — no shared state between tests
+
+### Search integration tests
+`TestSearchProjects` in `internal/tools/testprojects_test.go` runs 100+ search flows across 5 domains:
+- house-construction, tomato-garden, sales-department, accounting, recipe-collection
+- Each project seeds 30-50 triples and runs 20+ search queries
+- Tests check: MinResults, MaxResults, MustFind (recall), MustNotFind (precision)
+- Metrics logged via `t.Logf`: recall, precision per query
+- Helper builders (`entity()`, `topic()`, `note()`, `decision()`, etc.) reduce boilerplate
+- To add a new test flow: add a `searchQuery` struct to a project's Queries slice
+- To add a new project: write a `testdata_{name}_test.go` with a function returning `testProject`
