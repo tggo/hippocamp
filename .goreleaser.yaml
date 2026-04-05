@@ -7,14 +7,29 @@ before:
     - go mod tidy
 
 builds:
-  - id: hippocamp
+  - id: hippocamp-darwin
+    main: ./cmd/hippocamp
+    binary: hippocamp
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w -X main.version={{.Version}} -X main.buildTime={{.Date}}
+    hooks:
+      post:
+        - cmd: codesign --sign "Developer ID Application: Ruslan Korennoy (4JV3A5SUSZ)" --options runtime --timestamp "{{ .Path }}"
+
+  - id: hippocamp-other
     main: ./cmd/hippocamp
     binary: hippocamp
     env:
       - CGO_ENABLED=0
     goos:
       - linux
-      - darwin
       - windows
     goarch:
       - amd64
