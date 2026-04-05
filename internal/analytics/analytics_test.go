@@ -187,3 +187,156 @@ func TestCollectorSequentialIDs(t *testing.T) {
 		t.Error("expected distinct subjects for different calls")
 	}
 }
+
+func TestIsAnalyticsQueryByGraph(t *testing.T) {
+	store := rdfstore.NewStore()
+	defer store.Close()
+
+	c := New(store)
+
+	reqID := "req-graph"
+	req := &mcp.CallToolRequest{}
+	req.Params.Name = "triple"
+	req.Params.Arguments = map[string]any{
+		"action": "list",
+		"graph":  GraphURI,
+	}
+
+	c.BeforeCallTool(context.Background(), reqID, req)
+
+	result := &mcp.CallToolResult{
+		Content: []mcp.Content{mcp.TextContent{Text: "[]"}},
+	}
+	c.AfterCallTool(context.Background(), reqID, req, result)
+
+	// Should NOT have recorded any triples because the call targets the analytics graph.
+	triples, _ := store.ListTriples(GraphURI, "", ns+"tool", "")
+	if len(triples) != 0 {
+		t.Errorf("expected 0 tool triples for analytics-graph call, got %d", len(triples))
+	}
+}
+
+func TestIsAnalyticsQueryByScope(t *testing.T) {
+	store := rdfstore.NewStore()
+	defer store.Close()
+
+	c := New(store)
+
+	reqID := "req-scope"
+	req := &mcp.CallToolRequest{}
+	req.Params.Name = "search"
+	req.Params.Arguments = map[string]any{
+		"query": "something",
+		"scope": GraphURI,
+	}
+
+	c.BeforeCallTool(context.Background(), reqID, req)
+
+	result := &mcp.CallToolResult{
+		Content: []mcp.Content{mcp.TextContent{Text: "[]"}},
+	}
+	c.AfterCallTool(context.Background(), reqID, req, result)
+
+	triples, _ := store.ListTriples(GraphURI, "", ns+"tool", "")
+	if len(triples) != 0 {
+		t.Errorf("expected 0 tool triples for scope=analytics call, got %d", len(triples))
+	}
+}
+
+func TestIsAnalyticsQueryBySparql(t *testing.T) {
+	store := rdfstore.NewStore()
+	defer store.Close()
+
+	c := New(store)
+
+	reqID := "req-sparql"
+	req := &mcp.CallToolRequest{}
+	req.Params.Name = "sparql"
+	req.Params.Arguments = map[string]any{
+		"query": "SELECT ?s WHERE { GRAPH <" + GraphURI + "> { ?s ?p ?o } }",
+	}
+
+	c.BeforeCallTool(context.Background(), reqID, req)
+
+	result := &mcp.CallToolResult{
+		Content: []mcp.Content{mcp.TextContent{Text: "[]"}},
+	}
+	c.AfterCallTool(context.Background(), reqID, req, result)
+
+	triples, _ := store.ListTriples(GraphURI, "", ns+"tool", "")
+	if len(triples) != 0 {
+		t.Errorf("expected 0 tool triples for SPARQL targeting analytics graph, got %d", len(triples))
+	}
+}
+
+func TestCollectorRecordsGraphAction(t *testing.T) {
+	store := rdfstore.NewStore()
+	defer store.Close()
+
+	c := New(store)
+
+	reqID := "req-graph-create"
+	req := &mcp.CallToolRequest{}
+	req.Params.Name = "graph"
+	req.Params.Arguments = map[string]any{
+		"action": "create",
+		"graph":  "http://example.org/my-graph",
+	}
+
+	c.BeforeCallTool(context.Background(), reqID, req)
+
+	result := &mcp.CallToolResult{
+		Content: []mcp.Content{mcp.TextContent{Text: "ok"}},
+	}
+	c.AfterCallTool(context.Background(), reqID, req, result)
+
+	preds := make(map[string]string)
+	triples, _ := store.ListTriples(GraphURI, "", "", "")
+	for _, tr := range triples {
+		preds[tr.Predicate] = tr.Object
+	}
+
+	if preds[ns+"tool"] != "graph" {
+		t.Errorf("expected tool=graph, got %q", preds[ns+"tool"])
+	}
+	if preds[ns+"input"] != "create" {
+		t.Errorf("expected input=create, got %q", preds[ns+"input"])
+	}
+	if preds[ns+"graph"] != "http://example.org/my-graph" {
+		t.Errorf("expected graph=http://example.org/my-graph, got %q", preds[ns+"graph"])
+	}
+}
+
+func TestCollectorRecordsValidateCall(t *testing.T) {
+	store := rdfstore.NewStore()
+	defer store.Close()
+
+	c := New(store)
+
+	reqID := "req-validate"
+	req := &mcp.CallToolRequest{}
+	req.Params.Name = "validate"
+	req.Params.Arguments = map[string]any{}
+
+	c.BeforeCallTool(context.Background(), reqID, req)
+
+	result := &mcp.CallToolResult{
+		Content: []mcp.Content{
+			mcp.TextContent{Text: `{"valid":true,"errors":[],"warnings":[],"stats":{"resources":0}}`},
+		},
+	}
+	c.AfterCallTool(context.Background(), reqID, req, result)
+
+	preds := make(map[string]string)
+	triples, _ := store.ListTriples(GraphURI, "", "", "")
+	for _, tr := range triples {
+		preds[tr.Predicate] = tr.Object
+	}
+
+	if preds[ns+"tool"] != "validate" {
+		t.Errorf("expected tool=validate, got %q", preds[ns+"tool"])
+	}
+	if preds[ns+"input"] != "validate" {
+		t.Errorf("expected input=validate, got %q", preds[ns+"input"])
+	}
+}

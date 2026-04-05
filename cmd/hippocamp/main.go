@@ -10,7 +10,6 @@ import (
 	"os/exec"
 	"os/signal"
 	"path/filepath"
-	"strings"
 	"syscall"
 	"time"
 
@@ -174,7 +173,7 @@ func main() {
 	hooks.AddAfterCallTool(func(ctx context.Context, id any, req *mcp.CallToolRequest, result any) {
 		collector.AfterCallTool(ctx, id, req, result)
 		// Mark healthcheck dirty after mutations.
-		if isMutatingTool(req) {
+		if tools.IsMutatingCall(req.Params.Name, req.GetArguments()) {
 			checker.MarkDirty()
 		}
 	})
@@ -303,39 +302,6 @@ func runUninstall() {
 	fmt.Println("Done. To also remove the binary: brew uninstall hippocamp")
 }
 
-// isMutatingTool returns true if the tool call modifies the graph.
-func isMutatingTool(req *mcp.CallToolRequest) bool {
-	args := req.GetArguments()
-	switch req.Params.Name {
-	case "triple":
-		a, _ := args["action"].(string)
-		return a == "add" || a == "remove"
-	case "sparql":
-		q, _ := args["query"].(string)
-		return len(q) > 0 && isUpdateKeyword(q)
-	case "graph":
-		a, _ := args["action"].(string)
-		return a == "create" || a == "delete" || a == "clear" || a == "load" || a == "import"
-	}
-	return false
-}
-
-func isUpdateKeyword(q string) bool {
-	upper := strings.ToUpper(strings.TrimSpace(q))
-	for strings.HasPrefix(upper, "PREFIX") || strings.HasPrefix(upper, "BASE") {
-		idx := strings.Index(upper, "\n")
-		if idx < 0 {
-			return false
-		}
-		upper = strings.TrimSpace(upper[idx+1:])
-	}
-	for _, kw := range []string{"INSERT", "DELETE", "LOAD", "CLEAR", "DROP", "CREATE", "COPY", "MOVE", "ADD"} {
-		if strings.HasPrefix(upper, kw) {
-			return true
-		}
-	}
-	return false
-}
 
 func printManualConfig(binPath string) {
 	fmt.Println("Add to ~/.claude/settings.json:")
