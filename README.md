@@ -1,5 +1,7 @@
 <p align="center">
-  <img src="docs/logo-sm.png" alt="Hippocamp Logo" width="200">
+  <a href="https://tggo.github.io/hippocamp/">
+    <img src="docs/logo-sm.png" alt="Hippocamp Logo" width="200">
+  </a>
 </p>
 
 # hippocamp

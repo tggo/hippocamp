@@ -83,6 +83,13 @@
       text-decoration: none;
     }
     .nav-logo span { color: var(--terra); }
+    .nav-logo-img {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
     .nav-links {
       display: flex;
       gap: 28px;
@@ -126,6 +133,13 @@
       opacity: 0;
       transform: translateY(24px);
       animation: fadeUp 0.8s ease forwards 0.2s;
+    }
+    .hero-logo {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 24px rgba(28,24,21,0.12);
     }
     .hero-eyebrow {
       font-family: 'JetBrains Mono', monospace;
@@ -336,7 +350,7 @@
     #tools { background: var(--bg-warm); }
     .tools-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 24px;
     }
     .tool-card {
@@ -624,7 +638,7 @@
 <!-- NAV -->
 <nav>
   <div class="nav-inner">
-    <a href="#hero" class="nav-logo">hippo<span>camp</span></a>
+    <a href="#hero" class="nav-logo"><img src="logo-sm.png" alt="" class="nav-logo-img">hippo<span>camp</span></a>
     <ul class="nav-links">
       <li><a href="#what">About</a></li>
       <li><a href="#tools">Tools</a></li>
@@ -643,11 +657,12 @@
   <div class="container" style="display:contents;">
     <div style="padding-left:32px; max-width:540px;">
       <div class="hero-left">
-        <div class="hero-eyebrow">MCP Server</div>
+        <img src="logo-sm.png" alt="Hippocamp Logo" class="hero-logo">
+        <div class="hero-eyebrow">RDF Knowledge Graph for LLMs</div>
         <h1 class="hero-title">hippo<em>camp</em></h1>
         <p class="hero-sub">
-          An RDF knowledge graph server for LLMs.
-          Query, build, and persist semantic graphs — through Claude's tool calls.
+          A structured brain for any AI agent.
+          Build, query, and persist knowledge graphs — for code, research, or any domain.
         </p>
         <div class="hero-install">
           <span class="hero-install-label">brew</span>
@@ -752,13 +767,18 @@
     <div class="what-grid">
       <div class="what-text reveal">
         <p>
-          <strong>Hippocamp</strong> is an MCP server that gives Claude a persistent, queryable RDF knowledge graph.
-          Named after the brain's memory center — it gives LLMs a structured place to store and recall knowledge.
+          <strong>Hippocamp</strong> is an MCP server that gives any LLM a persistent, queryable RDF knowledge graph.
+          Named after the brain's memory center — it gives AI agents a structured place to store and recall knowledge.
         </p>
         <p>
-          RDF represents facts as <strong>triples</strong>: Subject → Predicate → Object.
-          Graphs of triples form a semantic web of knowledge that Claude can build,
+          RDF represents facts as <strong>triples</strong>: Subject &rarr; Predicate &rarr; Object.
+          Graphs of triples form a semantic web of knowledge that any LLM can build,
           query with SPARQL, and persist across sessions.
+        </p>
+        <p>
+          Works for <strong>any domain</strong>: code analysis, research notes, API documentation,
+          business processes. The built-in ontology has a generic base layer (topics, entities, notes, decisions)
+          and an optional code layer (files, symbols, dependencies). Extend with your own classes &mdash; RDF is open-world.
         </p>
         <p>
           Backed by <strong>BadgerDB</strong> in-memory with full named graph support.
@@ -809,7 +829,7 @@
   <div class="container">
     <div class="section-rule reveal">
       <span class="section-num">02</span>
-      <h2 class="section-title">Three tools</h2>
+      <h2 class="section-title">Four tools</h2>
     </div>
 
     <div class="tools-grid">
@@ -861,6 +881,21 @@
           Clear graphs without deleting them.
         </p>
       </div>
+
+      <div class="tool-card reveal reveal-delay-3">
+        <div class="tool-num">iv</div>
+        <div class="tool-name">search</div>
+        <div class="tool-actions">
+          <span class="tool-action">keyword</span>
+          <span class="tool-action">type filter</span>
+          <span class="tool-action">scope</span>
+        </div>
+        <p class="tool-desc">
+          Semantic keyword search across the entire graph. Matches labels, summaries,
+          file paths, signatures, and content. Filter by RDF type or named graph scope.
+          Returns ranked results with properties.
+        </p>
+      </div>
     </div>
   </div>
 </section>
@@ -878,6 +913,7 @@
         <button class="tab-btn active" onclick="switchTab('triple')">triple</button>
         <button class="tab-btn" onclick="switchTab('sparql')">sparql</button>
         <button class="tab-btn" onclick="switchTab('graph')">graph</button>
+        <button class="tab-btn" onclick="switchTab('search')">search</button>
         <button class="tab-btn" onclick="switchTab('config')">config</button>
       </div>
 
@@ -952,6 +988,29 @@
 <span class="cm">// Stats for a graph</span>
 { <span class="key">"action"</span>: <span class="str">"stats"</span>, <span class="key">"name"</span>: <span class="str">"http://example.org/people"</span> }
 <span class="cm">// → {"triples": 42}</span></pre>
+        </div>
+      </div>
+
+      <div id="tab-search" class="code-panel">
+        <div class="code-panel-inner">
+<pre><span class="cm">// Search by keyword</span>
+{ <span class="key">"query"</span>: <span class="str">"authentication middleware"</span> }
+
+<span class="cm">// Filter by type</span>
+{
+  <span class="key">"query"</span>: <span class="str">"Store"</span>,
+  <span class="key">"type"</span>:  <span class="str">"https://hippocamp.dev/ontology#Struct"</span>
+}
+
+<span class="cm">// Search within a project graph</span>
+{
+  <span class="key">"query"</span>: <span class="str">"database connection"</span>,
+  <span class="key">"scope"</span>: <span class="str">"project:myapp"</span>,
+  <span class="key">"limit"</span>: <span class="val">5</span>
+}
+
+<span class="cm">// CLI one-shot query (for hooks/scripts)</span>
+<span class="cm">// $ hippocamp --query "auth" --type "hippo:Function" --limit 10</span></pre>
         </div>
       </div>
 
@@ -1066,7 +1125,7 @@
       <div class="feature-cell">
         <div class="feature-icon">◈</div>
         <div class="feature-name">Named graphs</div>
-        <p class="feature-desc">Multiple isolated named graphs in a single store. Each graph is independently queryable.</p>
+        <p class="feature-desc">Multiple isolated named graphs in a single store. Each graph is independently queryable. One graph per project, shared ontology.</p>
       </div>
       <div class="feature-cell">
         <div class="feature-icon">◉</div>
@@ -1082,6 +1141,16 @@
         <div class="feature-icon">◌</div>
         <div class="feature-name">SPARQL 1.1</div>
         <p class="feature-desc">Full W3C-conformant query engine. SELECT, ASK, CONSTRUCT, and all UPDATE operations.</p>
+      </div>
+      <div class="feature-cell">
+        <div class="feature-icon">◇</div>
+        <div class="feature-name">Ontology</div>
+        <p class="feature-desc">Built-in hippo: ontology with base layer (topics, entities, notes, decisions) and code layer (files, symbols, dependencies). Open-world extensible.</p>
+      </div>
+      <div class="feature-cell">
+        <div class="feature-icon">◆</div>
+        <div class="feature-name">Claude Code hooks</div>
+        <p class="feature-desc">Pre-query hook loads graph context before each prompt. Post-edit hook tracks changes for re-indexing. Skills for automated project analysis.</p>
       </div>
     </div>
   </div>
