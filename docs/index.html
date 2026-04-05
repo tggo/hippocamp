@@ -466,6 +466,71 @@
       .proof-grid { grid-template-columns: 1fr; }
     }
 
+    /* -- BENCHMARK SECTION -- */
+    .benchmark-section { padding: 60px 0; }
+    .benchmark-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: center;
+    }
+    .benchmark-text h3 {
+      font-size: 1.6rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--ink);
+    }
+    .benchmark-text p {
+      color: var(--ink-light);
+      margin-bottom: 16px;
+      line-height: 1.7;
+    }
+    .benchmark-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,179,64,0.1);
+      border: 1px solid rgba(255,179,64,0.3);
+      color: var(--gold);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .benchmark-table {
+      background: var(--bg-card);
+      border: 1px solid var(--rule);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .benchmark-header {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--rule);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--ink-faint);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .benchmark-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--rule);
+      font-size: 0.85rem;
+      align-items: center;
+    }
+    .benchmark-row:last-child { border-bottom: none; }
+    .benchmark-label { color: var(--ink-light); font-weight: 500; }
+    .benchmark-old { color: var(--ink-faint); }
+    .benchmark-new { color: var(--gold); font-weight: 600; }
+    @media (max-width: 768px) {
+      .benchmark-grid { grid-template-columns: 1fr; }
+    }
+
     /* -- TOOLS -- */
     #tools { background: var(--bg); }
     .tools-grid {
@@ -968,6 +1033,54 @@
           <div class="proof-q" data-i18n="proof.q5">Completion date + remaining phases</div>
           <div class="proof-a" data-i18n="proof.a5">Oct 2026, 3 phases left</div>
           <div class="proof-check">&#x2713;</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BENCHMARK -->
+<section class="benchmark-section">
+  <div class="container">
+    <div class="benchmark-grid">
+      <div class="benchmark-text reveal">
+        <h3 data-i18n="benchmark.title">15&times; faster than file scanning</h3>
+        <p data-i18n="benchmark.desc1">
+          Real test: the same question &mdash; &ldquo;what&rsquo;s needed for electricity?&rdquo; &mdash;
+          asked two ways. First, Claude scanned dozens of markdown files (38 tool calls, 3&nbsp;minutes).
+          Then it queried the Hippocamp graph (2&nbsp;calls, 2&nbsp;seconds).
+        </p>
+        <p data-i18n="benchmark.desc2">
+          Same answer. 15&times; faster. 30&times; less context consumed.
+          The LLM remembered on its own: &ldquo;from now on, always search Hippocamp first.&rdquo;
+        </p>
+        <div class="benchmark-badge" data-i18n="benchmark.badge">2 sec vs 3 min &mdash; same answer</div>
+      </div>
+      <div class="benchmark-table reveal reveal-delay-1">
+        <div class="benchmark-header">
+          <div></div>
+          <div data-i18n="benchmark.col_files">File scanning</div>
+          <div data-i18n="benchmark.col_graph">Hippocamp</div>
+        </div>
+        <div class="benchmark-row">
+          <div class="benchmark-label" data-i18n="benchmark.row_time">Time</div>
+          <div class="benchmark-old">~3 min (38 tool calls)</div>
+          <div class="benchmark-new">~2 sec (2 queries)</div>
+        </div>
+        <div class="benchmark-row">
+          <div class="benchmark-label" data-i18n="benchmark.row_tokens">Tokens used</div>
+          <div class="benchmark-old">60,500 tokens</div>
+          <div class="benchmark-new">~2,000 tokens</div>
+        </div>
+        <div class="benchmark-row">
+          <div class="benchmark-label" data-i18n="benchmark.row_result">Result quality</div>
+          <div class="benchmark-old" data-i18n="benchmark.result_old">Complete but verbose</div>
+          <div class="benchmark-new" data-i18n="benchmark.result_new">Structured, concise</div>
+        </div>
+        <div class="benchmark-row">
+          <div class="benchmark-label" data-i18n="benchmark.row_context">Context consumed</div>
+          <div class="benchmark-old" data-i18n="benchmark.context_old">Large text blocks</div>
+          <div class="benchmark-new" data-i18n="benchmark.context_new">Compact JSON</div>
         </div>
       </div>
     </div>

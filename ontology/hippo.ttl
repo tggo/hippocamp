@@ -198,6 +198,11 @@ hippo:describes a rdf:Property ;
 # COMMON PROPERTIES — usable across all layers
 # ══════════════════════════════════════════════════════════════
 
+hippo:alias a rdf:Property ;
+    rdfs:label "alias" ;
+    rdfs:comment "Alternative name, synonym, or colloquial term for a resource. Supports language tags. Used by the search tool with the same boost as hippo:summary." ;
+    rdfs:range rdfs:Literal .
+
 hippo:summary a rdf:Property ;
     rdfs:label "summary" ;
     rdfs:comment "Brief text summary of any resource." ;

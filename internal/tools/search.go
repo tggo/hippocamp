@@ -21,6 +21,7 @@ const (
 	hippoURL        = hippoNS + "url"
 	hippoRationale  = hippoNS + "rationale"
 	hippoStatus_    = hippoNS + "status"
+	hippoAlias      = hippoNS + "alias"
 )
 
 // fieldWeight maps searchable predicates to their scoring weight.
@@ -28,6 +29,7 @@ const (
 var fieldWeight = map[string]int{
 	rdfsLabel:       4, // label matches are most relevant
 	hippoSummary:    3, // summary is a concise description
+	hippoAlias:      3, // synonyms, colloquial terms
 	hippoFilePath:   2,
 	hippoSignature:  2,
 	hippoContent:    1, // content is long text, lower signal
@@ -103,6 +105,23 @@ func searchHandlerFactory(store *rdfstore.Store) handlerFunc {
 			return mcp.NewToolResultError(fmt.Sprintf("search error: %v", err)), nil
 		}
 
+		if len(results) == 0 {
+			// Count distinct subjects in the searched scope to give context.
+			resourceCount := countResources(store, scope)
+			hint := struct {
+				Results []SearchResult `json:"results"`
+				Hint    string         `json:"hint"`
+			}{
+				Results: []SearchResult{},
+				Hint:    fmt.Sprintf("0 matches for '%s'. Graph has %d resources. Try: English terms, rdfs:label values, or hippo:alias values.", query, resourceCount),
+			}
+			data, err := json.Marshal(hint)
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			return mcp.NewToolResultText(string(data)), nil
+		}
+
 		data, err := json.Marshal(results)
 		if err != nil {
 			return mcp.NewToolResultError(err.Error()), nil
@@ -158,18 +177,23 @@ func searchGraph(store *rdfstore.Store, query, typeFilter, scope string, limit i
 			words := strings.Fields(val)
 			score := 0
 			for _, kw := range keywords {
-				if !strings.Contains(val, kw) {
-					continue
-				}
-				matchScore := weight // base: field weight
-				// Word boundary bonus: keyword matches at the start of a word.
-				for _, w := range words {
-					if strings.HasPrefix(w, kw) {
-						matchScore += weight // double for word-start match
-						break
+				if strings.Contains(val, kw) {
+					matchScore := weight // base: field weight
+					// Word boundary bonus: keyword matches at the start of a word.
+					for _, w := range words {
+						if strings.HasPrefix(w, kw) {
+							matchScore += weight // double for word-start match
+							break
+						}
+					}
+					score += matchScore
+				} else if len(kw) >= minPrefixLen {
+					// Prefix matching: keyword and word share a common prefix of 4+ chars.
+					// Catches stem variations (електр → електрика, електричний).
+					if prefixMatch(kw, words) {
+						score += weight / 2 // half weight for prefix match
 					}
 				}
-				score += matchScore
 			}
 			if score > 0 {
 				if c, ok := candidates[t.Subject]; ok {
@@ -337,4 +361,56 @@ func searchGraph(store *rdfstore.Store, query, typeFilter, scope string, limit i
 		out[i] = r.result
 	}
 	return out, nil
+}
+
+// minPrefixLen is the minimum shared prefix length for prefix matching.
+// Shorter prefixes produce too many false positives.
+const minPrefixLen = 4
+
+// prefixMatch returns true if keyword shares a prefix of minPrefixLen+ chars
+// with any word in words. This catches stem variations across languages
+// (e.g. "електр" matches "електрика", "електричний", "електропостачання").
+func prefixMatch(kw string, words []string) bool {
+	kwRunes := []rune(kw)
+	for _, w := range words {
+		wRunes := []rune(w)
+		shared := 0
+		limit := len(kwRunes)
+		if len(wRunes) < limit {
+			limit = len(wRunes)
+		}
+		for i := 0; i < limit; i++ {
+			if kwRunes[i] == wRunes[i] {
+				shared++
+			} else {
+				break
+			}
+		}
+		if shared >= minPrefixLen {
+			return true
+		}
+	}
+	return false
+}
+
+// countResources counts distinct subjects across the given scope (or all graphs).
+func countResources(store *rdfstore.Store, scope string) int {
+	graphNames := []string{}
+	if scope != "" {
+		graphNames = append(graphNames, scope)
+	} else {
+		graphNames = store.ListGraphs()
+	}
+
+	subjects := make(map[string]bool)
+	for _, gn := range graphNames {
+		triples, err := store.ListTriples(gn, "", "", "")
+		if err != nil {
+			continue
+		}
+		for _, t := range triples {
+			subjects[t.Subject] = true
+		}
+	}
+	return len(subjects)
 }

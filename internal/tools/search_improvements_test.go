@@ -3,6 +3,7 @@ package tools
 import (
 	"context"
 	"encoding/json"
+	"strings"
 	"testing"
 
 	"github.com/mark3labs/mcp-go/mcp"
@@ -23,11 +24,22 @@ func searchAndParse(t *testing.T, store *rdfstore.Store, args map[string]any) []
 	if res.IsError {
 		t.Fatalf("search tool error: %s", text)
 	}
+
+	// Try array first (normal results).
 	var results []SearchResult
-	if err := json.Unmarshal([]byte(text), &results); err != nil {
-		t.Fatalf("unmarshal: %v", err)
+	if err := json.Unmarshal([]byte(text), &results); err == nil {
+		return results
 	}
-	return results
+
+	// Try hint object (zero-result response).
+	var hint struct {
+		Results []SearchResult `json:"results"`
+		Hint    string         `json:"hint"`
+	}
+	if err := json.Unmarshal([]byte(text), &hint); err != nil {
+		t.Fatalf("unmarshal: %v (text: %s)", err, text)
+	}
+	return hint.Results
 }
 
 func TestSearch_PrefixMatch(t *testing.T) {
@@ -204,5 +216,112 @@ func TestSearch_AccumulateScores(t *testing.T) {
 	// A should rank higher (metal in 2 fields vs 1).
 	if results[0].URI != "http://test.org/A" {
 		t.Errorf("expected multi-field match to rank first, got %s", results[0].URI)
+	}
+}
+
+func TestSearch_PrefixMatch_StemVariation(t *testing.T) {
+	store := rdfstore.NewStore()
+	defer store.Close()
+
+	// "електропостачання" in label — keyword "електрика" is NOT a substring,
+	// but they share the prefix "електр" (6 chars > minPrefixLen of 4).
+	store.AddTriple("", "http://test.org/power", rdfType, testHippoEntity, "uri", "", "")
+	store.AddTriple("", "http://test.org/power", rdfsLabel, "електропостачання системи", "literal", "", "")
+
+	results := searchAndParse(t, store, map[string]any{"query": "електрика"})
+	if len(results) == 0 {
+		t.Fatal("expected prefix match: 'електрика' shares prefix 'електр' with 'електропостачання'")
+	}
+}
+
+func TestSearch_PrefixMatch_TooShort(t *testing.T) {
+	store := rdfstore.NewStore()
+	defer store.Close()
+
+	// "abc" is only 3 chars — below minPrefixLen, should NOT trigger prefix match.
+	store.AddTriple("", "http://test.org/x", rdfType, testHippoEntity, "uri", "", "")
+	store.AddTriple("", "http://test.org/x", rdfsLabel, "abcdefgh", "literal", "", "")
+
+	results := searchAndParse(t, store, map[string]any{"query": "abcz"})
+	if len(results) > 0 {
+		// "abcz" shares only 3 chars with "abcdefgh" — too short for prefix match.
+		// But "abcz" is 4 chars and shares prefix "abc" (3 chars) — below threshold.
+		t.Fatal("prefix match should not trigger for shared prefix < 4 chars")
+	}
+}
+
+func TestSearch_AliasMatch(t *testing.T) {
+	store := rdfstore.NewStore()
+	defer store.Close()
+
+	testHippoAlias := testHippoNS + "alias"
+
+	// Entity with English label but Ukrainian alias.
+	store.AddTriple("", "http://test.org/electrical", rdfType, testHippoEntity, "uri", "", "")
+	store.AddTriple("", "http://test.org/electrical", rdfsLabel, "Electrical Wiring", "literal", "", "")
+	store.AddTriple("", "http://test.org/electrical", testHippoAlias, "електрика", "literal", "", "")
+	store.AddTriple("", "http://test.org/electrical", testHippoAlias, "проводка", "literal", "", "")
+
+	// Search by alias keyword should find the resource.
+	results := searchAndParse(t, store, map[string]any{"query": "електрика"})
+	if len(results) == 0 {
+		t.Fatal("expected to find resource via hippo:alias match")
+	}
+	if results[0].URI != "http://test.org/electrical" {
+		t.Errorf("expected http://test.org/electrical, got %s", results[0].URI)
+	}
+
+	// Search by English label should still work.
+	results = searchAndParse(t, store, map[string]any{"query": "wiring"})
+	if len(results) == 0 {
+		t.Fatal("expected to find resource via rdfs:label match")
+	}
+}
+
+func TestSearch_ZeroResultHint(t *testing.T) {
+	store := rdfstore.NewStore()
+	defer store.Close()
+
+	// Seed some data so resource count > 0.
+	store.AddTriple("", "http://test.org/A", rdfType, testHippoEntity, "uri", "", "")
+	store.AddTriple("", "http://test.org/A", rdfsLabel, "Alpha Resource", "literal", "", "")
+	store.AddTriple("", "http://test.org/B", rdfType, testHippoNote, "uri", "", "")
+	store.AddTriple("", "http://test.org/B", rdfsLabel, "Beta Note", "literal", "", "")
+
+	handler := HandlerFor(store, "search")
+	req := mcp.CallToolRequest{}
+	req.Params.Arguments = map[string]any{"query": "zzzznonexistent"}
+
+	res, err := handler(context.Background(), req)
+	if err != nil {
+		t.Fatalf("search error: %v", err)
+	}
+	text := ResultText(res)
+	if res.IsError {
+		t.Fatalf("search returned error: %s", text)
+	}
+
+	// Parse as hint object.
+	var hint struct {
+		Results []SearchResult `json:"results"`
+		Hint    string         `json:"hint"`
+	}
+	if err := json.Unmarshal([]byte(text), &hint); err != nil {
+		t.Fatalf("expected hint JSON object, got: %s", text)
+	}
+
+	if len(hint.Results) != 0 {
+		t.Errorf("expected 0 results, got %d", len(hint.Results))
+	}
+	if hint.Hint == "" {
+		t.Fatal("expected non-empty hint")
+	}
+
+	// Hint should mention the query and resource count.
+	if !strings.Contains(hint.Hint, "zzzznonexistent") {
+		t.Errorf("hint should contain the query, got: %s", hint.Hint)
+	}
+	if !strings.Contains(hint.Hint, "2 resources") {
+		t.Errorf("hint should mention resource count (2), got: %s", hint.Hint)
 	}
 }

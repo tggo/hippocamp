@@ -55,11 +55,21 @@ func callSearch(t *testing.T, handler handlerFunc, args map[string]any) []Search
 		t.Fatalf("search returned error: %s", text)
 	}
 
+	// Try array first (normal results).
 	var results []SearchResult
-	if err := json.Unmarshal([]byte(text), &results); err != nil {
+	if err := json.Unmarshal([]byte(text), &results); err == nil {
+		return results
+	}
+
+	// Try hint object (zero-result response).
+	var hint struct {
+		Results []SearchResult `json:"results"`
+		Hint    string         `json:"hint"`
+	}
+	if err := json.Unmarshal([]byte(text), &hint); err != nil {
 		t.Fatalf("unmarshal: %v (text: %s)", err, text)
 	}
-	return results
+	return hint.Results
 }
 
 func TestSearch_BasicKeyword(t *testing.T) {

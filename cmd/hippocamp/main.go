@@ -15,6 +15,7 @@ import (
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
+	"github.com/ruslanmv/hippocamp/internal/analytics"
 	"github.com/ruslanmv/hippocamp/internal/config"
 	"github.com/ruslanmv/hippocamp/internal/rdfstore"
 	"github.com/ruslanmv/hippocamp/internal/setup"
@@ -161,12 +162,19 @@ func main() {
 		os.Exit(0)
 	}()
 
+	// Set up analytics collector for tool call tracking.
+	collector := analytics.New(store)
+	hooks := &server.Hooks{}
+	hooks.AddBeforeCallTool(collector.BeforeCallTool)
+	hooks.AddAfterCallTool(collector.AfterCallTool)
+
 	// Create MCP server and register tools.
 	s := server.NewMCPServer(
 		"hippocamp",
 		version,
 		server.WithToolCapabilities(false),
 		server.WithRecovery(),
+		server.WithHooks(hooks),
 	)
 	tools.Register(s, store)
 

@@ -12,6 +12,19 @@ Plug it into any project as a persistent brain. Use the built-in ontology for re
 
 On first launch, Hippocamp automatically sets up Claude Code hooks and skills in your project — no manual configuration needed.
 
+## Why a graph?
+
+Real test: the same question — "what's needed for electricity?" — asked two ways in a home construction project.
+
+| | File scanning | Hippocamp |
+|---|---|---|
+| **Time** | ~3 min (38 tool calls) | ~2 sec (2 queries) |
+| **Tokens** | 60,500 | ~2,000 |
+| **Result** | Complete but verbose | Structured, concise |
+| **Context** | Large text blocks | Compact JSON |
+
+15× faster. 30× less context consumed. Same answer. The LLM learned on its own: *"from now on, always search Hippocamp first."*
+
 ## Install
 
 **Homebrew (macOS / Linux):**
@@ -134,9 +147,13 @@ Returns JSON bindings for SELECT, `"true"`/`"false"` for ASK, `"ok"` for updates
 | `limit` | Max results (default: 20) |
 | `related` | Follow `hasTopic`, `references`, `partOf` links to include related resources (default: false) |
 
-Searches across `rdfs:label`, `hippo:summary`, `hippo:filePath`, `hippo:signature`, `hippo:content`, `hippo:url`, `hippo:rationale`, and subject URIs. Uses field boosting (label matches score highest), word boundary scoring, and score accumulation across predicates.
+Searches across `rdfs:label`, `hippo:summary`, `hippo:alias`, `hippo:filePath`, `hippo:signature`, `hippo:content`, `hippo:url`, `hippo:rationale`, and subject URIs. Uses field boosting (label matches score highest), word boundary scoring, and score accumulation across predicates.
+
+Use `hippo:alias` to add synonyms and translations — e.g. Ukrainian labels for English-named resources so search finds them in either language.
 
 With `related=true`, also returns resources that link TO direct matches via relationship predicates (1-hop graph traversal).
+
+When no results are found, the response includes a hint with the total resource count and suggestions for refining the query.
 
 ---
 

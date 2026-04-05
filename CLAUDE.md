@@ -28,7 +28,8 @@ go mod tidy
 ## Architecture
 
 ```
-cmd/hippocamp/main.go            — entry point: config, store, auto-setup, signal handler, ServeStdio, --query CLI
+cmd/hippocamp/main.go            — entry point: config, store, analytics, auto-setup, signal handler, ServeStdio, --query CLI
+internal/analytics/analytics.go  — tool call analytics: logs + stores metrics as RDF triples in urn:hippocamp:analytics
 internal/config/config.go        — YAML + ENV config loading
 internal/rdfstore/store.go       — Store struct: wraps graph.Dataset (BadgerDB in-memory), dirty tracking
 internal/rdfstore/persistence.go — Save/Load/AutoLoad (TriG format via trig.SerializeDataset/ParseDataset)
@@ -70,10 +71,13 @@ TriG extends Turtle with named graph blocks. It's the only text format that pres
 
 ### Search tool implementation
 `search` in `search.go` does text matching in Go (not SPARQL FILTER/REGEX) for reliability:
-- **Field boosting**: `rdfs:label` matches score 4x, `hippo:summary` 3x, `hippo:content` 1x
+- **Field boosting**: `rdfs:label` matches score 4x, `hippo:summary` and `hippo:alias` 3x, `hippo:content` 1x
+- **`hippo:alias`**: alternative names, synonyms, and colloquial terms (e.g. Ukrainian labels for English-labeled resources). Searched with the same boost as `hippo:summary`
 - **Word boundary bonus**: keyword matching at the start of a word scores double
 - **Score accumulation**: scores from multiple matching predicates on the same subject are summed
 - **Graph-aware**: `related=true` parameter enables 1-hop traversal via `hippo:hasTopic`, `hippo:references`, `hippo:partOf`, `hippo:relatedTo` — finds resources linked to direct matches
+- **Prefix matching**: when exact substring match fails, tries matching words sharing a 4+ character prefix (e.g. `електрика` → `електропостачання` via shared stem `електр`). Scores at half field weight.
+- **Zero-result hints**: when search returns no matches, the response includes a hint with resource count and suggestions for refining the query
 
 ### Validate tool
 `validate` in `validate.go` checks graph compliance:
@@ -106,6 +110,13 @@ This allows Hippocamp to be a general-purpose knowledge graph, not just a code a
 
 ### SPARQL update detection
 `isUpdate()` in `sparql.go` checks the first keyword of the query string (INSERT, DELETE, LOAD, etc.) to distinguish updates from queries. Updates go through `store.SPARQLUpdate()` which builds a `sparql.Dataset` struct from the store's named graphs.
+
+### Analytics (tool call tracking)
+Every tool call is recorded via mcp-go's `OnBeforeCallTool`/`OnAfterCallTool` hooks. The `analytics.Collector` in `internal/analytics/` does two things:
+1. **Log line** (Level 1): `analytics: tool=search query="auth" results=3 duration=12ms`
+2. **RDF triples** (Level 2): stored in `urn:hippocamp:analytics` named graph with predicates from `http://purl.org/hippocamp/analytics#` (tool, input, timestamp, durationMs, resultCount, error, graph)
+
+The LLM can SPARQL the analytics graph to answer: "what queries returned 0 results?", "what are the most frequent search terms?", "which tools take longest?". Queries targeting the analytics graph are excluded from recording to prevent infinite loops.
 
 ## Configuration
 

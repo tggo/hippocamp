@@ -189,9 +189,18 @@ func TestUserStory_SearchAfterImport(t *testing.T) {
 	if err != nil {
 		t.Fatalf("search error: %v", err)
 	}
+	negText := ResultText(res)
 	var negResults []SearchResult
-	if err := json.Unmarshal([]byte(ResultText(res)), &negResults); err != nil {
-		t.Fatalf("unmarshal: %v", err)
+	if err := json.Unmarshal([]byte(negText), &negResults); err != nil {
+		// Try hint object (zero-result response).
+		var hint struct {
+			Results []SearchResult `json:"results"`
+			Hint    string         `json:"hint"`
+		}
+		if err2 := json.Unmarshal([]byte(negText), &hint); err2 != nil {
+			t.Fatalf("unmarshal: %v", err2)
+		}
+		negResults = hint.Results
 	}
 	if len(negResults) != 0 {
 		t.Errorf("search for 'electrical' in garden project should return 0 results, got %d", len(negResults))
