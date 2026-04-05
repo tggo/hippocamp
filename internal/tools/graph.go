@@ -183,11 +183,15 @@ func handleGraphImport(store *rdfstore.Store, req mcp.CallToolRequest) (*mcp.Cal
 	if data == "" {
 		return mcp.NewToolResultError("import requires: data (TriG/Turtle string)"), nil
 	}
+	targetGraph := req.GetString("name", "")
 
-	count, err := store.Import(data)
+	count, err := store.Import(data, targetGraph)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("import error: %v", err)), nil
 	}
 
+	if targetGraph != "" {
+		return mcp.NewToolResultText(fmt.Sprintf("imported %d triples into %s", count, targetGraph)), nil
+	}
 	return mcp.NewToolResultText(fmt.Sprintf("imported %d triples", count)), nil
 }

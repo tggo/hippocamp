@@ -11,6 +11,7 @@ import (
 
 type validateResult struct {
 	Valid    bool     `json:"valid"`
+	Errors   []string `json:"errors"`
 	Warnings []string `json:"warnings"`
 	Stats    struct {
 		Resources    int `json:"resources"`
@@ -59,8 +60,8 @@ func TestValidate_AllTypesFromOntology(t *testing.T) {
 	if vr.Stats.NonStandard != 1 {
 		t.Errorf("expected 1 non-standard type, got %d", vr.Stats.NonStandard)
 	}
-	if len(vr.Warnings) == 0 {
-		t.Error("expected warnings about non-standard type")
+	if len(vr.Errors) == 0 {
+		t.Error("expected errors about non-standard type from non-hippo namespace")
 	}
 }
 
@@ -113,6 +114,26 @@ func TestValidate_Scoped(t *testing.T) {
 	vr := callValidate(t, store, map[string]any{"scope": "http://test.org/g1"})
 	if !vr.Valid {
 		t.Errorf("scoped validation should be valid, got: %v", vr.Warnings)
+	}
+}
+
+func TestValidate_HippoUnknownType_WarningNotError(t *testing.T) {
+	store := rdfstore.NewStore()
+	defer store.Close()
+
+	// hippo:Component is not in the standard list but IS in hippo: namespace.
+	store.AddTriple("", "http://test.org/a", rdfType, testHippoNS+"Component", "uri", "", "")
+	store.AddTriple("", "http://test.org/a", rdfsLabel, "Foundation", "literal", "", "")
+
+	vr := callValidate(t, store, map[string]any{})
+	if !vr.Valid {
+		t.Error("hippo: unknown type should still be valid (warning only)")
+	}
+	if len(vr.Warnings) == 0 {
+		t.Error("expected warning about unknown hippo type")
+	}
+	if len(vr.Errors) != 0 {
+		t.Errorf("expected no errors for hippo: type, got: %v", vr.Errors)
 	}
 }
 

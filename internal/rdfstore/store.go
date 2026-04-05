@@ -333,8 +333,13 @@ func (s *Store) SPARQLUpdate(defaultGraphName, update string) error {
 }
 
 // Import parses a TriG/Turtle string and adds all triples to the store.
-// Triples without an explicit named graph go into the default graph.
-func (s *Store) Import(data string) (int, error) {
+// If targetGraph is non-empty, all triples go into that named graph.
+// If targetGraph is empty, triples without an explicit named graph go into the default graph.
+func (s *Store) Import(data string, targetGraph ...string) (int, error) {
+	var target string
+	if len(targetGraph) > 0 {
+		target = targetGraph[0]
+	}
 	// Parse into a temporary dataset.
 	tmpBg, err := badgerstore.New(badgerstore.WithInMemory())
 	if err != nil {
@@ -353,19 +358,22 @@ func (s *Store) Import(data string) (int, error) {
 
 	count := 0
 	tmpDs.Graphs()(func(g *graph.Graph) bool {
-		// Determine target graph: named graphs keep their URI, default goes to our default.
-		var targetID string
-		if id := g.Identifier(); id != nil {
+		// Determine destination graph.
+		var destID string
+		if target != "" {
+			// Explicit target: all triples go there.
+			destID = target
+		} else if id := g.Identifier(); id != nil {
 			if _, ok := id.(term.BNode); ok {
-				targetID = "" // BNode = default context → our default graph
+				destID = "" // BNode = default context → our default graph
 			} else {
-				targetID = id.String()
+				destID = id.String()
 			}
 		}
-		target := s.getGraph(targetID)
+		dest := s.getGraph(destID)
 
 		g.Triples(nil, nil, nil)(func(t term.Triple) bool {
-			target.Add(t.Subject, t.Predicate, t.Object)
+			dest.Add(t.Subject, t.Predicate, t.Object)
 			count++
 			return true
 		})

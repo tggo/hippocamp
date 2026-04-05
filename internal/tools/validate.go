@@ -33,6 +33,7 @@ var validHippoTypes = map[string]bool{
 
 type validateOutput struct {
 	Valid    bool     `json:"valid"`
+	Errors   []string `json:"errors"`
 	Warnings []string `json:"warnings"`
 	Stats    struct {
 		Resources   int `json:"resources"`
@@ -69,6 +70,7 @@ func validateHandlerFactory(store *rdfstore.Store) handlerFunc {
 		}
 
 		var out validateOutput
+		out.Errors = []string{}
 		out.Warnings = []string{}
 
 		// Collect all subjects and their properties.
@@ -113,27 +115,32 @@ func validateHandlerFactory(store *rdfstore.Store) handlerFunc {
 					shortType := ri.rdfType
 					if strings.HasPrefix(shortType, hippoNS) {
 						shortType = "hippo:" + strings.TrimPrefix(shortType, hippoNS)
+						// Unknown hippo: type — warning only (user may extend the ontology).
+						out.Warnings = append(out.Warnings,
+							fmt.Sprintf("unknown hippo type %s on <%s> — consider using hippo:Entity with hippo:hasTag instead", shortType, uri))
+					} else {
+						// Non-hippo namespace — error.
+						out.Errors = append(out.Errors,
+							fmt.Sprintf("non-standard type %q on <%s> — use hippo:Entity, hippo:Topic, etc.", shortType, uri))
 					}
-					out.Warnings = append(out.Warnings,
-						fmt.Sprintf("non-standard type %q on <%s> — use hippo:Entity, hippo:Topic, etc.", shortType, uri))
 				}
 			}
 
 			if ri.hasLabel {
 				out.Stats.WithLabel++
 			} else if ri.rdfType != "" {
-				out.Warnings = append(out.Warnings,
+				out.Errors = append(out.Errors,
 					fmt.Sprintf("missing rdfs:label on <%s> (type: %s)", uri, ri.rdfType))
 			}
 
 			// Decisions should have rationale.
 			if ri.rdfType == hippoNS+"Decision" && !ri.hasRationale {
-				out.Warnings = append(out.Warnings,
+				out.Errors = append(out.Errors,
 					fmt.Sprintf("Decision <%s> is missing hippo:rationale", uri))
 			}
 		}
 
-		out.Valid = len(out.Warnings) == 0
+		out.Valid = len(out.Errors) == 0
 
 		data, _ := json.Marshal(out)
 		return mcp.NewToolResultText(string(data)), nil
