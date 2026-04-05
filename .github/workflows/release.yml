@@ -68,12 +68,16 @@ jobs:
 
       - name: Notarize macOS binaries
         run: |
-          for archive in dist/hippocamp_darwin_*.tar.gz; do
-            echo "Notarizing $archive..."
-            xcrun notarytool submit "$archive" \
+          # Find darwin binaries in GoReleaser dist and notarize them.
+          find dist -name "hippocamp" -path "*darwin*" | while read bin; do
+            dirname=$(basename $(dirname "$bin"))
+            zipfile="$RUNNER_TEMP/${dirname}.zip"
+            ditto -c -k --keepParent "$bin" "$zipfile"
+            echo "Notarizing $dirname..."
+            xcrun notarytool submit "$zipfile" \
               --keychain-profile "hippocamp-notarize" \
               --wait
-            echo "Notarized: $archive"
+            echo "Done: $dirname"
           done
 
       - name: Clean up keychain
