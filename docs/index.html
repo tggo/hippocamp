@@ -598,6 +598,108 @@
       line-height: 1.5;
     }
 
+    /* ── DEMO TERMINAL ── */
+    .demo-section { padding: 80px 0; background: var(--bg); }
+    .demo-terminal {
+      background: #0D0F0A;
+      border: 1px solid var(--rule);
+      border-radius: 10px;
+      overflow: hidden;
+      max-width: 800px;
+      margin: 0 auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .demo-titlebar {
+      background: #1A1D16;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid var(--rule);
+    }
+    .demo-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .demo-dot.r { background: #FF5F56; }
+    .demo-dot.y { background: #FFBD2E; }
+    .demo-dot.g { background: #27C93F; }
+    .demo-titlebar-text {
+      flex: 1; text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem; color: var(--ink-faint);
+    }
+    .demo-body {
+      padding: 24px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.8;
+      min-height: 320px;
+    }
+    .demo-line {
+      opacity: 0;
+      animation: demo-reveal 0.3s ease forwards;
+    }
+    .demo-prompt { color: var(--gold); }
+    .demo-tool { color: var(--olive); }
+    .demo-result { color: var(--ink-light); }
+    .demo-success { color: #27C93F; }
+    .demo-dim { color: var(--ink-faint); }
+    @keyframes demo-reveal {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── PROOF SECTION ── */
+    .proof-section { padding: 60px 0; background: var(--bg-warm); }
+    .proof-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: center;
+    }
+    .proof-text h3 {
+      font-size: 1.6rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--ink);
+    }
+    .proof-text p {
+      color: var(--ink-light);
+      margin-bottom: 16px;
+      line-height: 1.7;
+    }
+    .proof-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(39,201,63,0.1);
+      border: 1px solid rgba(39,201,63,0.3);
+      color: #27C93F;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .proof-table {
+      background: var(--bg-card);
+      border: 1px solid var(--rule);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .proof-row {
+      display: flex;
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--rule);
+      font-size: 0.85rem;
+      align-items: center;
+    }
+    .proof-row:last-child { border-bottom: none; }
+    .proof-q { flex: 1; color: var(--ink-light); }
+    .proof-a { color: var(--ink); font-weight: 500; min-width: 120px; text-align: right; }
+    .proof-check { color: #27C93F; margin-left: 8px; }
+    @media (max-width: 768px) {
+      .proof-grid { grid-template-columns: 1fr; }
+    }
+
     /* ── FOOTER ── */
     footer {
       border-top: 1px solid var(--rule);
@@ -710,21 +812,21 @@
       <img src="logo-sm.png" alt="Hippocamp" class="hero-logo">
     </div>
     <div class="fade-in" style="animation-delay:0.2s;">
-      <div class="hero-eyebrow">Knowledge graph for LLMs</div>
+      <div class="hero-eyebrow">MCP server for Claude Code</div>
     </div>
     <div class="fade-in" style="animation-delay:0.3s;">
-      <h1 class="hero-title">A persistent brain<br>for any AI agent</h1>
+      <h1 class="hero-title">Your AI remembers<br>everything about<br>your project</h1>
     </div>
     <div class="fade-in" style="animation-delay:0.4s;">
       <p class="hero-sub">
-        An MCP server with four tools. Build, query, and persist
-        RDF knowledge graphs for any domain &mdash; from construction planning
-        to recipe collections.
+        Hippocamp gives Claude a persistent memory that survives between sessions.
+        It reads your project files, builds a structured knowledge graph, and answers
+        questions &mdash; even in a fresh session with zero context.
       </p>
     </div>
     <div class="fade-in" style="animation-delay:0.5s;">
       <div class="hero-auto">
-        <span>auto-setup &mdash; zero config on first launch</span>
+        <span>two commands to install &mdash; zero config needed</span>
       </div>
     </div>
     <div class="fade-in" style="animation-delay:0.6s;">
@@ -771,11 +873,80 @@
   </div>
 </div>
 
+<!-- DEMO -->
+<section class="demo-section">
+  <div class="container">
+    <div class="section-rule reveal">
+      <span class="section-num">01</span>
+      <h2 class="section-title">See it in action</h2>
+    </div>
+
+    <div class="demo-terminal reveal" id="demo-terminal">
+      <div class="demo-titlebar">
+        <div class="demo-dot r"></div>
+        <div class="demo-dot y"></div>
+        <div class="demo-dot g"></div>
+        <div class="demo-titlebar-text">claude &mdash; ~/my-house-project</div>
+      </div>
+      <div class="demo-body" id="demo-body">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROOF -->
+<section class="proof-section">
+  <div class="container">
+    <div class="proof-grid">
+      <div class="proof-text reveal">
+        <h3>A fresh Claude session answered 5/5 questions correctly</h3>
+        <p>
+          We built a knowledge graph from a real house construction project (227 triples, 49 resources).
+          Then we started a <strong>brand new Claude session</strong> with zero context &mdash;
+          it only had access to the graph. No files, no conversation history.
+        </p>
+        <p>
+          It answered every question correctly: room sizes, supplier prices,
+          budget breakdowns, construction phases, and pending decisions.
+        </p>
+        <div class="proof-badge">5/5 correct answers from graph alone</div>
+      </div>
+      <div class="proof-table reveal reveal-delay-1">
+        <div class="proof-row">
+          <div class="proof-q">Kitchen area + room count</div>
+          <div class="proof-a">58.54 m&sup2;, 10 rooms</div>
+          <div class="proof-check">&#x2713;</div>
+        </div>
+        <div class="proof-row">
+          <div class="proof-q">VPS foundation supplier + price</div>
+          <div class="proof-a">KRASNEBRUCK, 73.50/pile</div>
+          <div class="proof-check">&#x2713;</div>
+        </div>
+        <div class="proof-row">
+          <div class="proof-q">Decided vs pending decisions</div>
+          <div class="proof-a">3 decided + 1 pending</div>
+          <div class="proof-check">&#x2713;</div>
+        </div>
+        <div class="proof-row">
+          <div class="proof-q">Total expenses to date</div>
+          <div class="proof-a">633K + $9,300</div>
+          <div class="proof-check">&#x2713;</div>
+        </div>
+        <div class="proof-row">
+          <div class="proof-q">Move-in date + remaining phases</div>
+          <div class="proof-a">May 2028, 5 phases left</div>
+          <div class="proof-check">&#x2713;</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- HOW IT WORKS -->
 <section id="how">
   <div class="container">
     <div class="section-rule reveal">
-      <span class="section-num">01</span>
+      <span class="section-num">02</span>
       <h2 class="section-title">How it works</h2>
     </div>
 
@@ -809,8 +980,8 @@
 <section id="tools">
   <div class="container">
     <div class="section-rule reveal">
-      <span class="section-num">02</span>
-      <h2 class="section-title">Four tools</h2>
+      <span class="section-num">03</span>
+      <h2 class="section-title">Five tools</h2>
     </div>
 
     <div class="tools-grid">
@@ -855,7 +1026,17 @@
           <span class="tool-action">type filter</span>
           <span class="tool-action">scope</span>
         </div>
-        <p class="tool-desc">Keyword search across labels, summaries, content. Filter by RDF type or named graph. Ranked results.</p>
+        <p class="tool-desc">Keyword search across labels, summaries, content. Filter by RDF type or named graph. Ranked results with graph traversal.</p>
+      </div>
+
+      <div class="tool-card reveal reveal-delay-4">
+        <div class="tool-name">validate</div>
+        <div class="tool-actions">
+          <span class="tool-action">types</span>
+          <span class="tool-action">labels</span>
+          <span class="tool-action">rationale</span>
+        </div>
+        <p class="tool-desc">Check graph compliance. Verify all resources have proper types and labels. Catch issues before they become problems.</p>
       </div>
     </div>
   </div>
@@ -865,7 +1046,7 @@
 <section id="examples">
   <div class="container">
     <div class="section-rule reveal">
-      <span class="section-num">03</span>
+      <span class="section-num">04</span>
       <h2 class="section-title">Examples</h2>
     </div>
 
@@ -1008,7 +1189,7 @@
 <section id="ontology">
   <div class="container">
     <div class="section-rule reveal">
-      <span class="section-num">04</span>
+      <span class="section-num">05</span>
       <h2 class="section-title">Built-in ontology</h2>
     </div>
 
@@ -1046,7 +1227,7 @@
 <section id="install">
   <div class="container">
     <div class="section-rule reveal">
-      <span class="section-num">05</span>
+      <span class="section-num">06</span>
       <h2 class="section-title">Get started</h2>
     </div>
 
@@ -1112,7 +1293,7 @@
 <section id="features">
   <div class="container">
     <div class="section-rule reveal">
-      <span class="section-num">06</span>
+      <span class="section-num">07</span>
       <h2 class="section-title">Under the hood</h2>
     </div>
 
@@ -1194,6 +1375,57 @@
   }, { threshold: 0.1 });
 
   document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Demo terminal animation
+  const demoLines = [
+    { type: 'prompt', text: '> analyze this project and build a knowledge graph' },
+    { type: 'dim', text: '' },
+    { type: 'tool', text: '\u25CF Reading project files... (12 files, 4,200 words)' },
+    { type: 'tool', text: '\u25CF graph import \u2014 227 triples loaded' },
+    { type: 'tool', text: '\u25CF validate \u2014 49 resources, all valid' },
+    { type: 'success', text: '\u2713 Knowledge graph built: 7 topics, 8 suppliers, 4 decisions, 10 rooms' },
+    { type: 'dim', text: '' },
+    { type: 'dim', text: '\u2500\u2500\u2500 new session, zero context \u2500\u2500\u2500' },
+    { type: 'dim', text: '' },
+    { type: 'prompt', text: '> when will we have electricity?' },
+    { type: 'dim', text: '' },
+    { type: 'tool', text: '\u25CF search("electrical connection meter")' },
+    { type: 'result', text: '  Cable SIP-5ng installed Jan 28, panel mounted Jan 30.' },
+    { type: 'result', text: '  Meter: NOT installed. Application #120140/6 filed Mar 13.' },
+    { type: 'success', text: '  \u2192 Physically ready, waiting for meter installation from LOE.' },
+  ];
+
+  const demoObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        runDemo();
+        demoObs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.3 });
+  const demoEl = document.getElementById('demo-terminal');
+  if (demoEl) demoObs.observe(demoEl);
+
+  function runDemo() {
+    const body = document.getElementById('demo-body');
+    if (!body) return;
+    let delay = 0;
+    demoLines.forEach((line, i) => {
+      delay += line.type === 'dim' && line.text === '' ? 300 : line.type === 'prompt' ? 800 : 400;
+      setTimeout(() => {
+        const div = document.createElement('div');
+        div.className = 'demo-line demo-' + line.type;
+        div.style.animationDelay = '0s';
+        if (line.text === '') {
+          div.innerHTML = '&nbsp;';
+        } else {
+          div.textContent = line.text;
+        }
+        body.appendChild(div);
+        body.scrollTop = body.scrollHeight;
+      }, delay);
+    });
+  }
 </script>
 </body>
 </html>
