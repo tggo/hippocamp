@@ -8,7 +8,7 @@
 
 RDF knowledge graph for LLMs — an MCP server that gives any AI agent a structured, queryable memory via five tools: `triple`, `sparql`, `graph`, `search`, `validate`.
 
-Plug it into any project as a persistent brain. Use the built-in ontology for research notes, construction planning, sales pipelines, recipe collections, or any structured knowledge. Includes a Claude Code skill (`/project-analyze`) and hooks for automatic graph queries.
+Plug it into any project as a persistent brain. Use the built-in ontology for research notes, construction planning, sales pipelines, recipe collections, or any structured knowledge. Auto-installs Claude Code skills and hooks.
 
 On first launch, Hippocamp automatically sets up Claude Code hooks and skills in your project — no manual configuration needed.
 
@@ -197,9 +197,9 @@ The ontology is open-world — extend with your own classes and properties.
 
 Hippocamp automatically writes hooks and skills to your project's `.claude/` directory on first launch. No manual copying needed. On subsequent launches, files are only updated if the binary is newer.
 
-### Skill: `/project-analyze`
+### Skill: project-analyze
 
-Run `/project-analyze` to scan your project and build a knowledge graph. Works for any domain — the skill extracts topics, entities, notes, decisions, questions, and sources from your documents.
+Ask Claude: *"analyze this project and build a knowledge graph"*. The skill file (`.claude/skills/project-analyze.md`) is auto-installed and instructs Claude how to scan your project, extract topics, entities, notes, decisions, questions, and sources into the graph.
 
 ### Hooks
 
