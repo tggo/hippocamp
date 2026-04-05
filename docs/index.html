@@ -6,29 +6,29 @@
   <title>hippocamp — RDF Knowledge Graph for LLMs</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
       --bg:         #1A1D16;
-      --bg-warm:    #22261C;
-      --bg-card:    #272B20;
+      --bg-warm:    #1F221A;
+      --bg-card:    #252920;
       --bg-elevated:#2E3327;
       --ink:        #E8E4D8;
       --ink-light:  #A8A393;
       --ink-faint:  #6B6758;
       --gold:       #C9A94E;
       --gold-dim:   #9B833D;
-      --gold-glow:  rgba(201,169,78,0.15);
+      --gold-glow:  rgba(201,169,78,0.12);
       --forest:     #6B8E5A;
       --forest-dim: #4A6B3A;
-      --forest-glow:rgba(107,142,90,0.12);
+      --forest-glow:rgba(107,142,90,0.10);
       --olive:      #8BA87A;
-      --rule:       #3A3D30;
-      --rule-light: #4A4D3E;
-      --code-bg:    #1E2118;
+      --rule:       #333828;
+      --rule-light: #3F4434;
+      --code-bg:    #1C1F17;
     }
 
     html { scroll-behavior: smooth; }
@@ -42,31 +42,23 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* ── TYPOGRAPHY ── */
-    h1, h2, h3 {
-      font-family: 'Inter', sans-serif;
-      font-weight: 600;
-      letter-spacing: -0.02em;
-    }
-
     code, pre, .mono {
-      font-family: 'JetBrains Mono', 'Courier New', monospace;
+      font-family: 'JetBrains Mono', monospace;
       font-size: 0.82em;
     }
 
-    /* ── LAYOUT ── */
     .container {
       max-width: 1080px;
       margin: 0 auto;
       padding: 0 32px;
     }
 
-    /* ── SUBTLE TEXTURE ── */
+    /* ── hexagonal texture ── */
     body::before {
       content: '';
       position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0L60 17.32v34.64L30 60 0 51.96V17.32z' fill='none' stroke='%23ffffff' stroke-width='0.3' opacity='0.02'/%3E%3C/svg%3E");
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='52' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l30 15v22L30 52 0 37V15z' fill='none' stroke='%23ffffff' stroke-width='0.3' opacity='0.015'/%3E%3C/svg%3E");
       pointer-events: none;
       z-index: 0;
     }
@@ -76,7 +68,7 @@
       position: fixed;
       top: 0; left: 0; right: 0;
       z-index: 100;
-      background: rgba(26, 29, 22, 0.92);
+      background: rgba(26,29,22,0.92);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--rule);
     }
@@ -95,9 +87,9 @@
       font-family: 'JetBrains Mono', monospace;
       font-size: 1rem;
       font-weight: 600;
-      letter-spacing: 0.02em;
       color: var(--ink);
       text-decoration: none;
+      gap: 10px;
     }
     .nav-logo span { color: var(--gold); }
     .nav-logo-img {
@@ -105,20 +97,20 @@
       height: 28px;
       border-radius: 50%;
       object-fit: cover;
-      margin-right: 10px;
       border: 1.5px solid var(--rule-light);
     }
     .nav-links {
       display: flex;
-      gap: 28px;
+      gap: 24px;
       list-style: none;
+      align-items: center;
     }
     .nav-links a {
       color: var(--ink-faint);
       text-decoration: none;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.72rem;
-      letter-spacing: 0.08em;
+      font-size: 0.7rem;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
       transition: color 0.2s;
     }
@@ -130,121 +122,112 @@
       background: var(--gold);
       color: var(--bg) !important;
       padding: 6px 14px;
-      border-radius: 4px;
+      border-radius: 5px;
       font-weight: 600;
       transition: all 0.2s !important;
     }
-    .nav-gh:hover { background: var(--ink) !important; color: var(--bg) !important; }
+    .nav-gh:hover { background: var(--ink) !important; }
 
     /* ── HERO ── */
-    #hero {
-      padding-top: 56px;
-      min-height: 100vh;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      align-items: center;
-      gap: 64px;
-      position: relative;
-      overflow: hidden;
-    }
-    #hero::before {
-      content: '';
-      position: absolute;
-      top: -200px; right: -200px;
-      width: 600px; height: 600px;
-      background: radial-gradient(circle, var(--gold-glow) 0%, transparent 70%);
-      pointer-events: none;
-    }
-    #hero::after {
-      content: '';
-      position: absolute;
-      bottom: -150px; left: -100px;
-      width: 500px; height: 500px;
-      background: radial-gradient(circle, var(--forest-glow) 0%, transparent 70%);
-      pointer-events: none;
-    }
-    .hero-left {
-      padding: 80px 0 80px;
-      opacity: 0;
-      transform: translateY(24px);
-      animation: fadeUp 0.8s ease forwards 0.2s;
+    .hero {
+      padding: 140px 0 100px;
+      text-align: center;
       position: relative;
       z-index: 1;
     }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -100px; left: 50%; transform: translateX(-50%);
+      width: 800px; height: 600px;
+      background: radial-gradient(ellipse, var(--gold-glow) 0%, transparent 65%);
+      pointer-events: none;
+    }
     .hero-logo {
-      width: 100px;
-      height: 100px;
+      width: 120px;
+      height: 120px;
       border-radius: 50%;
       object-fit: cover;
-      margin-bottom: 28px;
+      margin-bottom: 32px;
       border: 2px solid var(--rule-light);
-      box-shadow: 0 4px 32px rgba(201,169,78,0.15), 0 0 0 8px rgba(201,169,78,0.04);
+      box-shadow: 0 4px 40px rgba(201,169,78,0.18), 0 0 0 10px rgba(201,169,78,0.04);
+      position: relative;
     }
     .hero-eyebrow {
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.72rem;
-      letter-spacing: 0.14em;
+      letter-spacing: 0.16em;
       text-transform: uppercase;
       color: var(--gold);
       margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
     }
-    .hero-eyebrow::before {
-      content: '';
-      display: block;
-      width: 28px;
-      height: 1px;
-      background: var(--gold-dim);
-    }
-    h1.hero-title {
-      font-size: clamp(3.5rem, 7vw, 5.5rem);
-      line-height: 1.05;
+    .hero-title {
+      font-size: clamp(3rem, 6vw, 4.5rem);
+      font-weight: 700;
+      line-height: 1.1;
       letter-spacing: -0.03em;
       margin-bottom: 24px;
-      color: var(--ink);
     }
-    h1.hero-title em {
+    .hero-title em {
       font-style: normal;
       color: var(--gold);
     }
     .hero-sub {
-      font-size: 1.1rem;
+      font-size: 1.15rem;
       color: var(--ink-light);
       line-height: 1.65;
-      margin-bottom: 40px;
-      max-width: 440px;
+      margin: 0 auto 20px;
+      max-width: 560px;
       font-weight: 300;
+    }
+    .hero-auto {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--forest);
+      margin-bottom: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .hero-auto::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--forest);
+      display: block;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
     }
     .hero-install {
       display: inline-flex;
       align-items: center;
-      gap: 0;
       border: 1px solid var(--rule-light);
-      border-radius: 6px;
+      border-radius: 8px;
       overflow: hidden;
       background: var(--bg-card);
-      box-shadow: 0 2px 16px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.25);
     }
     .hero-install-label {
       background: var(--code-bg);
-      padding: 10px 14px;
+      padding: 12px 16px;
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.72rem;
       color: var(--ink-faint);
       letter-spacing: 0.06em;
       border-right: 1px solid var(--rule);
-      white-space: nowrap;
     }
     .hero-install-cmd {
-      padding: 10px 16px;
+      padding: 12px 18px;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.82rem;
+      font-size: 0.85rem;
       color: var(--forest);
     }
     .hero-install-copy {
-      padding: 10px 14px;
+      padding: 12px 16px;
       background: none;
       border: none;
       border-left: 1px solid var(--rule);
@@ -254,61 +237,59 @@
       font-size: 0.9rem;
     }
     .hero-install-copy:hover { color: var(--gold); }
+    .copied { color: var(--forest) !important; }
 
-    /* Graph SVG hero */
-    .hero-graph {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      animation: fadeIn 0.8s ease forwards 0.4s;
+    /* ── DOMAINS ── */
+    .domains {
+      padding: 80px 0 100px;
       position: relative;
       z-index: 1;
     }
-
-    /* ── GRAPH SVG STYLES ── */
-    .graph-svg { width: 100%; max-width: 520px; height: auto; }
-
-    .g-edge {
-      stroke: var(--rule-light);
-      stroke-width: 1.5;
-      fill: none;
-      stroke-dasharray: 200;
-      stroke-dashoffset: 200;
-    }
-    .g-edge.draw-1 { animation: drawEdge 0.7s ease forwards 0.9s; }
-    .g-edge.draw-2 { animation: drawEdge 0.7s ease forwards 1.2s; }
-    .g-edge.draw-3 { animation: drawEdge 0.7s ease forwards 1.5s; }
-    .g-edge.draw-4 { animation: drawEdge 0.7s ease forwards 1.8s; }
-
-    .g-node { opacity: 0; }
-    .g-node.appear-1 { animation: nodeIn 0.5s ease forwards 0.6s; }
-    .g-node.appear-2 { animation: nodeIn 0.5s ease forwards 0.9s; }
-    .g-node.appear-3 { animation: nodeIn 0.5s ease forwards 1.2s; }
-    .g-node.appear-4 { animation: nodeIn 0.5s ease forwards 1.5s; }
-    .g-node.appear-5 { animation: nodeIn 0.5s ease forwards 1.8s; }
-
-    .g-label {
+    .domains-title {
+      text-align: center;
+      font-size: 0.72rem;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      fill: var(--ink-light);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      margin-bottom: 32px;
     }
-    .g-label.uri { fill: var(--gold); font-weight: 500; }
-    .g-edge-label {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 8px;
-      fill: var(--ink-faint);
+    .domains-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
     }
-    .g-graph-label {
+    .domain-card {
+      background: var(--bg-card);
+      border: 1px solid var(--rule);
+      border-radius: 10px;
+      padding: 28px 20px;
+      text-align: center;
+      transition: border-color 0.25s, transform 0.25s;
+    }
+    .domain-card:hover {
+      border-color: var(--gold-dim);
+      transform: translateY(-2px);
+    }
+    .domain-icon {
+      font-size: 1.6rem;
+      margin-bottom: 12px;
+      display: block;
+    }
+    .domain-name {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 8px;
-      fill: var(--ink-faint);
-      letter-spacing: 0.08em;
-      opacity: 0;
-      animation: fadeIn 0.6s ease forwards 2.2s;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+    .domain-examples {
+      font-size: 0.72rem;
+      color: var(--ink-faint);
+      line-height: 1.4;
     }
 
-    /* ── SECTION BASE ── */
+    /* ── SECTION ── */
     section { padding: 100px 0; position: relative; z-index: 1; }
     .section-rule {
       display: flex;
@@ -324,9 +305,8 @@
       min-width: 28px;
     }
     .section-title {
-      font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
       font-weight: 600;
-      color: var(--ink);
     }
     .section-rule::after {
       content: '';
@@ -335,126 +315,117 @@
       background: var(--rule);
     }
 
-    /* ── WHAT IS IT ── */
-    #what { background: var(--bg); }
-    .what-grid {
+    /* ── HOW IT WORKS ── */
+    #how { background: var(--bg-warm); }
+    .how-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 64px;
-      align-items: start;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
     }
-    .what-text p { color: var(--ink-light); margin-bottom: 16px; }
-    .what-text p strong { color: var(--gold); font-weight: 500; }
-
-    .triple-diagram {
+    .how-step {
       background: var(--bg-card);
       border: 1px solid var(--rule);
-      border-radius: 8px;
-      padding: 36px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    .triple-diagram-title {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.68rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--ink-faint);
-      margin-bottom: 8px;
-    }
-    .triple-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    .triple-node {
-      padding: 6px 12px;
-      border-radius: 4px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.75rem;
-      border: 1px solid transparent;
-    }
-    .triple-node.subj { background: rgba(201,169,78,0.1); border-color: rgba(201,169,78,0.3); color: var(--gold); }
-    .triple-node.pred { background: rgba(107,142,90,0.1); border-color: rgba(107,142,90,0.3); color: var(--forest); }
-    .triple-node.obj  { background: var(--bg-elevated); border-color: var(--rule); color: var(--ink); }
-    .triple-arrow { font-size: 0.8rem; color: var(--ink-faint); }
-    .triple-divider { height: 1px; background: var(--rule); }
-
-    /* ── TOOLS ── */
-    #tools { background: var(--bg-warm); }
-    .tools-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 20px;
-    }
-    .tool-card {
-      background: var(--bg-card);
-      border: 1px solid var(--rule);
-      border-radius: 8px;
-      padding: 36px 32px;
+      border-radius: 10px;
+      padding: 36px 28px;
       position: relative;
-      transition: border-color 0.25s, box-shadow 0.25s;
     }
-    .tool-card:hover {
-      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-      border-color: var(--gold-dim);
-    }
-    .tool-num {
+    .how-num {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 2rem;
-      font-weight: 300;
+      font-size: 2.5rem;
+      font-weight: 700;
       color: var(--rule-light);
       line-height: 1;
       margin-bottom: 16px;
     }
-    .tool-name {
+    .how-label {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 1.1rem;
+      font-size: 0.85rem;
       font-weight: 600;
       color: var(--gold);
       margin-bottom: 8px;
     }
+    .how-cmd {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      background: var(--code-bg);
+      border: 1px solid var(--rule);
+      border-radius: 5px;
+      padding: 10px 14px;
+      color: var(--forest);
+      margin-bottom: 12px;
+    }
+    .how-desc {
+      font-size: 0.88rem;
+      color: var(--ink-light);
+      line-height: 1.55;
+    }
+    .how-auto-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.06em;
+      color: var(--forest);
+      background: rgba(107,142,90,0.1);
+      border: 1px solid rgba(107,142,90,0.2);
+      border-radius: 4px;
+      padding: 3px 8px;
+      margin-top: 12px;
+    }
+
+    /* ── TOOLS ── */
+    #tools { background: var(--bg); }
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    .tool-card {
+      background: var(--bg-card);
+      border: 1px solid var(--rule);
+      border-radius: 10px;
+      padding: 32px 24px;
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+    .tool-card:hover {
+      box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+      border-color: var(--gold-dim);
+    }
+    .tool-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--gold);
+      margin-bottom: 12px;
+    }
     .tool-actions {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
-      margin: 16px 0;
+      gap: 5px;
+      margin-bottom: 14px;
     }
     .tool-action {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.68rem;
+      font-size: 0.65rem;
       background: var(--code-bg);
       border: 1px solid var(--rule);
-      padding: 3px 8px;
+      padding: 2px 7px;
       border-radius: 3px;
       color: var(--forest);
     }
     .tool-desc {
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       color: var(--ink-light);
-      line-height: 1.6;
+      line-height: 1.55;
     }
-    .tool-card::after {
-      content: '';
-      position: absolute;
-      top: 0; left: 0;
-      width: 3px;
-      height: 0;
-      background: var(--gold);
-      border-radius: 8px 0 0 8px;
-      transition: height 0.3s ease;
-    }
-    .tool-card:hover::after { height: 100%; }
 
-    /* ── CODE EXAMPLES ── */
-    #examples { background: var(--bg); }
+    /* ── EXAMPLES ── */
+    #examples { background: var(--bg-warm); }
     .examples-tabs {
       display: flex;
       gap: 0;
       border-bottom: 1px solid var(--rule);
-      margin-bottom: 0;
     }
     .tab-btn {
       background: none;
@@ -474,7 +445,6 @@
       border-bottom-color: var(--gold);
     }
     .tab-btn:hover { color: var(--ink); }
-
     .code-panel {
       display: none;
       background: var(--bg-card);
@@ -490,7 +460,7 @@
     pre {
       margin: 0;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       line-height: 1.7;
       color: var(--ink);
     }
@@ -499,30 +469,69 @@
     .cm  { color: var(--ink-faint); font-style: italic; }
     .key { color: var(--ink-light); }
     .val { color: var(--olive); }
-    .op  { color: var(--gold-dim); }
 
-    /* ── INSTALL / SETUP ── */
+    /* ── ONTOLOGY ── */
+    #ontology { background: var(--bg); }
+    .ontology-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    .ontology-layer {
+      background: var(--bg-card);
+      border: 1px solid var(--rule);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .ontology-head {
+      padding: 16px 24px;
+      background: var(--code-bg);
+      border-bottom: 1px solid var(--rule);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+    }
+    .ontology-body {
+      padding: 24px;
+    }
+    .ontology-item {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .ontology-item:last-child { margin-bottom: 0; }
+    .ontology-class {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--gold);
+      min-width: 110px;
+      white-space: nowrap;
+    }
+    .ontology-desc {
+      font-size: 0.82rem;
+      color: var(--ink-faint);
+    }
+
+    /* ── INSTALL ── */
     #install { background: var(--bg-warm); }
     .install-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 48px;
+      gap: 32px;
     }
     .install-card {
       background: var(--bg-card);
       border: 1px solid var(--rule);
-      border-radius: 8px;
+      border-radius: 10px;
       overflow: hidden;
     }
     .install-card-head {
-      padding: 16px 24px;
+      padding: 14px 24px;
       background: var(--code-bg);
       border-bottom: 1px solid var(--rule);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .install-card-title {
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.72rem;
       letter-spacing: 0.08em;
@@ -532,19 +541,18 @@
     .install-card-body { padding: 24px; }
     .install-step {
       display: flex;
-      gap: 16px;
-      margin-bottom: 20px;
+      gap: 14px;
+      margin-bottom: 18px;
     }
     .install-step:last-child { margin-bottom: 0; }
     .step-n {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 1.1rem;
+      font-size: 1rem;
+      font-weight: 600;
       color: var(--gold-dim);
-      min-width: 24px;
-      line-height: 1;
-      padding-top: 4px;
+      min-width: 20px;
+      padding-top: 2px;
     }
-    .step-body {}
     .step-label {
       font-size: 0.82rem;
       font-weight: 500;
@@ -554,10 +562,10 @@
     .step-cmd {
       background: var(--code-bg);
       border: 1px solid var(--rule);
-      border-radius: 4px;
+      border-radius: 5px;
       padding: 8px 12px;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       color: var(--forest);
     }
 
@@ -569,7 +577,7 @@
       gap: 1px;
       background: var(--rule);
       border: 1px solid var(--rule);
-      border-radius: 8px;
+      border-radius: 10px;
       overflow: hidden;
     }
     .feature-cell {
@@ -579,27 +587,27 @@
     }
     .feature-cell:hover { background: var(--bg-elevated); }
     .feature-icon {
-      font-size: 1.4rem;
-      margin-bottom: 12px;
+      font-size: 1.2rem;
+      margin-bottom: 10px;
       color: var(--gold-dim);
     }
     .feature-name {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.9rem;
+      font-size: 0.82rem;
       font-weight: 600;
       color: var(--ink);
       margin-bottom: 8px;
     }
     .feature-desc {
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       color: var(--ink-light);
-      line-height: 1.55;
+      line-height: 1.5;
     }
 
     /* ── FOOTER ── */
     footer {
       border-top: 1px solid var(--rule);
-      padding: 48px 0;
+      padding: 40px 0;
       position: relative;
       z-index: 1;
     }
@@ -611,24 +619,23 @@
     .footer-logo {
       display: flex;
       align-items: center;
+      gap: 8px;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       font-weight: 600;
       color: var(--ink-faint);
     }
     .footer-logo span { color: var(--gold-dim); }
     .footer-logo img {
-      width: 22px;
-      height: 22px;
+      width: 20px; height: 20px;
       border-radius: 50%;
-      margin-right: 8px;
-      opacity: 0.6;
+      object-fit: cover;
+      opacity: 0.5;
     }
-    .footer-links { display: flex; gap: 24px; list-style: none; }
+    .footer-links { display: flex; gap: 20px; list-style: none; }
     .footer-links a {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.7rem;
-      letter-spacing: 0.06em;
+      font-size: 0.68rem;
       color: var(--ink-faint);
       text-decoration: none;
       transition: color 0.2s;
@@ -636,7 +643,7 @@
     .footer-links a:hover { color: var(--gold); }
     .footer-copy {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.68rem;
+      font-size: 0.65rem;
       color: var(--ink-faint);
     }
 
@@ -647,43 +654,38 @@
     @keyframes fadeIn {
       to { opacity: 1; }
     }
-    @keyframes drawEdge {
-      to { stroke-dashoffset: 0; }
-    }
-    @keyframes nodeIn {
-      from { opacity: 0; }
-      to   { opacity: 1; }
-    }
 
-    /* ── SCROLL REVEAL ── */
     .reveal {
       opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .reveal.visible { opacity: 1; transform: none; }
+    .reveal-delay-1 { transition-delay: 0.08s; }
+    .reveal-delay-2 { transition-delay: 0.16s; }
+    .reveal-delay-3 { transition-delay: 0.24s; }
+    .reveal-delay-4 { transition-delay: 0.32s; }
+
+    .fade-in {
+      opacity: 0;
+      animation: fadeUp 0.7s ease forwards 0.15s;
       transform: translateY(20px);
-      transition: opacity 0.6s ease, transform 0.6s ease;
     }
-    .reveal.visible {
-      opacity: 1;
-      transform: none;
-    }
-    .reveal-delay-1 { transition-delay: 0.1s; }
-    .reveal-delay-2 { transition-delay: 0.2s; }
-    .reveal-delay-3 { transition-delay: 0.3s; }
 
     /* ── RESPONSIVE ── */
     @media (max-width: 900px) {
-      #hero { grid-template-columns: 1fr; min-height: auto; padding: 100px 0 60px; }
-      .hero-graph { display: none; }
-      .what-grid, .install-grid { grid-template-columns: 1fr; }
-      .tools-grid { grid-template-columns: 1fr; }
+      .domains-grid { grid-template-columns: repeat(3, 1fr); }
+      .how-grid { grid-template-columns: 1fr; }
+      .tools-grid { grid-template-columns: repeat(2, 1fr); }
+      .ontology-grid, .install-grid { grid-template-columns: 1fr; }
       .features-grid { grid-template-columns: repeat(2, 1fr); }
       .nav-links { display: none; }
     }
     @media (max-width: 600px) {
+      .domains-grid { grid-template-columns: repeat(2, 1fr); }
+      .tools-grid { grid-template-columns: 1fr; }
       .features-grid { grid-template-columns: 1fr; }
     }
-
-    /* ── COPY BUTTON STATE ── */
-    .copied { color: var(--forest) !important; }
   </style>
 </head>
 <body>
@@ -691,9 +693,12 @@
 <!-- NAV -->
 <nav>
   <div class="nav-inner">
-    <a href="#hero" class="nav-logo"><img src="logo-sm.png" alt="" class="nav-logo-img">hippo<span>camp</span></a>
+    <a href="#" class="nav-logo">
+      <img src="logo-sm.png" alt="" class="nav-logo-img">
+      hippo<span>camp</span>
+    </a>
     <ul class="nav-links">
-      <li><a href="#what">About</a></li>
+      <li><a href="#how">How it works</a></li>
       <li><a href="#tools">Tools</a></li>
       <li><a href="#examples">Examples</a></li>
       <li><a href="#install">Install</a></li>
@@ -706,172 +711,102 @@
 </nav>
 
 <!-- HERO -->
-<section id="hero">
-  <div class="container" style="display:contents;">
-    <div style="padding-left:32px; max-width:540px;">
-      <div class="hero-left">
-        <img src="logo-sm.png" alt="Hippocamp Logo" class="hero-logo">
-        <div class="hero-eyebrow">RDF Knowledge Graph for LLMs</div>
-        <h1 class="hero-title">hippo<em>camp</em></h1>
-        <p class="hero-sub">
-          A structured brain for any AI agent.
-          Build, query, and persist knowledge graphs — for code, research, or any domain.
-        </p>
-        <div class="hero-install">
-          <span class="hero-install-label">brew</span>
-          <span class="hero-install-cmd">brew install tggo/tap/hippocamp</span>
-          <button class="hero-install-copy" onclick="copyInstall(this)" title="Copy">&#x2398;</button>
-        </div>
+<div class="hero">
+  <div class="container">
+    <div class="fade-in" style="animation-delay:0.1s;">
+      <img src="logo-sm.png" alt="Hippocamp" class="hero-logo">
+    </div>
+    <div class="fade-in" style="animation-delay:0.2s;">
+      <div class="hero-eyebrow">Knowledge graph for LLMs</div>
+    </div>
+    <div class="fade-in" style="animation-delay:0.3s;">
+      <h1 class="hero-title">A persistent brain<br>for any AI agent</h1>
+    </div>
+    <div class="fade-in" style="animation-delay:0.4s;">
+      <p class="hero-sub">
+        An MCP server with four tools. Build, query, and persist
+        RDF knowledge graphs for any domain &mdash; from construction planning
+        to recipe collections.
+      </p>
+    </div>
+    <div class="fade-in" style="animation-delay:0.5s;">
+      <div class="hero-auto">
+        <span>auto-setup &mdash; zero config on first launch</span>
       </div>
     </div>
-
-    <div class="hero-graph" style="padding-right:16px;">
-      <svg class="graph-svg" viewBox="0 0 520 420" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-            <path d="M0,0 L0,7 L10,3.5 z" fill="#4A4D3E"/>
-          </marker>
-          <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="2.5" result="blur"/>
-            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-          <filter id="shadow" x="-20%" y="-10%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="2" stdDeviation="6" flood-color="#000" flood-opacity="0.3"/>
-          </filter>
-        </defs>
-
-        <!-- Named graph dashed border -->
-        <rect x="32" y="40" width="456" height="350" rx="12"
-              fill="none" stroke="#3A3D30" stroke-width="1.2" stroke-dasharray="6,5"/>
-        <text class="g-graph-label" x="50" y="32">NAMED GRAPH &middot; ex:people</text>
-
-        <!-- Edges -->
-        <line class="g-edge draw-1" x1="240" y1="146" x2="360" y2="106" marker-end="url(#arr)"/>
-        <line class="g-edge draw-2" x1="180" y1="188" x2="128" y2="268" marker-end="url(#arr)"/>
-        <line class="g-edge draw-3" x1="236" y1="198" x2="243" y2="280" marker-end="url(#arr)"/>
-        <line class="g-edge draw-4" x1="290" y1="188" x2="380" y2="272" marker-end="url(#arr)"/>
-
-        <!-- Edge labels -->
-        <text class="g-edge-label" x="308" y="118" text-anchor="middle"
-              transform="rotate(-12,308,118)">ex:knows</text>
-        <text class="g-edge-label" x="140" y="232" text-anchor="middle"
-              transform="rotate(57,140,232)">rdf:type</text>
-        <text class="g-edge-label" x="227" y="244" text-anchor="end">ex:age</text>
-        <text class="g-edge-label" x="348" y="236" text-anchor="middle"
-              transform="rotate(42,348,236)">ex:name</text>
-
-        <!-- Nodes -->
-
-        <!-- ex:Alice -->
-        <g class="g-node appear-1" transform="translate(210,170)" filter="url(#shadow)">
-          <circle r="40" fill="#272B20" stroke="#C9A94E" stroke-width="2.5"/>
-          <text class="g-label uri" text-anchor="middle" dy="-4">ex:Alice</text>
-          <text class="g-label" text-anchor="middle" dy="12" style="font-size:7.5px;fill:#6B6758;">subject</text>
-        </g>
-
-        <!-- ex:Bob -->
-        <g class="g-node appear-2" transform="translate(395,90)" filter="url(#shadow)">
-          <circle r="34" fill="#272B20" stroke="#C9A94E" stroke-width="2"/>
-          <text class="g-label uri" text-anchor="middle" dy="-4">ex:Bob</text>
-          <text class="g-label" text-anchor="middle" dy="12" style="font-size:7.5px;fill:#6B6758;">subject</text>
-        </g>
-
-        <!-- foaf:Person -->
-        <g class="g-node appear-3" transform="translate(105,300)" filter="url(#shadow)">
-          <circle r="34" fill="#272B20" stroke="#6B8E5A" stroke-width="2"/>
-          <text class="g-label" text-anchor="middle" dy="-4" style="fill:#6B8E5A;font-size:9px;">foaf:Person</text>
-          <text class="g-label" text-anchor="middle" dy="12" style="font-size:7.5px;fill:#6B6758;">class</text>
-        </g>
-
-        <!-- 30 — integer literal -->
-        <g class="g-node appear-4" transform="translate(248,310)">
-          <rect x="-32" y="-24" width="64" height="48" rx="6"
-                fill="#22261C" stroke="#3A3D30" stroke-width="1.5"/>
-          <text class="g-label" text-anchor="middle" dy="-4" style="fill:#A8A393;font-weight:500;">30</text>
-          <text class="g-label" text-anchor="middle" dy="12" style="font-size:7.5px;fill:#6B6758;">xsd:integer</text>
-        </g>
-
-        <!-- "Bob" — string literal -->
-        <g class="g-node appear-5" transform="translate(408,305)">
-          <rect x="-38" y="-24" width="76" height="48" rx="6"
-                fill="#22261C" stroke="#3A3D30" stroke-width="1.5"/>
-          <text class="g-label" text-anchor="middle" dy="-4" style="fill:#A8A393;font-weight:500;">"Bob"</text>
-          <text class="g-label" text-anchor="middle" dy="12" style="font-size:7.5px;fill:#6B6758;">literal</text>
-        </g>
-
-        <!-- Decorative dots -->
-        <circle cx="52"  cy="68"  r="2.5" fill="#3A3D30" opacity="0.6"/>
-        <circle cx="480" cy="56"  r="2"   fill="#3A3D30" opacity="0.4"/>
-        <circle cx="470" cy="370" r="3"   fill="#3A3D30" opacity="0.5"/>
-        <circle cx="60"  cy="380" r="2"   fill="#3A3D30" opacity="0.4"/>
-      </svg>
+    <div class="fade-in" style="animation-delay:0.6s;">
+      <div class="hero-install">
+        <span class="hero-install-label">brew</span>
+        <span class="hero-install-cmd">brew install tggo/tap/hippocamp</span>
+        <button class="hero-install-copy" onclick="copyInstall(this)" title="Copy">&#x2398;</button>
+      </div>
     </div>
   </div>
-</section>
+</div>
 
-<!-- WHAT IS IT -->
-<section id="what">
+<!-- DOMAINS -->
+<div class="domains">
+  <div class="container">
+    <div class="domains-title reveal">Works for any domain</div>
+    <div class="domains-grid">
+      <div class="domain-card reveal">
+        <span class="domain-icon">&#x1F3D7;</span>
+        <div class="domain-name">Construction</div>
+        <div class="domain-examples">phases, materials, inspections</div>
+      </div>
+      <div class="domain-card reveal reveal-delay-1">
+        <span class="domain-icon">&#x1F331;</span>
+        <div class="domain-name">Gardening</div>
+        <div class="domain-examples">plants, schedules, soil data</div>
+      </div>
+      <div class="domain-card reveal reveal-delay-2">
+        <span class="domain-icon">&#x1F4C8;</span>
+        <div class="domain-name">Sales</div>
+        <div class="domain-examples">leads, pipelines, forecasts</div>
+      </div>
+      <div class="domain-card reveal reveal-delay-3">
+        <span class="domain-icon">&#x1F4CA;</span>
+        <div class="domain-name">Accounting</div>
+        <div class="domain-examples">ledgers, reports, audits</div>
+      </div>
+      <div class="domain-card reveal reveal-delay-4">
+        <span class="domain-icon">&#x1F373;</span>
+        <div class="domain-name">Recipes</div>
+        <div class="domain-examples">ingredients, methods, pairings</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section id="how">
   <div class="container">
     <div class="section-rule reveal">
       <span class="section-num">01</span>
-      <h2 class="section-title">What is it?</h2>
+      <h2 class="section-title">How it works</h2>
     </div>
 
-    <div class="what-grid">
-      <div class="what-text reveal">
-        <p>
-          <strong>Hippocamp</strong> is an MCP server that gives any LLM a persistent, queryable RDF knowledge graph.
-          Named after the brain's memory center — it gives AI agents a structured place to store and recall knowledge.
-        </p>
-        <p>
-          RDF represents facts as <strong>triples</strong>: Subject &rarr; Predicate &rarr; Object.
-          Graphs of triples form a semantic web of knowledge that any LLM can build,
-          query with SPARQL, and persist across sessions.
-        </p>
-        <p>
-          Works for <strong>any domain</strong>: code analysis, research notes, API documentation,
-          business processes. The built-in ontology has a generic base layer (topics, entities, notes, decisions)
-          and an optional code layer (files, symbols, dependencies). Extend with your own classes &mdash; RDF is open-world.
-        </p>
-        <p>
-          Backed by <strong>BadgerDB</strong> in-memory with full named graph support.
-          Data is serialized in <strong>TriG format</strong> — auto-loaded on startup,
-          auto-saved on shutdown.
-        </p>
+    <div class="how-grid">
+      <div class="how-step reveal">
+        <div class="how-num">1</div>
+        <div class="how-label">Install</div>
+        <div class="how-cmd">brew install tggo/tap/hippocamp</div>
+        <p class="how-desc">One command. Add to your Claude MCP config and you're ready.</p>
       </div>
 
-      <div class="triple-diagram reveal reveal-delay-1">
-        <div class="triple-diagram-title">RDF Triples</div>
+      <div class="how-step reveal reveal-delay-1">
+        <div class="how-num">2</div>
+        <div class="how-label">Launch</div>
+        <div class="how-cmd">hippocamp --config config.yaml</div>
+        <p class="how-desc">On first launch, hooks and skills are auto-installed to your project's <code>.claude/</code> directory.</p>
+        <div class="how-auto-badge">&#x26A1; auto-setup</div>
+      </div>
 
-        <div class="triple-row">
-          <div class="triple-node subj">ex:Alice</div>
-          <div class="triple-arrow">&rarr;</div>
-          <div class="triple-node pred">ex:name</div>
-          <div class="triple-arrow">&rarr;</div>
-          <div class="triple-node obj">"Alice"</div>
-        </div>
-        <div class="triple-divider"></div>
-        <div class="triple-row">
-          <div class="triple-node subj">ex:Alice</div>
-          <div class="triple-arrow">&rarr;</div>
-          <div class="triple-node pred">rdf:type</div>
-          <div class="triple-arrow">&rarr;</div>
-          <div class="triple-node obj">ex:Person</div>
-        </div>
-        <div class="triple-divider"></div>
-        <div class="triple-row">
-          <div class="triple-node subj">ex:Alice</div>
-          <div class="triple-arrow">&rarr;</div>
-          <div class="triple-node pred">ex:knows</div>
-          <div class="triple-arrow">&rarr;</div>
-          <div class="triple-node obj">ex:Bob</div>
-        </div>
-        <div class="triple-divider"></div>
-        <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
-          <div style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:var(--ink-faint);letter-spacing:0.08em;">graph</div>
-          <div class="triple-arrow">&rarr;</div>
-          <div class="triple-node pred" style="font-size:0.72rem;">ex:people</div>
-        </div>
+      <div class="how-step reveal reveal-delay-2">
+        <div class="how-num">3</div>
+        <div class="how-label">Use</div>
+        <div class="how-cmd">/project-analyze</div>
+        <p class="how-desc">Scan your project, build a knowledge graph. Ask questions. The graph persists across sessions.</p>
       </div>
     </div>
   </div>
@@ -887,22 +822,16 @@
 
     <div class="tools-grid">
       <div class="tool-card reveal">
-        <div class="tool-num">i</div>
         <div class="tool-name">triple</div>
         <div class="tool-actions">
           <span class="tool-action">add</span>
           <span class="tool-action">remove</span>
           <span class="tool-action">list</span>
         </div>
-        <p class="tool-desc">
-          CRUD operations on individual triples. Add URIs, literals, or blank nodes.
-          List with wildcard pattern matching on subject, predicate, or object.
-          Supports language tags and XSD datatypes.
-        </p>
+        <p class="tool-desc">CRUD on individual triples. URIs, literals, blank nodes. Wildcard pattern matching. Language tags and XSD datatypes.</p>
       </div>
 
       <div class="tool-card reveal reveal-delay-1">
-        <div class="tool-num">ii</div>
         <div class="tool-name">sparql</div>
         <div class="tool-actions">
           <span class="tool-action">SELECT</span>
@@ -910,15 +839,10 @@
           <span class="tool-action">CONSTRUCT</span>
           <span class="tool-action">UPDATE</span>
         </div>
-        <p class="tool-desc">
-          Full SPARQL 1.1 query and update engine. Write expressive graph queries,
-          perform pattern matching, aggregations. Update operations auto-detected
-          by keyword (INSERT, DELETE, LOAD...).
-        </p>
+        <p class="tool-desc">Full SPARQL 1.1 engine. Expressive graph queries, pattern matching, aggregations. Updates auto-detected.</p>
       </div>
 
       <div class="tool-card reveal reveal-delay-2">
-        <div class="tool-num">iii</div>
         <div class="tool-name">graph</div>
         <div class="tool-actions">
           <span class="tool-action">create</span>
@@ -928,32 +852,23 @@
           <span class="tool-action">load</span>
           <span class="tool-action">prefix_*</span>
         </div>
-        <p class="tool-desc">
-          Named graph lifecycle management. Save and load graphs from TriG files.
-          Register namespace prefixes. Get stats on any named graph.
-          Clear graphs without deleting them.
-        </p>
+        <p class="tool-desc">Named graph lifecycle. TriG persistence. Namespace prefixes. Stats and clear.</p>
       </div>
 
       <div class="tool-card reveal reveal-delay-3">
-        <div class="tool-num">iv</div>
         <div class="tool-name">search</div>
         <div class="tool-actions">
           <span class="tool-action">keyword</span>
           <span class="tool-action">type filter</span>
           <span class="tool-action">scope</span>
         </div>
-        <p class="tool-desc">
-          Semantic keyword search across the entire graph. Matches labels, summaries,
-          file paths, signatures, and content. Filter by RDF type or named graph scope.
-          Returns ranked results with properties.
-        </p>
+        <p class="tool-desc">Keyword search across labels, summaries, content. Filter by RDF type or named graph. Ranked results.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- CODE EXAMPLES -->
+<!-- EXAMPLES -->
 <section id="examples">
   <div class="container">
     <div class="section-rule reveal">
@@ -963,107 +878,107 @@
 
     <div class="reveal">
       <div class="examples-tabs">
-        <button class="tab-btn active" onclick="switchTab('triple')">triple</button>
-        <button class="tab-btn" onclick="switchTab('sparql')">sparql</button>
-        <button class="tab-btn" onclick="switchTab('graph')">graph</button>
-        <button class="tab-btn" onclick="switchTab('search')">search</button>
-        <button class="tab-btn" onclick="switchTab('config')">config</button>
+        <button class="tab-btn active" onclick="switchTab('garden')">Garden</button>
+        <button class="tab-btn" onclick="switchTab('construction')">Construction</button>
+        <button class="tab-btn" onclick="switchTab('sparql')">SPARQL</button>
+        <button class="tab-btn" onclick="switchTab('search')">Search</button>
+        <button class="tab-btn" onclick="switchTab('config')">Config</button>
       </div>
 
-      <div id="tab-triple" class="code-panel active">
+      <div id="tab-garden" class="code-panel active">
         <div class="code-panel-inner">
-<pre><span class="cm">// Add a literal with language tag</span>
+<pre><span class="cm">// Track tomato varieties in your garden</span>
 {
   <span class="key">"action"</span>: <span class="str">"add"</span>,
-  <span class="key">"subject"</span>:   <span class="str">"http://example.org/Alice"</span>,
-  <span class="key">"predicate"</span>: <span class="str">"http://example.org/name"</span>,
-  <span class="key">"object"</span>:    <span class="str">"Alice"</span>,
-  <span class="key">"object_type"</span>: <span class="str">"literal"</span>,
-  <span class="key">"lang"</span>: <span class="str">"en"</span>
-}
-
-<span class="cm">// Add to a named graph</span>
-{
-  <span class="key">"action"</span>: <span class="str">"add"</span>,
-  <span class="key">"graph"</span>:     <span class="str">"http://example.org/people"</span>,
-  <span class="key">"subject"</span>:   <span class="str">"http://example.org/Alice"</span>,
+  <span class="key">"graph"</span>:     <span class="str">"garden:2026"</span>,
+  <span class="key">"subject"</span>:   <span class="str">"garden:TomatoBrandywine"</span>,
   <span class="key">"predicate"</span>: <span class="str">"rdf:type"</span>,
-  <span class="key">"object"</span>:    <span class="str">"http://example.org/Person"</span>
+  <span class="key">"object"</span>:    <span class="str">"hippo:Entity"</span>
 }
 
-<span class="cm">// List all triples for a subject (wildcard)</span>
+<span class="cm">// Add planting details</span>
 {
-  <span class="key">"action"</span>: <span class="str">"list"</span>,
-  <span class="key">"subject"</span>: <span class="str">"http://example.org/Alice"</span>
-}</pre>
+  <span class="key">"action"</span>: <span class="str">"add"</span>,
+  <span class="key">"graph"</span>:     <span class="str">"garden:2026"</span>,
+  <span class="key">"subject"</span>:   <span class="str">"garden:TomatoBrandywine"</span>,
+  <span class="key">"predicate"</span>: <span class="str">"hippo:summary"</span>,
+  <span class="key">"object"</span>:    <span class="str">"Heirloom variety, planted March 15, bed #3"</span>,
+  <span class="key">"object_type"</span>: <span class="str">"literal"</span>
+}
+
+<span class="cm">// Search across your garden</span>
+{ <span class="key">"query"</span>: <span class="str">"tomato planting"</span>, <span class="key">"scope"</span>: <span class="str">"garden:2026"</span> }</pre>
+        </div>
+      </div>
+
+      <div id="tab-construction" class="code-panel">
+        <div class="code-panel-inner">
+<pre><span class="cm">// Track construction phases</span>
+{
+  <span class="key">"action"</span>: <span class="str">"add"</span>,
+  <span class="key">"graph"</span>:     <span class="str">"project:house"</span>,
+  <span class="key">"subject"</span>:   <span class="str">"house:FoundationPhase"</span>,
+  <span class="key">"predicate"</span>: <span class="str">"rdf:type"</span>,
+  <span class="key">"object"</span>:    <span class="str">"hippo:Topic"</span>
+}
+
+<span class="cm">// Record a decision</span>
+{
+  <span class="key">"action"</span>: <span class="str">"add"</span>,
+  <span class="key">"subject"</span>:   <span class="str">"house:DecisionSlabType"</span>,
+  <span class="key">"predicate"</span>: <span class="str">"hippo:summary"</span>,
+  <span class="key">"object"</span>:    <span class="str">"Chose post-tension slab over traditional — better for clay soil"</span>,
+  <span class="key">"object_type"</span>: <span class="str">"literal"</span>
+}
+
+<span class="cm">// Find all decisions about foundation</span>
+{ <span class="key">"query"</span>: <span class="str">"foundation slab"</span>, <span class="key">"type"</span>: <span class="str">"hippo:Decision"</span> }</pre>
         </div>
       </div>
 
       <div id="tab-sparql" class="code-panel">
         <div class="code-panel-inner">
-<pre><span class="cm">// SELECT — returns JSON bindings</span>
+<pre><span class="cm">// Find all entities in your garden graph</span>
 {
-  <span class="key">"query"</span>: <span class="str">"SELECT ?s ?name WHERE { ?s &lt;http://example.org/name&gt; ?name } LIMIT 10"</span>
+  <span class="key">"query"</span>: <span class="str">"SELECT ?plant ?summary WHERE {
+    ?plant a hippo:Entity ;
+           hippo:summary ?summary .
+  }"</span>,
+  <span class="key">"graph"</span>: <span class="str">"garden:2026"</span>
 }
 
-<span class="cm">// ASK — returns "true" or "false"</span>
+<span class="cm">// Count items by type across all graphs</span>
 {
-  <span class="key">"query"</span>: <span class="str">"ASK { &lt;http://example.org/Alice&gt; a &lt;http://example.org/Person&gt; }"</span>
+  <span class="key">"query"</span>: <span class="str">"SELECT ?type (COUNT(?s) AS ?count) WHERE { ?s a ?type } GROUP BY ?type ORDER BY DESC(?count)"</span>
 }
 
-<span class="cm">// INSERT DATA (auto-detected as update)</span>
+<span class="cm">// Insert data with SPARQL UPDATE</span>
 {
-  <span class="key">"query"</span>: <span class="str">"INSERT DATA { &lt;http://example.org/Alice&gt; &lt;http://example.org/age&gt; 30 }"</span>
-}
-
-<span class="cm">// Query a specific named graph</span>
-{
-  <span class="key">"query"</span>: <span class="str">"SELECT ?s WHERE { ?s ?p ?o }"</span>,
-  <span class="key">"graph"</span>: <span class="str">"http://example.org/people"</span>
+  <span class="key">"query"</span>: <span class="str">"INSERT DATA { &lt;garden:Basil&gt; a &lt;hippo:Entity&gt; ; &lt;hippo:summary&gt; 'Companion plant for tomatoes' }"</span>
 }</pre>
-        </div>
-      </div>
-
-      <div id="tab-graph" class="code-panel">
-        <div class="code-panel-inner">
-<pre><span class="cm">// Create a named graph</span>
-{ <span class="key">"action"</span>: <span class="str">"create"</span>, <span class="key">"name"</span>: <span class="str">"http://example.org/people"</span> }
-
-<span class="cm">// Save everything to disk</span>
-{ <span class="key">"action"</span>: <span class="str">"dump"</span>, <span class="key">"file"</span>: <span class="str">"./backup.trig"</span> }
-
-<span class="cm">// Load from file (merges with existing)</span>
-{ <span class="key">"action"</span>: <span class="str">"load"</span>, <span class="key">"file"</span>: <span class="str">"./backup.trig"</span> }
-
-<span class="cm">// Register a namespace prefix</span>
-{ <span class="key">"action"</span>: <span class="str">"prefix_add"</span>, <span class="key">"prefix"</span>: <span class="str">"ex"</span>, <span class="key">"uri"</span>: <span class="str">"http://example.org/"</span> }
-
-<span class="cm">// Stats for a graph</span>
-{ <span class="key">"action"</span>: <span class="str">"stats"</span>, <span class="key">"name"</span>: <span class="str">"http://example.org/people"</span> }
-<span class="cm">// &rarr; {"triples": 42}</span></pre>
         </div>
       </div>
 
       <div id="tab-search" class="code-panel">
         <div class="code-panel-inner">
-<pre><span class="cm">// Search by keyword</span>
-{ <span class="key">"query"</span>: <span class="str">"authentication middleware"</span> }
+<pre><span class="cm">// Search any keyword</span>
+{ <span class="key">"query"</span>: <span class="str">"irrigation schedule"</span> }
 
-<span class="cm">// Filter by type</span>
+<span class="cm">// Filter by ontology type</span>
 {
-  <span class="key">"query"</span>: <span class="str">"Store"</span>,
-  <span class="key">"type"</span>:  <span class="str">"https://hippocamp.dev/ontology#Struct"</span>
+  <span class="key">"query"</span>: <span class="str">"budget overrun"</span>,
+  <span class="key">"type"</span>:  <span class="str">"hippo:Decision"</span>
 }
 
-<span class="cm">// Search within a project graph</span>
+<span class="cm">// Scope to a specific project graph</span>
 {
-  <span class="key">"query"</span>: <span class="str">"database connection"</span>,
-  <span class="key">"scope"</span>: <span class="str">"project:myapp"</span>,
+  <span class="key">"query"</span>: <span class="str">"invoice payment"</span>,
+  <span class="key">"scope"</span>: <span class="str">"project:accounting"</span>,
   <span class="key">"limit"</span>: <span class="val">5</span>
 }
 
-<span class="cm">// CLI one-shot query (for hooks/scripts)</span>
-<span class="cm">// $ hippocamp --query "auth" --type "hippo:Function" --limit 10</span></pre>
+<span class="cm">// CLI one-shot (for scripts)</span>
+<span class="cm">// $ hippocamp --query "tomato" --limit 10</span></pre>
         </div>
       </div>
 
@@ -1076,8 +991,8 @@
   <span class="key">format</span>: <span class="str">"trig"</span>
 
 <span class="key">prefixes</span>:
-  <span class="key">ex</span>:     <span class="str">"http://example.org/"</span>
-  <span class="key">schema</span>: <span class="str">"http://schema.org/"</span>
+  <span class="key">garden</span>: <span class="str">"http://example.org/garden/"</span>
+  <span class="key">house</span>:  <span class="str">"http://example.org/house/"</span>
 
 <span class="cm">---</span>
 
@@ -1096,19 +1011,55 @@
   </div>
 </section>
 
+<!-- ONTOLOGY -->
+<section id="ontology">
+  <div class="container">
+    <div class="section-rule reveal">
+      <span class="section-num">04</span>
+      <h2 class="section-title">Built-in ontology</h2>
+    </div>
+
+    <div class="ontology-grid">
+      <div class="ontology-layer reveal">
+        <div class="ontology-head">Base layer &mdash; any domain</div>
+        <div class="ontology-body">
+          <div class="ontology-item"><span class="ontology-class">hippo:Topic</span><span class="ontology-desc">subject areas, themes</span></div>
+          <div class="ontology-item"><span class="ontology-class">hippo:Entity</span><span class="ontology-desc">people, orgs, products, plants</span></div>
+          <div class="ontology-item"><span class="ontology-class">hippo:Note</span><span class="ontology-desc">free-form observations</span></div>
+          <div class="ontology-item"><span class="ontology-class">hippo:Source</span><span class="ontology-desc">articles, papers, URLs, books</span></div>
+          <div class="ontology-item"><span class="ontology-class">hippo:Decision</span><span class="ontology-desc">decisions with rationale</span></div>
+          <div class="ontology-item"><span class="ontology-class">hippo:Question</span><span class="ontology-desc">open questions</span></div>
+          <div class="ontology-item"><span class="ontology-class">hippo:Tag</span><span class="ontology-desc">lightweight labels</span></div>
+        </div>
+      </div>
+
+      <div class="ontology-layer reveal reveal-delay-1">
+        <div class="ontology-head">Code layer &mdash; software projects</div>
+        <div class="ontology-body">
+          <div class="ontology-item"><span class="ontology-class">hippo:Project</span><span class="ontology-desc">top-level project</span></div>
+          <div class="ontology-item"><span class="ontology-class">hippo:Module</span><span class="ontology-desc">package / module</span></div>
+          <div class="ontology-item"><span class="ontology-class">hippo:File</span><span class="ontology-desc">source file</span></div>
+          <div class="ontology-item"><span class="ontology-class">hippo:Function</span><span class="ontology-desc">function / method</span></div>
+          <div class="ontology-item"><span class="ontology-class">hippo:Struct</span><span class="ontology-desc">struct / type</span></div>
+          <div class="ontology-item"><span class="ontology-class">hippo:Interface</span><span class="ontology-desc">interface definition</span></div>
+          <div class="ontology-item"><span class="ontology-class">hippo:Dependency</span><span class="ontology-desc">external dependency</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- INSTALL -->
 <section id="install">
   <div class="container">
     <div class="section-rule reveal">
-      <span class="section-num">04</span>
+      <span class="section-num">05</span>
       <h2 class="section-title">Get started</h2>
     </div>
 
     <div class="install-grid">
       <div class="install-card reveal">
-        <div class="install-card-head">
-          <div class="install-card-title">Homebrew (recommended)</div>
-        </div>
+        <div class="install-card-head">Homebrew (recommended)</div>
         <div class="install-card-body">
           <div class="install-step">
             <div class="step-n">1</div>
@@ -1127,17 +1078,15 @@
           <div class="install-step">
             <div class="step-n">3</div>
             <div class="step-body">
-              <div class="step-label">Done — ask Claude about it</div>
-              <div class="step-cmd">list my RDF graphs</div>
+              <div class="step-label">Done &mdash; hooks auto-install</div>
+              <div class="step-cmd">list my knowledge graphs</div>
             </div>
           </div>
         </div>
       </div>
 
       <div class="install-card reveal reveal-delay-1">
-        <div class="install-card-head">
-          <div class="install-card-title">Direct download</div>
-        </div>
+        <div class="install-card-head">Direct download</div>
         <div class="install-card-body">
           <div class="install-step">
             <div class="step-n">&#x2193;</div>
@@ -1170,40 +1119,40 @@
 <section id="features">
   <div class="container">
     <div class="section-rule reveal">
-      <span class="section-num">05</span>
+      <span class="section-num">06</span>
       <h2 class="section-title">Under the hood</h2>
     </div>
 
     <div class="features-grid reveal">
       <div class="feature-cell">
+        <div class="feature-icon">&#x26A1;</div>
+        <div class="feature-name">Auto-setup</div>
+        <p class="feature-desc">Hooks and skills auto-install to <code>.claude/</code> on first launch. Updated only when the binary is newer.</p>
+      </div>
+      <div class="feature-cell">
         <div class="feature-icon">&#x25C8;</div>
         <div class="feature-name">Named graphs</div>
-        <p class="feature-desc">Multiple isolated named graphs in a single store. Each graph is independently queryable. One graph per project, shared ontology.</p>
+        <p class="feature-desc">Multiple isolated graphs in one store. One graph per project, shared ontology.</p>
       </div>
       <div class="feature-cell">
         <div class="feature-icon">&#x25C9;</div>
         <div class="feature-name">BadgerDB</div>
-        <p class="feature-desc">Context-aware in-memory store with ACID transactions. Proper graph isolation — no shared state.</p>
+        <p class="feature-desc">Context-aware in-memory store with ACID transactions. Proper graph isolation.</p>
       </div>
       <div class="feature-cell">
         <div class="feature-icon">&#x25CE;</div>
-        <div class="feature-name">TriG format</div>
-        <p class="feature-desc">Persistence in TriG — a Turtle superset that preserves named graph boundaries across sessions.</p>
+        <div class="feature-name">TriG persistence</div>
+        <p class="feature-desc">Auto-load on startup, auto-save on shutdown. TriG preserves named graph boundaries.</p>
       </div>
       <div class="feature-cell">
         <div class="feature-icon">&#x25CC;</div>
         <div class="feature-name">SPARQL 1.1</div>
-        <p class="feature-desc">Full W3C-conformant query engine. SELECT, ASK, CONSTRUCT, and all UPDATE operations.</p>
+        <p class="feature-desc">W3C-conformant query engine. SELECT, ASK, CONSTRUCT, and all UPDATE operations.</p>
       </div>
       <div class="feature-cell">
         <div class="feature-icon">&#x25C7;</div>
-        <div class="feature-name">Ontology</div>
-        <p class="feature-desc">Built-in hippo: ontology with base layer (topics, entities, notes, decisions) and code layer (files, symbols, dependencies). Open-world extensible.</p>
-      </div>
-      <div class="feature-cell">
-        <div class="feature-icon">&#x25C6;</div>
-        <div class="feature-name">Claude Code hooks</div>
-        <p class="feature-desc">Pre-query hook loads graph context before each prompt. Post-edit hook tracks changes for re-indexing. Skills for automated project analysis.</p>
+        <div class="feature-name">Open-world ontology</div>
+        <p class="feature-desc">Base + code layers. Extend with your own classes and properties &mdash; RDF is open-world.</p>
       </div>
     </div>
   </div>
@@ -1213,19 +1162,21 @@
 <footer>
   <div class="container">
     <div class="footer-inner">
-      <div class="footer-logo"><img src="logo-sm.png" alt="">hippo<span>camp</span></div>
+      <div class="footer-logo">
+        <img src="logo-sm.png" alt="">
+        hippo<span>camp</span>
+      </div>
       <ul class="footer-links">
         <li><a href="https://github.com/tggo/hippocamp" target="_blank">GitHub</a></li>
         <li><a href="https://github.com/tggo/hippocamp/releases" target="_blank">Releases</a></li>
         <li><a href="https://github.com/tggo/hippocamp/blob/main/CLAUDE.md" target="_blank">Docs</a></li>
       </ul>
-      <div class="footer-copy">v0.0.1 &middot; MIT</div>
+      <div class="footer-copy">MIT</div>
     </div>
   </div>
 </footer>
 
 <script>
-  // Tab switching
   function switchTab(name) {
     document.querySelectorAll('.code-panel').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -1233,7 +1184,6 @@
     event.target.classList.add('active');
   }
 
-  // Copy install command
   function copyInstall(btn) {
     navigator.clipboard.writeText('brew install tggo/tap/hippocamp');
     btn.textContent = '\u2713';
@@ -1241,7 +1191,6 @@
     setTimeout(() => { btn.textContent = '\u2398'; btn.classList.remove('copied'); }, 1800);
   }
 
-  // Scroll reveal
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(e => {
       if (e.isIntersecting) {
@@ -1249,7 +1198,7 @@
         observer.unobserve(e.target);
       }
     });
-  }, { threshold: 0.12 });
+  }, { threshold: 0.1 });
 
   document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 </script>
