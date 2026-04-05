@@ -53,7 +53,7 @@
       padding: 0 32px;
     }
 
-    /* ── hexagonal texture ── */
+    /* -- hexagonal texture -- */
     body::before {
       content: '';
       position: fixed;
@@ -63,7 +63,7 @@
       z-index: 0;
     }
 
-    /* ── NAV ── */
+    /* -- NAV -- */
     nav {
       position: fixed;
       top: 0; left: 0; right: 0;
@@ -125,7 +125,34 @@
     }
     .nav-gh:hover { background: var(--ink) !important; }
 
-    /* ── HERO ── */
+    /* -- LANG SWITCHER -- */
+    .lang-switcher {
+      display: flex;
+      gap: 2px;
+      background: var(--bg-card);
+      border: 1px solid var(--rule);
+      border-radius: 5px;
+      overflow: hidden;
+      margin-left: 16px;
+    }
+    .lang-btn {
+      background: none;
+      border: none;
+      padding: 4px 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem;
+      color: var(--ink-faint);
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.04em;
+    }
+    .lang-btn:hover { color: var(--ink); }
+    .lang-btn.active {
+      background: var(--gold);
+      color: var(--bg);
+    }
+
+    /* -- HERO -- */
     .hero {
       padding: 140px 0 100px;
       text-align: center;
@@ -233,7 +260,7 @@
     .hero-install-copy:hover { color: var(--gold); }
     .copied { color: var(--forest) !important; }
 
-    /* ── DOMAINS ── */
+    /* -- DOMAINS -- */
     .domains {
       padding: 80px 0 100px;
       position: relative;
@@ -283,7 +310,7 @@
       line-height: 1.4;
     }
 
-    /* ── SECTION ── */
+    /* -- SECTION -- */
     section { padding: 100px 0; position: relative; z-index: 1; }
     .section-rule {
       display: flex;
@@ -309,66 +336,136 @@
       background: var(--rule);
     }
 
-    /* ── HOW IT WORKS ── */
-    #how { background: var(--bg-warm); }
-    .how-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
+    /* -- DEMO TERMINAL -- */
+    .demo-section { padding: 80px 0; background: var(--bg); }
+    .demo-domain-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 24px;
     }
-    .how-step {
+    .demo-domain-btn {
       background: var(--bg-card);
       border: 1px solid var(--rule);
-      border-radius: 10px;
-      padding: 36px 28px;
-      position: relative;
-    }
-    .how-num {
+      border-radius: 20px;
+      padding: 8px 18px;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 2.5rem;
-      font-weight: 700;
-      color: var(--rule-light);
-      line-height: 1;
-      margin-bottom: 16px;
+      font-size: 0.72rem;
+      color: var(--ink-faint);
+      cursor: pointer;
+      transition: all 0.25s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
-    .how-label {
+    .demo-domain-btn:hover { border-color: var(--gold-dim); color: var(--ink); }
+    .demo-domain-btn.active {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: var(--bg-elevated);
+    }
+    .demo-domain-icon { font-size: 1rem; }
+    .demo-terminal {
+      background: #0D0F0A;
+      border: 1px solid var(--rule);
+      border-radius: 10px;
+      overflow: hidden;
+      max-width: 800px;
+      margin: 0 auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .demo-titlebar {
+      background: #1A1D16;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid var(--rule);
+    }
+    .demo-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .demo-dot.r { background: #FF5F56; }
+    .demo-dot.y { background: #FFBD2E; }
+    .demo-dot.g { background: #27C93F; }
+    .demo-titlebar-text {
+      flex: 1; text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem; color: var(--ink-faint);
+    }
+    .demo-body {
+      padding: 24px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.8;
+      min-height: 320px;
+    }
+    .demo-line {
+      opacity: 0;
+      animation: demo-reveal 0.3s ease forwards;
+    }
+    .demo-prompt { color: var(--gold); }
+    .demo-tool { color: var(--olive); }
+    .demo-result { color: var(--ink-light); }
+    .demo-success { color: #27C93F; }
+    .demo-dim { color: var(--ink-faint); }
+    @keyframes demo-reveal {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* -- PROOF SECTION -- */
+    .proof-section { padding: 60px 0; background: var(--bg-warm); }
+    .proof-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: center;
+    }
+    .proof-text h3 {
+      font-size: 1.6rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--ink);
+    }
+    .proof-text p {
+      color: var(--ink-light);
+      margin-bottom: 16px;
+      line-height: 1.7;
+    }
+    .proof-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(39,201,63,0.1);
+      border: 1px solid rgba(39,201,63,0.3);
+      color: #27C93F;
+      padding: 6px 16px;
+      border-radius: 20px;
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.85rem;
       font-weight: 600;
-      color: var(--gold);
-      margin-bottom: 8px;
     }
-    .how-cmd {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.78rem;
-      background: var(--code-bg);
+    .proof-table {
+      background: var(--bg-card);
       border: 1px solid var(--rule);
-      border-radius: 5px;
-      padding: 10px 14px;
-      color: var(--forest);
-      margin-bottom: 12px;
+      border-radius: 8px;
+      overflow: hidden;
     }
-    .how-desc {
-      font-size: 0.88rem;
-      color: var(--ink-light);
-      line-height: 1.55;
-    }
-    .how-auto-badge {
-      display: inline-flex;
+    .proof-row {
+      display: flex;
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--rule);
+      font-size: 0.85rem;
       align-items: center;
-      gap: 5px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.65rem;
-      letter-spacing: 0.06em;
-      color: var(--forest);
-      background: rgba(107,142,90,0.1);
-      border: 1px solid rgba(107,142,90,0.2);
-      border-radius: 4px;
-      padding: 3px 8px;
-      margin-top: 12px;
+    }
+    .proof-row:last-child { border-bottom: none; }
+    .proof-q { flex: 1; color: var(--ink-light); }
+    .proof-a { color: var(--ink); font-weight: 500; min-width: 120px; text-align: right; }
+    .proof-check { color: #27C93F; margin-left: 8px; }
+    @media (max-width: 768px) {
+      .proof-grid { grid-template-columns: 1fr; }
     }
 
-    /* ── TOOLS ── */
+    /* -- TOOLS -- */
     #tools { background: var(--bg); }
     .tools-grid {
       display: grid;
@@ -414,7 +511,7 @@
       line-height: 1.55;
     }
 
-    /* ── EXAMPLES ── */
+    /* -- EXAMPLES -- */
     #examples { background: var(--bg-warm); }
     .examples-tabs {
       display: flex;
@@ -464,7 +561,7 @@
     .key { color: var(--ink-light); }
     .val { color: var(--olive); }
 
-    /* ── ONTOLOGY ── */
+    /* -- ONTOLOGY -- */
     #ontology { background: var(--bg); }
     .ontology-grid {
       display: grid;
@@ -509,7 +606,7 @@
       color: var(--ink-faint);
     }
 
-    /* ── INSTALL ── */
+    /* -- INSTALL -- */
     #install { background: var(--bg-warm); }
     .install-grid {
       display: grid;
@@ -563,7 +660,7 @@
       color: var(--forest);
     }
 
-    /* ── FEATURES ── */
+    /* -- FEATURES -- */
     #features { background: var(--bg); }
     .features-grid {
       display: grid;
@@ -598,109 +695,7 @@
       line-height: 1.5;
     }
 
-    /* ── DEMO TERMINAL ── */
-    .demo-section { padding: 80px 0; background: var(--bg); }
-    .demo-terminal {
-      background: #0D0F0A;
-      border: 1px solid var(--rule);
-      border-radius: 10px;
-      overflow: hidden;
-      max-width: 800px;
-      margin: 0 auto;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-    }
-    .demo-titlebar {
-      background: #1A1D16;
-      padding: 10px 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      border-bottom: 1px solid var(--rule);
-    }
-    .demo-dot { width: 12px; height: 12px; border-radius: 50%; }
-    .demo-dot.r { background: #FF5F56; }
-    .demo-dot.y { background: #FFBD2E; }
-    .demo-dot.g { background: #27C93F; }
-    .demo-titlebar-text {
-      flex: 1; text-align: center;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.7rem; color: var(--ink-faint);
-    }
-    .demo-body {
-      padding: 24px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.78rem;
-      line-height: 1.8;
-      min-height: 320px;
-    }
-    .demo-line {
-      opacity: 0;
-      animation: demo-reveal 0.3s ease forwards;
-    }
-    .demo-prompt { color: var(--gold); }
-    .demo-tool { color: var(--olive); }
-    .demo-result { color: var(--ink-light); }
-    .demo-success { color: #27C93F; }
-    .demo-dim { color: var(--ink-faint); }
-    @keyframes demo-reveal {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ── PROOF SECTION ── */
-    .proof-section { padding: 60px 0; background: var(--bg-warm); }
-    .proof-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 40px;
-      align-items: center;
-    }
-    .proof-text h3 {
-      font-size: 1.6rem;
-      font-weight: 600;
-      margin-bottom: 12px;
-      color: var(--ink);
-    }
-    .proof-text p {
-      color: var(--ink-light);
-      margin-bottom: 16px;
-      line-height: 1.7;
-    }
-    .proof-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(39,201,63,0.1);
-      border: 1px solid rgba(39,201,63,0.3);
-      color: #27C93F;
-      padding: 6px 16px;
-      border-radius: 20px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.85rem;
-      font-weight: 600;
-    }
-    .proof-table {
-      background: var(--bg-card);
-      border: 1px solid var(--rule);
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    .proof-row {
-      display: flex;
-      padding: 12px 20px;
-      border-bottom: 1px solid var(--rule);
-      font-size: 0.85rem;
-      align-items: center;
-    }
-    .proof-row:last-child { border-bottom: none; }
-    .proof-q { flex: 1; color: var(--ink-light); }
-    .proof-a { color: var(--ink); font-weight: 500; min-width: 120px; text-align: right; }
-    .proof-check { color: #27C93F; margin-left: 8px; }
-    @media (max-width: 768px) {
-      .proof-grid { grid-template-columns: 1fr; }
-    }
-
-    /* ── FOOTER ── */
+    /* -- FOOTER -- */
     footer {
       border-top: 1px solid var(--rule);
       padding: 40px 0;
@@ -742,7 +737,7 @@
       color: var(--ink-faint);
     }
 
-    /* ── ANIMATIONS ── */
+    /* -- ANIMATIONS -- */
     @keyframes fadeUp {
       to { opacity: 1; transform: translateY(0); }
     }
@@ -767,19 +762,21 @@
       transform: translateY(20px);
     }
 
-    /* ── RESPONSIVE ── */
+    /* -- RESPONSIVE -- */
     @media (max-width: 900px) {
       .domains-grid { grid-template-columns: repeat(3, 1fr); }
-      .how-grid { grid-template-columns: 1fr; }
       .tools-grid { grid-template-columns: repeat(2, 1fr); }
       .ontology-grid, .install-grid { grid-template-columns: 1fr; }
       .features-grid { grid-template-columns: repeat(2, 1fr); }
       .nav-links { display: none; }
+      .demo-domain-tabs { flex-wrap: wrap; }
     }
     @media (max-width: 600px) {
       .domains-grid { grid-template-columns: repeat(2, 1fr); }
       .tools-grid { grid-template-columns: 1fr; }
       .features-grid { grid-template-columns: 1fr; }
+      .demo-domain-tabs { gap: 6px; }
+      .demo-domain-btn { padding: 6px 12px; font-size: 0.65rem; }
     }
   </style>
 </head>
@@ -793,10 +790,17 @@
       hippo<span>camp</span>
     </a>
     <ul class="nav-links">
-      <li><a href="#how">How it works</a></li>
-      <li><a href="#tools">Tools</a></li>
-      <li><a href="#examples">Examples</a></li>
-      <li><a href="#install">Install</a></li>
+      <li><a href="#tools" data-i18n="nav.tools">Tools</a></li>
+      <li><a href="#examples" data-i18n="nav.examples">Examples</a></li>
+      <li><a href="#install" data-i18n="nav.install">Install</a></li>
+      <li>
+        <div class="lang-switcher">
+          <button class="lang-btn active" onclick="setLang('en')">EN</button>
+          <button class="lang-btn" onclick="setLang('uk')">UK</button>
+          <button class="lang-btn" onclick="setLang('fr')">FR</button>
+          <button class="lang-btn" onclick="setLang('es')">ES</button>
+        </div>
+      </li>
       <li><a href="https://github.com/tggo/hippocamp" class="nav-gh" target="_blank">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
         GitHub
@@ -812,13 +816,13 @@
       <img src="logo-sm.png" alt="Hippocamp" class="hero-logo">
     </div>
     <div class="fade-in" style="animation-delay:0.2s;">
-      <div class="hero-eyebrow">MCP server for Claude Code</div>
+      <div class="hero-eyebrow" data-i18n="hero.eyebrow">MCP server for Claude Code</div>
     </div>
     <div class="fade-in" style="animation-delay:0.3s;">
-      <h1 class="hero-title">Your AI remembers<br>everything about<br>your project</h1>
+      <h1 class="hero-title" data-i18n="hero.title">Your AI remembers<br>everything about<br>your project</h1>
     </div>
     <div class="fade-in" style="animation-delay:0.4s;">
-      <p class="hero-sub">
+      <p class="hero-sub" data-i18n="hero.sub">
         Hippocamp gives Claude a persistent memory that survives between sessions.
         It reads your project files, builds a structured knowledge graph, and answers
         questions &mdash; even in a fresh session with zero context.
@@ -826,7 +830,7 @@
     </div>
     <div class="fade-in" style="animation-delay:0.5s;">
       <div class="hero-auto">
-        <span>two commands to install &mdash; zero config needed</span>
+        <span data-i18n="hero.auto">two commands to install &mdash; zero config needed</span>
       </div>
     </div>
     <div class="fade-in" style="animation-delay:0.6s;">
@@ -842,32 +846,32 @@
 <!-- DOMAINS -->
 <div class="domains">
   <div class="container">
-    <div class="domains-title reveal">Works for any domain</div>
+    <div class="domains-title reveal" data-i18n="domains.title">Works for any domain</div>
     <div class="domains-grid">
       <div class="domain-card reveal">
         <span class="domain-icon">&#x1F3D7;</span>
-        <div class="domain-name">Construction</div>
-        <div class="domain-examples">phases, materials, inspections</div>
+        <div class="domain-name" data-i18n="domains.construction">Construction</div>
+        <div class="domain-examples" data-i18n="domains.construction_ex">phases, materials, inspections</div>
       </div>
       <div class="domain-card reveal reveal-delay-1">
         <span class="domain-icon">&#x1F331;</span>
-        <div class="domain-name">Gardening</div>
-        <div class="domain-examples">plants, schedules, soil data</div>
+        <div class="domain-name" data-i18n="domains.gardening">Gardening</div>
+        <div class="domain-examples" data-i18n="domains.gardening_ex">plants, schedules, soil data</div>
       </div>
       <div class="domain-card reveal reveal-delay-2">
         <span class="domain-icon">&#x1F4C8;</span>
-        <div class="domain-name">Sales</div>
-        <div class="domain-examples">leads, pipelines, forecasts</div>
+        <div class="domain-name" data-i18n="domains.sales">Sales</div>
+        <div class="domain-examples" data-i18n="domains.sales_ex">leads, pipelines, forecasts</div>
       </div>
       <div class="domain-card reveal reveal-delay-3">
         <span class="domain-icon">&#x1F4CA;</span>
-        <div class="domain-name">Accounting</div>
-        <div class="domain-examples">ledgers, reports, audits</div>
+        <div class="domain-name" data-i18n="domains.accounting">Accounting</div>
+        <div class="domain-examples" data-i18n="domains.accounting_ex">ledgers, reports, audits</div>
       </div>
       <div class="domain-card reveal reveal-delay-4">
         <span class="domain-icon">&#x1F373;</span>
-        <div class="domain-name">Recipes</div>
-        <div class="domain-examples">ingredients, methods, pairings</div>
+        <div class="domain-name" data-i18n="domains.recipes">Recipes</div>
+        <div class="domain-examples" data-i18n="domains.recipes_ex">ingredients, methods, pairings</div>
       </div>
     </div>
   </div>
@@ -878,7 +882,26 @@
   <div class="container">
     <div class="section-rule reveal">
       <span class="section-num">01</span>
-      <h2 class="section-title">See it in action</h2>
+      <h2 class="section-title" data-i18n="demo.title">See it in action</h2>
+    </div>
+
+    <div class="demo-domain-tabs reveal">
+      <button class="demo-domain-btn active" onclick="switchDemo('construction')">
+        <span class="demo-domain-icon">&#x1F3D7;</span>
+        <span data-i18n="demo.tab.construction">Construction</span>
+      </button>
+      <button class="demo-domain-btn" onclick="switchDemo('garden')">
+        <span class="demo-domain-icon">&#x1F331;</span>
+        <span data-i18n="demo.tab.garden">Garden</span>
+      </button>
+      <button class="demo-domain-btn" onclick="switchDemo('research')">
+        <span class="demo-domain-icon">&#x1F52C;</span>
+        <span data-i18n="demo.tab.research">Research</span>
+      </button>
+      <button class="demo-domain-btn" onclick="switchDemo('learning')">
+        <span class="demo-domain-icon">&#x1F4DA;</span>
+        <span data-i18n="demo.tab.learning">Learning</span>
+      </button>
     </div>
 
     <div class="demo-terminal reveal" id="demo-terminal">
@@ -886,7 +909,7 @@
         <div class="demo-dot r"></div>
         <div class="demo-dot y"></div>
         <div class="demo-dot g"></div>
-        <div class="demo-titlebar-text">claude &mdash; ~/my-house-project</div>
+        <div class="demo-titlebar-text" id="demo-titlebar-text">claude &mdash; ~/my-renovation</div>
       </div>
       <div class="demo-body" id="demo-body">
       </div>
@@ -899,78 +922,44 @@
   <div class="container">
     <div class="proof-grid">
       <div class="proof-text reveal">
-        <h3>A fresh Claude session answered 5/5 questions correctly</h3>
-        <p>
-          We built a knowledge graph from a real house construction project (227 triples, 49 resources).
+        <h3 data-i18n="proof.title">A fresh Claude session answered 5/5 questions correctly</h3>
+        <p data-i18n="proof.desc1">
+          We built a knowledge graph for a home renovation project (185 triples, 42 resources).
           Then we started a <strong>brand new Claude session</strong> with zero context &mdash;
           it only had access to the graph. No files, no conversation history.
         </p>
-        <p>
-          It answered every question correctly: room sizes, supplier prices,
-          budget breakdowns, construction phases, and pending decisions.
+        <p data-i18n="proof.desc2">
+          It answered every question correctly: room dimensions, contractor quotes,
+          budget totals, project phases, and open decisions.
         </p>
-        <div class="proof-badge">5/5 correct answers from graph alone</div>
+        <div class="proof-badge" data-i18n="proof.badge">5/5 correct answers from graph alone</div>
       </div>
       <div class="proof-table reveal reveal-delay-1">
         <div class="proof-row">
-          <div class="proof-q">Kitchen area + room count</div>
-          <div class="proof-a">58.54 m&sup2;, 10 rooms</div>
+          <div class="proof-q" data-i18n="proof.q1">Living room area + room count</div>
+          <div class="proof-a">42 m&sup2;, 8 rooms</div>
           <div class="proof-check">&#x2713;</div>
         </div>
         <div class="proof-row">
-          <div class="proof-q">VPS foundation supplier + price</div>
-          <div class="proof-a">KRASNEBRUCK, 73.50/pile</div>
+          <div class="proof-q" data-i18n="proof.q2">Flooring supplier + price</div>
+          <div class="proof-a">OakWood Co., $28/sq.ft</div>
           <div class="proof-check">&#x2713;</div>
         </div>
         <div class="proof-row">
-          <div class="proof-q">Decided vs pending decisions</div>
-          <div class="proof-a">3 decided + 1 pending</div>
+          <div class="proof-q" data-i18n="proof.q3">Decided vs pending decisions</div>
+          <div class="proof-a" data-i18n="proof.a3">5 decided + 2 pending</div>
           <div class="proof-check">&#x2713;</div>
         </div>
         <div class="proof-row">
-          <div class="proof-q">Total expenses to date</div>
-          <div class="proof-a">633K + $9,300</div>
+          <div class="proof-q" data-i18n="proof.q4">Total expenses to date</div>
+          <div class="proof-a">$47,200</div>
           <div class="proof-check">&#x2713;</div>
         </div>
         <div class="proof-row">
-          <div class="proof-q">Move-in date + remaining phases</div>
-          <div class="proof-a">May 2028, 5 phases left</div>
+          <div class="proof-q" data-i18n="proof.q5">Completion date + remaining phases</div>
+          <div class="proof-a" data-i18n="proof.a5">Oct 2026, 3 phases left</div>
           <div class="proof-check">&#x2713;</div>
         </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- HOW IT WORKS -->
-<section id="how">
-  <div class="container">
-    <div class="section-rule reveal">
-      <span class="section-num">02</span>
-      <h2 class="section-title">How it works</h2>
-    </div>
-
-    <div class="how-grid">
-      <div class="how-step reveal">
-        <div class="how-num">1</div>
-        <div class="how-label">Install</div>
-        <div class="how-cmd">brew install tggo/tap/hippocamp</div>
-        <p class="how-desc">One command. Add to your Claude MCP config and you're ready.</p>
-      </div>
-
-      <div class="how-step reveal reveal-delay-1">
-        <div class="how-num">2</div>
-        <div class="how-label">Launch</div>
-        <div class="how-cmd">hippocamp --config config.yaml</div>
-        <p class="how-desc">On first launch, hooks and skills are auto-installed to your project's <code>.claude/</code> directory.</p>
-        <div class="how-auto-badge">&#x26A1; auto-setup</div>
-      </div>
-
-      <div class="how-step reveal reveal-delay-2">
-        <div class="how-num">3</div>
-        <div class="how-label">Use</div>
-        <div class="how-cmd">analyze this project</div>
-        <p class="how-desc">Ask Claude to analyze your project. It reads your files, extracts knowledge, and builds a graph that persists across sessions.</p>
       </div>
     </div>
   </div>
@@ -980,8 +969,8 @@
 <section id="tools">
   <div class="container">
     <div class="section-rule reveal">
-      <span class="section-num">03</span>
-      <h2 class="section-title">Five tools</h2>
+      <span class="section-num">02</span>
+      <h2 class="section-title" data-i18n="tools.title">Five tools</h2>
     </div>
 
     <div class="tools-grid">
@@ -992,7 +981,7 @@
           <span class="tool-action">remove</span>
           <span class="tool-action">list</span>
         </div>
-        <p class="tool-desc">CRUD on individual triples. URIs, literals, blank nodes. Wildcard pattern matching. Language tags and XSD datatypes.</p>
+        <p class="tool-desc" data-i18n="tools.triple">CRUD on individual triples. URIs, literals, blank nodes. Wildcard pattern matching. Language tags and XSD datatypes.</p>
       </div>
 
       <div class="tool-card reveal reveal-delay-1">
@@ -1003,7 +992,7 @@
           <span class="tool-action">CONSTRUCT</span>
           <span class="tool-action">UPDATE</span>
         </div>
-        <p class="tool-desc">Full SPARQL 1.1 engine. Expressive graph queries, pattern matching, aggregations. Updates auto-detected.</p>
+        <p class="tool-desc" data-i18n="tools.sparql">Full SPARQL 1.1 engine. Expressive graph queries, pattern matching, aggregations. Updates auto-detected.</p>
       </div>
 
       <div class="tool-card reveal reveal-delay-2">
@@ -1016,7 +1005,7 @@
           <span class="tool-action">load</span>
           <span class="tool-action">prefix_*</span>
         </div>
-        <p class="tool-desc">Named graph lifecycle. TriG persistence. Namespace prefixes. Stats and clear.</p>
+        <p class="tool-desc" data-i18n="tools.graph">Named graph lifecycle. TriG persistence. Namespace prefixes. Stats and clear.</p>
       </div>
 
       <div class="tool-card reveal reveal-delay-3">
@@ -1026,7 +1015,7 @@
           <span class="tool-action">type filter</span>
           <span class="tool-action">scope</span>
         </div>
-        <p class="tool-desc">Keyword search across labels, summaries, content. Filter by RDF type or named graph. Ranked results with graph traversal.</p>
+        <p class="tool-desc" data-i18n="tools.search">Keyword search across labels, summaries, content. Filter by RDF type or named graph. Ranked results with graph traversal.</p>
       </div>
 
       <div class="tool-card reveal reveal-delay-4">
@@ -1036,7 +1025,7 @@
           <span class="tool-action">labels</span>
           <span class="tool-action">rationale</span>
         </div>
-        <p class="tool-desc">Check graph compliance. Verify all resources have proper types and labels. Catch issues before they become problems.</p>
+        <p class="tool-desc" data-i18n="tools.validate">Check graph compliance. Verify all resources have proper types and labels. Catch issues before they become problems.</p>
       </div>
     </div>
   </div>
@@ -1046,8 +1035,8 @@
 <section id="examples">
   <div class="container">
     <div class="section-rule reveal">
-      <span class="section-num">04</span>
-      <h2 class="section-title">Examples</h2>
+      <span class="section-num">03</span>
+      <h2 class="section-title" data-i18n="examples.title">Examples</h2>
     </div>
 
     <div class="reveal">
@@ -1189,34 +1178,34 @@
 <section id="ontology">
   <div class="container">
     <div class="section-rule reveal">
-      <span class="section-num">05</span>
-      <h2 class="section-title">Built-in ontology</h2>
+      <span class="section-num">04</span>
+      <h2 class="section-title" data-i18n="ontology.title">Built-in ontology</h2>
     </div>
 
     <div class="ontology-grid">
       <div class="ontology-layer reveal">
-        <div class="ontology-head">Base layer &mdash; any domain</div>
+        <div class="ontology-head" data-i18n="ontology.base">Base layer &mdash; any domain</div>
         <div class="ontology-body">
-          <div class="ontology-item"><span class="ontology-class">hippo:Topic</span><span class="ontology-desc">subject areas, themes</span></div>
-          <div class="ontology-item"><span class="ontology-class">hippo:Entity</span><span class="ontology-desc">people, orgs, products, plants</span></div>
-          <div class="ontology-item"><span class="ontology-class">hippo:Note</span><span class="ontology-desc">free-form observations</span></div>
-          <div class="ontology-item"><span class="ontology-class">hippo:Source</span><span class="ontology-desc">articles, papers, URLs, books</span></div>
-          <div class="ontology-item"><span class="ontology-class">hippo:Decision</span><span class="ontology-desc">decisions with rationale</span></div>
-          <div class="ontology-item"><span class="ontology-class">hippo:Question</span><span class="ontology-desc">open questions</span></div>
-          <div class="ontology-item"><span class="ontology-class">hippo:Tag</span><span class="ontology-desc">lightweight labels</span></div>
+          <div class="ontology-item"><span class="ontology-class">hippo:Topic</span><span class="ontology-desc" data-i18n="ontology.topic">subject areas, themes</span></div>
+          <div class="ontology-item"><span class="ontology-class">hippo:Entity</span><span class="ontology-desc" data-i18n="ontology.entity">people, orgs, products, plants</span></div>
+          <div class="ontology-item"><span class="ontology-class">hippo:Note</span><span class="ontology-desc" data-i18n="ontology.note">free-form observations</span></div>
+          <div class="ontology-item"><span class="ontology-class">hippo:Source</span><span class="ontology-desc" data-i18n="ontology.source">articles, papers, URLs, books</span></div>
+          <div class="ontology-item"><span class="ontology-class">hippo:Decision</span><span class="ontology-desc" data-i18n="ontology.decision">decisions with rationale</span></div>
+          <div class="ontology-item"><span class="ontology-class">hippo:Question</span><span class="ontology-desc" data-i18n="ontology.question">open questions</span></div>
+          <div class="ontology-item"><span class="ontology-class">hippo:Tag</span><span class="ontology-desc" data-i18n="ontology.tag">lightweight labels</span></div>
         </div>
       </div>
 
       <div class="ontology-layer reveal reveal-delay-1">
-        <div class="ontology-head">Code layer &mdash; software projects</div>
+        <div class="ontology-head" data-i18n="ontology.code">Code layer &mdash; software projects</div>
         <div class="ontology-body">
-          <div class="ontology-item"><span class="ontology-class">hippo:Project</span><span class="ontology-desc">top-level project</span></div>
-          <div class="ontology-item"><span class="ontology-class">hippo:Module</span><span class="ontology-desc">package / module</span></div>
-          <div class="ontology-item"><span class="ontology-class">hippo:File</span><span class="ontology-desc">source file</span></div>
-          <div class="ontology-item"><span class="ontology-class">hippo:Function</span><span class="ontology-desc">function / method</span></div>
-          <div class="ontology-item"><span class="ontology-class">hippo:Struct</span><span class="ontology-desc">struct / type</span></div>
-          <div class="ontology-item"><span class="ontology-class">hippo:Interface</span><span class="ontology-desc">interface definition</span></div>
-          <div class="ontology-item"><span class="ontology-class">hippo:Dependency</span><span class="ontology-desc">external dependency</span></div>
+          <div class="ontology-item"><span class="ontology-class">hippo:Project</span><span class="ontology-desc" data-i18n="ontology.project">top-level project</span></div>
+          <div class="ontology-item"><span class="ontology-class">hippo:Module</span><span class="ontology-desc" data-i18n="ontology.module">package / module</span></div>
+          <div class="ontology-item"><span class="ontology-class">hippo:File</span><span class="ontology-desc" data-i18n="ontology.file">source file</span></div>
+          <div class="ontology-item"><span class="ontology-class">hippo:Function</span><span class="ontology-desc" data-i18n="ontology.function">function / method</span></div>
+          <div class="ontology-item"><span class="ontology-class">hippo:Struct</span><span class="ontology-desc" data-i18n="ontology.struct">struct / type</span></div>
+          <div class="ontology-item"><span class="ontology-class">hippo:Interface</span><span class="ontology-desc" data-i18n="ontology.interface">interface definition</span></div>
+          <div class="ontology-item"><span class="ontology-class">hippo:Dependency</span><span class="ontology-desc" data-i18n="ontology.dependency">external dependency</span></div>
         </div>
       </div>
     </div>
@@ -1227,32 +1216,32 @@
 <section id="install">
   <div class="container">
     <div class="section-rule reveal">
-      <span class="section-num">06</span>
-      <h2 class="section-title">Get started</h2>
+      <span class="section-num">05</span>
+      <h2 class="section-title" data-i18n="install.title">Get started</h2>
     </div>
 
     <div class="install-grid">
       <div class="install-card reveal">
-        <div class="install-card-head">Homebrew (recommended)</div>
+        <div class="install-card-head" data-i18n="install.brew">Homebrew (recommended)</div>
         <div class="install-card-body">
           <div class="install-step">
             <div class="step-n">1</div>
             <div class="step-body">
-              <div class="step-label">Install</div>
+              <div class="step-label" data-i18n="install.step1">Install</div>
               <div class="step-cmd">brew install tggo/tap/hippocamp</div>
             </div>
           </div>
           <div class="install-step">
             <div class="step-n">2</div>
             <div class="step-body">
-              <div class="step-label">Add to Claude Code</div>
+              <div class="step-label" data-i18n="install.step2">Add to Claude Code</div>
               <div class="step-cmd">hippocamp install</div>
             </div>
           </div>
           <div class="install-step">
             <div class="step-n">3</div>
             <div class="step-body">
-              <div class="step-label">Done &mdash; hooks auto-install on first run</div>
+              <div class="step-label" data-i18n="install.step3">Done &mdash; hooks auto-install on first run</div>
               <div class="step-cmd" style="font-style:italic;color:var(--ink-faint);">ask Claude: "analyze this project and build a knowledge graph"</div>
             </div>
           </div>
@@ -1260,7 +1249,7 @@
       </div>
 
       <div class="install-card reveal reveal-delay-1">
-        <div class="install-card-head">Direct download</div>
+        <div class="install-card-head" data-i18n="install.direct">Direct download</div>
         <div class="install-card-body">
           <div class="install-step">
             <div class="step-n">&#x2193;</div>
@@ -1293,40 +1282,40 @@
 <section id="features">
   <div class="container">
     <div class="section-rule reveal">
-      <span class="section-num">07</span>
-      <h2 class="section-title">Under the hood</h2>
+      <span class="section-num">06</span>
+      <h2 class="section-title" data-i18n="features.title">Under the hood</h2>
     </div>
 
     <div class="features-grid reveal">
       <div class="feature-cell">
         <div class="feature-icon">&#x26A1;</div>
-        <div class="feature-name">Auto-setup</div>
-        <p class="feature-desc">Hooks and skills auto-install to <code>.claude/</code> on first launch. Updated only when the binary is newer.</p>
+        <div class="feature-name" data-i18n="features.autosetup">Auto-setup</div>
+        <p class="feature-desc" data-i18n="features.autosetup_desc">Hooks and skills auto-install to <code>.claude/</code> on first launch. Updated only when the binary is newer.</p>
       </div>
       <div class="feature-cell">
         <div class="feature-icon">&#x25C8;</div>
-        <div class="feature-name">Named graphs</div>
-        <p class="feature-desc">Multiple isolated graphs in one store. One graph per project, shared ontology.</p>
+        <div class="feature-name" data-i18n="features.namedgraphs">Named graphs</div>
+        <p class="feature-desc" data-i18n="features.namedgraphs_desc">Multiple isolated graphs in one store. One graph per project, shared ontology.</p>
       </div>
       <div class="feature-cell">
         <div class="feature-icon">&#x25C9;</div>
         <div class="feature-name">BadgerDB</div>
-        <p class="feature-desc">Context-aware in-memory store with ACID transactions. Proper graph isolation.</p>
+        <p class="feature-desc" data-i18n="features.badger_desc">Context-aware in-memory store with ACID transactions. Proper graph isolation.</p>
       </div>
       <div class="feature-cell">
         <div class="feature-icon">&#x25CE;</div>
-        <div class="feature-name">TriG persistence</div>
-        <p class="feature-desc">Auto-load on startup, auto-save on shutdown. TriG preserves named graph boundaries.</p>
+        <div class="feature-name" data-i18n="features.trig">TriG persistence</div>
+        <p class="feature-desc" data-i18n="features.trig_desc">Auto-load on startup, auto-save on shutdown. TriG preserves named graph boundaries.</p>
       </div>
       <div class="feature-cell">
         <div class="feature-icon">&#x25CC;</div>
         <div class="feature-name">SPARQL 1.1</div>
-        <p class="feature-desc">W3C-conformant query engine. SELECT, ASK, CONSTRUCT, and all UPDATE operations.</p>
+        <p class="feature-desc" data-i18n="features.sparql_desc">W3C-conformant query engine. SELECT, ASK, CONSTRUCT, and all UPDATE operations.</p>
       </div>
       <div class="feature-cell">
         <div class="feature-icon">&#x25C7;</div>
-        <div class="feature-name">Open-world ontology</div>
-        <p class="feature-desc">Base + code layers. Extend with your own classes and properties &mdash; RDF is open-world.</p>
+        <div class="feature-name" data-i18n="features.ontology">Open-world ontology</div>
+        <p class="feature-desc" data-i18n="features.ontology_desc">Base + code layers. Extend with your own classes and properties &mdash; RDF is open-world.</p>
       </div>
     </div>
   </div>
@@ -1351,6 +1340,334 @@
 </footer>
 
 <script>
+  // ── TRANSLATIONS ──
+  const T = {
+    en: {
+      'nav.tools': 'Tools',
+      'nav.examples': 'Examples',
+      'nav.install': 'Install',
+      'hero.eyebrow': 'MCP server for Claude Code',
+      'hero.title': 'Your AI remembers<br>everything about<br>your project',
+      'hero.sub': 'Hippocamp gives Claude a persistent memory that survives between sessions. It reads your project files, builds a structured knowledge graph, and answers questions \u2014 even in a fresh session with zero context.',
+      'hero.auto': 'two commands to install \u2014 zero config needed',
+      'domains.title': 'Works for any domain',
+      'domains.construction': 'Construction',
+      'domains.construction_ex': 'phases, materials, inspections',
+      'domains.gardening': 'Gardening',
+      'domains.gardening_ex': 'plants, schedules, soil data',
+      'domains.sales': 'Sales',
+      'domains.sales_ex': 'leads, pipelines, forecasts',
+      'domains.accounting': 'Accounting',
+      'domains.accounting_ex': 'ledgers, reports, audits',
+      'domains.recipes': 'Recipes',
+      'domains.recipes_ex': 'ingredients, methods, pairings',
+      'demo.title': 'See it in action',
+      'demo.tab.construction': 'Construction',
+      'demo.tab.garden': 'Garden',
+      'demo.tab.research': 'Research',
+      'demo.tab.learning': 'Learning',
+      'proof.title': 'A fresh Claude session answered 5/5 questions correctly',
+      'proof.desc1': 'We built a knowledge graph for a home renovation project (185 triples, 42 resources). Then we started a <strong>brand new Claude session</strong> with zero context \u2014 it only had access to the graph. No files, no conversation history.',
+      'proof.desc2': 'It answered every question correctly: room dimensions, contractor quotes, budget totals, project phases, and open decisions.',
+      'proof.badge': '5/5 correct answers from graph alone',
+      'proof.q1': 'Living room area + room count',
+      'proof.q2': 'Flooring supplier + price',
+      'proof.q3': 'Decided vs pending decisions',
+      'proof.a3': '5 decided + 2 pending',
+      'proof.q4': 'Total expenses to date',
+      'proof.q5': 'Completion date + remaining phases',
+      'proof.a5': 'Oct 2026, 3 phases left',
+      'tools.title': 'Five tools',
+      'tools.triple': 'CRUD on individual triples. URIs, literals, blank nodes. Wildcard pattern matching. Language tags and XSD datatypes.',
+      'tools.sparql': 'Full SPARQL 1.1 engine. Expressive graph queries, pattern matching, aggregations. Updates auto-detected.',
+      'tools.graph': 'Named graph lifecycle. TriG persistence. Namespace prefixes. Stats and clear.',
+      'tools.search': 'Keyword search across labels, summaries, content. Filter by RDF type or named graph. Ranked results with graph traversal.',
+      'tools.validate': 'Check graph compliance. Verify all resources have proper types and labels. Catch issues before they become problems.',
+      'examples.title': 'Examples',
+      'ontology.title': 'Built-in ontology',
+      'ontology.base': 'Base layer \u2014 any domain',
+      'ontology.code': 'Code layer \u2014 software projects',
+      'ontology.topic': 'subject areas, themes',
+      'ontology.entity': 'people, orgs, products, plants',
+      'ontology.note': 'free-form observations',
+      'ontology.source': 'articles, papers, URLs, books',
+      'ontology.decision': 'decisions with rationale',
+      'ontology.question': 'open questions',
+      'ontology.tag': 'lightweight labels',
+      'ontology.project': 'top-level project',
+      'ontology.module': 'package / module',
+      'ontology.file': 'source file',
+      'ontology.function': 'function / method',
+      'ontology.struct': 'struct / type',
+      'ontology.interface': 'interface definition',
+      'ontology.dependency': 'external dependency',
+      'install.title': 'Get started',
+      'install.brew': 'Homebrew (recommended)',
+      'install.step1': 'Install',
+      'install.step2': 'Add to Claude Code',
+      'install.step3': 'Done \u2014 hooks auto-install on first run',
+      'install.direct': 'Direct download',
+      'features.title': 'Under the hood',
+      'features.autosetup': 'Auto-setup',
+      'features.autosetup_desc': 'Hooks and skills auto-install to <code>.claude/</code> on first launch. Updated only when the binary is newer.',
+      'features.namedgraphs': 'Named graphs',
+      'features.namedgraphs_desc': 'Multiple isolated graphs in one store. One graph per project, shared ontology.',
+      'features.badger_desc': 'Context-aware in-memory store with ACID transactions. Proper graph isolation.',
+      'features.trig': 'TriG persistence',
+      'features.trig_desc': 'Auto-load on startup, auto-save on shutdown. TriG preserves named graph boundaries.',
+      'features.sparql_desc': 'W3C-conformant query engine. SELECT, ASK, CONSTRUCT, and all UPDATE operations.',
+      'features.ontology': 'Open-world ontology',
+      'features.ontology_desc': 'Base + code layers. Extend with your own classes and properties \u2014 RDF is open-world.',
+    },
+    uk: {
+      'nav.tools': '\u0406\u043D\u0441\u0442\u0440\u0443\u043C\u0435\u043D\u0442\u0438',
+      'nav.examples': '\u041F\u0440\u0438\u043A\u043B\u0430\u0434\u0438',
+      'nav.install': '\u0412\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D\u043D\u044F',
+      'hero.eyebrow': 'MCP \u0441\u0435\u0440\u0432\u0435\u0440 \u0434\u043B\u044F Claude Code',
+      'hero.title': '\u0412\u0430\u0448 AI \u043F\u0430\u043C\u2019\u044F\u0442\u0430\u0454<br>\u0432\u0441\u0435 \u043F\u0440\u043E<br>\u0432\u0430\u0448 \u043F\u0440\u043E\u0454\u043A\u0442',
+      'hero.sub': 'Hippocamp \u0434\u0430\u0454 Claude \u043F\u043E\u0441\u0442\u0456\u0439\u043D\u0443 \u043F\u0430\u043C\u2019\u044F\u0442\u044C, \u044F\u043A\u0430 \u0437\u0431\u0435\u0440\u0456\u0433\u0430\u0454\u0442\u044C\u0441\u044F \u043C\u0456\u0436 \u0441\u0435\u0441\u0456\u044F\u043C\u0438. \u0412\u0456\u043D \u0447\u0438\u0442\u0430\u0454 \u0444\u0430\u0439\u043B\u0438 \u043F\u0440\u043E\u0454\u043A\u0442\u0443, \u0431\u0443\u0434\u0443\u0454 \u0441\u0442\u0440\u0443\u043A\u0442\u0443\u0440\u043E\u0432\u0430\u043D\u0438\u0439 \u0433\u0440\u0430\u0444 \u0437\u043D\u0430\u043D\u044C \u0456 \u0432\u0456\u0434\u043F\u043E\u0432\u0456\u0434\u0430\u0454 \u043D\u0430 \u043F\u0438\u0442\u0430\u043D\u043D\u044F \u2014 \u043D\u0430\u0432\u0456\u0442\u044C \u0443 \u043D\u043E\u0432\u0456\u0439 \u0441\u0435\u0441\u0456\u0457 \u0431\u0435\u0437 \u043A\u043E\u043D\u0442\u0435\u043A\u0441\u0442\u0443.',
+      'hero.auto': '\u0434\u0432\u0456 \u043A\u043E\u043C\u0430\u043D\u0434\u0438 \u0434\u043B\u044F \u0432\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D\u043D\u044F \u2014 \u043D\u0443\u043B\u044C \u043D\u0430\u043B\u0430\u0448\u0442\u0443\u0432\u0430\u043D\u044C',
+      'domains.title': '\u041F\u0440\u0430\u0446\u044E\u0454 \u0434\u043B\u044F \u0431\u0443\u0434\u044C-\u044F\u043A\u043E\u0457 \u0441\u0444\u0435\u0440\u0438',
+      'domains.construction': '\u0411\u0443\u0434\u0456\u0432\u043D\u0438\u0446\u0442\u0432\u043E',
+      'domains.construction_ex': '\u0435\u0442\u0430\u043F\u0438, \u043C\u0430\u0442\u0435\u0440\u0456\u0430\u043B\u0438, \u0456\u043D\u0441\u043F\u0435\u043A\u0446\u0456\u0457',
+      'domains.gardening': '\u0421\u0430\u0434\u0456\u0432\u043D\u0438\u0446\u0442\u0432\u043E',
+      'domains.gardening_ex': '\u0440\u043E\u0441\u043B\u0438\u043D\u0438, \u0433\u0440\u0430\u0444\u0456\u043A\u0438, \u0434\u0430\u043D\u0456 \u0433\u0440\u0443\u043D\u0442\u0443',
+      'domains.sales': '\u041F\u0440\u043E\u0434\u0430\u0436\u0456',
+      'domains.sales_ex': '\u043B\u0456\u0434\u0438, \u0432\u043E\u0440\u043E\u043D\u043A\u0438, \u043F\u0440\u043E\u0433\u043D\u043E\u0437\u0438',
+      'domains.accounting': '\u0411\u0443\u0445\u0433\u0430\u043B\u0442\u0435\u0440\u0456\u044F',
+      'domains.accounting_ex': '\u043A\u043D\u0438\u0433\u0438, \u0437\u0432\u0456\u0442\u0438, \u0430\u0443\u0434\u0438\u0442',
+      'domains.recipes': '\u0420\u0435\u0446\u0435\u043F\u0442\u0438',
+      'domains.recipes_ex': '\u0456\u043D\u0433\u0440\u0435\u0434\u0456\u0454\u043D\u0442\u0438, \u043C\u0435\u0442\u043E\u0434\u0438, \u043F\u043E\u0454\u0434\u043D\u0430\u043D\u043D\u044F',
+      'demo.title': '\u041F\u043E\u0434\u0438\u0432\u0456\u0442\u044C\u0441\u044F \u0432 \u0434\u0456\u0457',
+      'demo.tab.construction': '\u0411\u0443\u0434\u0456\u0432\u043D\u0438\u0446\u0442\u0432\u043E',
+      'demo.tab.garden': '\u0421\u0430\u0434',
+      'demo.tab.research': '\u0414\u043E\u0441\u043B\u0456\u0434\u0436\u0435\u043D\u043D\u044F',
+      'demo.tab.learning': '\u041D\u0430\u0432\u0447\u0430\u043D\u043D\u044F',
+      'proof.title': '\u041D\u043E\u0432\u0430 \u0441\u0435\u0441\u0456\u044F Claude \u0432\u0456\u0434\u043F\u043E\u0432\u0456\u043B\u0430 \u043D\u0430 5/5 \u043F\u0438\u0442\u0430\u043D\u044C \u043F\u0440\u0430\u0432\u0438\u043B\u044C\u043D\u043E',
+      'proof.desc1': '\u041C\u0438 \u043F\u043E\u0431\u0443\u0434\u0443\u0432\u0430\u043B\u0438 \u0433\u0440\u0430\u0444 \u0437\u043D\u0430\u043D\u044C \u0434\u043B\u044F \u043F\u0440\u043E\u0454\u043A\u0442\u0443 \u0440\u0435\u043C\u043E\u043D\u0442\u0443 \u0431\u0443\u0434\u0438\u043D\u043A\u0443 (185 \u0442\u0440\u0456\u043F\u043B\u0456\u0432, 42 \u0440\u0435\u0441\u0443\u0440\u0441\u0438). \u041F\u043E\u0442\u0456\u043C \u0437\u0430\u043F\u0443\u0441\u0442\u0438\u043B\u0438 <strong>\u043D\u043E\u0432\u0443 \u0441\u0435\u0441\u0456\u044E Claude</strong> \u0431\u0435\u0437 \u043A\u043E\u043D\u0442\u0435\u043A\u0441\u0442\u0443 \u2014 \u0442\u0456\u043B\u044C\u043A\u0438 \u0434\u043E\u0441\u0442\u0443\u043F \u0434\u043E \u0433\u0440\u0430\u0444\u0443. \u0411\u0435\u0437 \u0444\u0430\u0439\u043B\u0456\u0432, \u0431\u0435\u0437 \u0456\u0441\u0442\u043E\u0440\u0456\u0457.',
+      'proof.desc2': '\u0412\u0456\u0434\u043F\u043E\u0432\u0456\u0434\u0456 \u0431\u0443\u043B\u0438 \u043F\u0440\u0430\u0432\u0438\u043B\u044C\u043D\u0438\u043C\u0438: \u0440\u043E\u0437\u043C\u0456\u0440\u0438 \u043A\u0456\u043C\u043D\u0430\u0442, \u0446\u0456\u043D\u0438 \u043F\u0456\u0434\u0440\u044F\u0434\u043D\u0438\u043A\u0456\u0432, \u0437\u0430\u0433\u0430\u043B\u044C\u043D\u0438\u0439 \u0431\u044E\u0434\u0436\u0435\u0442, \u0435\u0442\u0430\u043F\u0438 \u043F\u0440\u043E\u0454\u043A\u0442\u0443 \u0442\u0430 \u0432\u0456\u0434\u043A\u0440\u0438\u0442\u0456 \u0440\u0456\u0448\u0435\u043D\u043D\u044F.',
+      'proof.badge': '5/5 \u043F\u0440\u0430\u0432\u0438\u043B\u044C\u043D\u0438\u0445 \u0432\u0456\u0434\u043F\u043E\u0432\u0456\u0434\u0435\u0439 \u043B\u0438\u0448\u0435 \u0437 \u0433\u0440\u0430\u0444\u0443',
+      'proof.q1': '\u041F\u043B\u043E\u0449\u0430 \u0432\u0456\u0442\u0430\u043B\u044C\u043D\u0456 + \u043A\u0456\u043B\u044C\u043A\u0456\u0441\u0442\u044C \u043A\u0456\u043C\u043D\u0430\u0442',
+      'proof.q2': '\u041F\u043E\u0441\u0442\u0430\u0447\u0430\u043B\u044C\u043D\u0438\u043A \u043F\u0456\u0434\u043B\u043E\u0433\u0438 + \u0446\u0456\u043D\u0430',
+      'proof.q3': '\u041F\u0440\u0438\u0439\u043D\u044F\u0442\u0456 \u0432\u0441 \u043E\u0447\u0456\u043A\u0443\u0432\u0430\u043D\u0456 \u0440\u0456\u0448\u0435\u043D\u043D\u044F',
+      'proof.a3': '5 \u043F\u0440\u0438\u0439\u043D\u044F\u0442\u0438\u0445 + 2 \u043E\u0447\u0456\u043A\u0443\u0432\u0430\u043D\u0456',
+      'proof.q4': '\u0417\u0430\u0433\u0430\u043B\u044C\u043D\u0456 \u0432\u0438\u0442\u0440\u0430\u0442\u0438',
+      'proof.q5': '\u0414\u0430\u0442\u0430 \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043D\u043D\u044F + \u0437\u0430\u043B\u0438\u0448\u043E\u043A \u0435\u0442\u0430\u043F\u0456\u0432',
+      'proof.a5': '\u0416\u043E\u0432\u0442. 2026, 3 \u0435\u0442\u0430\u043F\u0438',
+      'tools.title': "\u041F\u2019\u044F\u0442\u044C \u0456\u043D\u0441\u0442\u0440\u0443\u043C\u0435\u043D\u0442\u0456\u0432",
+      'tools.triple': 'CRUD \u0434\u043B\u044F \u043E\u043A\u0440\u0435\u043C\u0438\u0445 \u0442\u0440\u0456\u043F\u043B\u0456\u0432. URI, \u043B\u0456\u0442\u0435\u0440\u0430\u043B\u0438, blank nodes. \u0428\u0430\u0431\u043B\u043E\u043D\u0438 \u0437 wildcard. \u041C\u043E\u0432\u043D\u0456 \u0442\u0435\u0433\u0438 \u0442\u0430 XSD.',
+      'tools.sparql': '\u041F\u043E\u0432\u043D\u0438\u0439 SPARQL 1.1. \u0412\u0438\u0440\u0430\u0437\u043D\u0456 \u0437\u0430\u043F\u0438\u0442\u0438, \u043F\u0430\u0442\u0435\u0440\u043D\u0438, \u0430\u0433\u0440\u0435\u0433\u0430\u0446\u0456\u0457. \u041E\u043D\u043E\u0432\u043B\u0435\u043D\u043D\u044F \u0432\u0438\u0437\u043D\u0430\u0447\u0430\u044E\u0442\u044C\u0441\u044F \u0430\u0432\u0442\u043E\u043C\u0430\u0442\u0438\u0447\u043D\u043E.',
+      'tools.graph': '\u0416\u0438\u0442\u0442\u0454\u0432\u0438\u0439 \u0446\u0438\u043A\u043B \u0456\u043C\u0435\u043D\u043E\u0432\u0430\u043D\u0438\u0445 \u0433\u0440\u0430\u0444\u0456\u0432. TriG \u043F\u0435\u0440\u0441\u0438\u0441\u0442\u0435\u043D\u0446\u0456\u044F. \u041F\u0440\u0435\u0444\u0456\u043A\u0441\u0438. \u0421\u0442\u0430\u0442\u0438\u0441\u0442\u0438\u043A\u0430.',
+      'tools.search': '\u041F\u043E\u0448\u0443\u043A \u043F\u043E \u043A\u043B\u044E\u0447\u043E\u0432\u0438\u0445 \u0441\u043B\u043E\u0432\u0430\u0445: \u043D\u0430\u0437\u0432\u0438, \u043E\u043F\u0438\u0441\u0438, \u0432\u043C\u0456\u0441\u0442. \u0424\u0456\u043B\u044C\u0442\u0440 \u0437\u0430 RDF-\u0442\u0438\u043F\u043E\u043C \u0447\u0438 \u0433\u0440\u0430\u0444\u043E\u043C. \u0420\u0430\u043D\u0436\u0443\u0432\u0430\u043D\u043D\u044F \u0437 \u043E\u0431\u0445\u043E\u0434\u043E\u043C \u0433\u0440\u0430\u0444\u0443.',
+      'tools.validate': '\u041F\u0435\u0440\u0435\u0432\u0456\u0440\u043A\u0430 \u0432\u0456\u0434\u043F\u043E\u0432\u0456\u0434\u043D\u043E\u0441\u0442\u0456 \u0433\u0440\u0430\u0444\u0443. \u0422\u0438\u043F\u0438, \u043C\u0456\u0442\u043A\u0438, \u043E\u0431\u0491\u0440\u0443\u043D\u0442\u0443\u0432\u0430\u043D\u043D\u044F. \u0412\u0438\u044F\u0432\u043B\u0435\u043D\u043D\u044F \u043F\u0440\u043E\u0431\u043B\u0435\u043C \u0437\u0430\u0432\u0447\u0430\u0441\u043D\u043E.',
+      'examples.title': '\u041F\u0440\u0438\u043A\u043B\u0430\u0434\u0438',
+      'ontology.title': '\u0412\u0431\u0443\u0434\u043E\u0432\u0430\u043D\u0430 \u043E\u043D\u0442\u043E\u043B\u043E\u0433\u0456\u044F',
+      'ontology.base': '\u0411\u0430\u0437\u043E\u0432\u0438\u0439 \u0448\u0430\u0440 \u2014 \u0431\u0443\u0434\u044C-\u044F\u043A\u0430 \u0441\u0444\u0435\u0440\u0430',
+      'ontology.code': '\u041A\u043E\u0434\u043E\u0432\u0438\u0439 \u0448\u0430\u0440 \u2014 \u043F\u0440\u043E\u0433\u0440\u0430\u043C\u043D\u0456 \u043F\u0440\u043E\u0454\u043A\u0442\u0438',
+      'ontology.topic': '\u0442\u0435\u043C\u0430\u0442\u0438\u043A\u0438, \u043D\u0430\u043F\u0440\u044F\u043C\u043A\u0438',
+      'ontology.entity': '\u043B\u044E\u0434\u0438, \u043E\u0440\u0433\u0430\u043D\u0456\u0437\u0430\u0446\u0456\u0457, \u043F\u0440\u043E\u0434\u0443\u043A\u0442\u0438',
+      'ontology.note': '\u0432\u0456\u043B\u044C\u043D\u0456 \u0441\u043F\u043E\u0441\u0442\u0435\u0440\u0435\u0436\u0435\u043D\u043D\u044F',
+      'ontology.source': '\u0441\u0442\u0430\u0442\u0442\u0456, \u043F\u0443\u0431\u043B\u0456\u043A\u0430\u0446\u0456\u0457, URL, \u043A\u043D\u0438\u0433\u0438',
+      'ontology.decision': '\u0440\u0456\u0448\u0435\u043D\u043D\u044F \u0437 \u043E\u0431\u0491\u0440\u0443\u043D\u0442\u0443\u0432\u0430\u043D\u043D\u044F\u043C',
+      'ontology.question': '\u0432\u0456\u0434\u043A\u0440\u0438\u0442\u0456 \u043F\u0438\u0442\u0430\u043D\u043D\u044F',
+      'ontology.tag': '\u043B\u0435\u0433\u043A\u0456 \u043C\u0456\u0442\u043A\u0438',
+      'ontology.project': '\u043F\u0440\u043E\u0454\u043A\u0442 \u0432\u0435\u0440\u0445\u043D\u044C\u043E\u0433\u043E \u0440\u0456\u0432\u043D\u044F',
+      'ontology.module': '\u043F\u0430\u043A\u0435\u0442 / \u043C\u043E\u0434\u0443\u043B\u044C',
+      'ontology.file': '\u0444\u0430\u0439\u043B \u0432\u0438\u0445\u0456\u0434\u043D\u043E\u0433\u043E \u043A\u043E\u0434\u0443',
+      'ontology.function': '\u0444\u0443\u043D\u043A\u0446\u0456\u044F / \u043C\u0435\u0442\u043E\u0434',
+      'ontology.struct': '\u0441\u0442\u0440\u0443\u043A\u0442\u0443\u0440\u0430 / \u0442\u0438\u043F',
+      'ontology.interface': '\u0432\u0438\u0437\u043D\u0430\u0447\u0435\u043D\u043D\u044F \u0456\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u0443',
+      'ontology.dependency': '\u0437\u043E\u0432\u043D\u0456\u0448\u043D\u044F \u0437\u0430\u043B\u0435\u0436\u043D\u0456\u0441\u0442\u044C',
+      'install.title': '\u041F\u043E\u0447\u0430\u0442\u043E\u043A \u0440\u043E\u0431\u043E\u0442\u0438',
+      'install.brew': 'Homebrew (\u0440\u0435\u043A\u043E\u043C\u0435\u043D\u0434\u043E\u0432\u0430\u043D\u043E)',
+      'install.step1': '\u0412\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D\u043D\u044F',
+      'install.step2': '\u0414\u043E\u0434\u0430\u0442\u0438 \u0434\u043E Claude Code',
+      'install.step3': '\u0413\u043E\u0442\u043E\u0432\u043E \u2014 \u0445\u0443\u043A\u0438 \u0432\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u044E\u044E\u0442\u044C\u0441\u044F \u043F\u0440\u0438 \u043F\u0435\u0440\u0448\u043E\u043C\u0443 \u0437\u0430\u043F\u0443\u0441\u043A\u0443',
+      'install.direct': '\u041F\u0440\u044F\u043C\u0435 \u0437\u0430\u0432\u0430\u043D\u0442\u0430\u0436\u0435\u043D\u043D\u044F',
+      'features.title': '\u041F\u0456\u0434 \u043A\u0430\u043F\u043E\u0442\u043E\u043C',
+      'features.autosetup': '\u0410\u0432\u0442\u043E-\u043D\u0430\u043B\u0430\u0448\u0442\u0443\u0432\u0430\u043D\u043D\u044F',
+      'features.autosetup_desc': '\u0425\u0443\u043A\u0438 \u0442\u0430 \u043D\u0430\u0432\u0438\u0447\u043A\u0438 \u0432\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u044E\u044E\u0442\u044C\u0441\u044F \u0434\u043E <code>.claude/</code> \u043F\u0440\u0438 \u043F\u0435\u0440\u0448\u043E\u043C\u0443 \u0437\u0430\u043F\u0443\u0441\u043A\u0443. \u041E\u043D\u043E\u0432\u043B\u0435\u043D\u043D\u044F \u043B\u0438\u0448\u0435 \u043A\u043E\u043B\u0438 \u0431\u0456\u043D\u0430\u0440\u043D\u0438\u043A \u043D\u043E\u0432\u0456\u0448\u0438\u0439.',
+      'features.namedgraphs': '\u0406\u043C\u0435\u043D\u043E\u0432\u0430\u043D\u0456 \u0433\u0440\u0430\u0444\u0438',
+      'features.namedgraphs_desc': '\u041A\u0456\u043B\u044C\u043A\u0430 \u0456\u0437\u043E\u043B\u044C\u043E\u0432\u0430\u043D\u0438\u0445 \u0433\u0440\u0430\u0444\u0456\u0432 \u0432 \u043E\u0434\u043D\u043E\u043C\u0443 \u0441\u0445\u043E\u0432\u0438\u0449\u0456. \u041E\u0434\u0438\u043D \u0433\u0440\u0430\u0444 \u043D\u0430 \u043F\u0440\u043E\u0454\u043A\u0442, \u0441\u043F\u0456\u043B\u044C\u043D\u0430 \u043E\u043D\u0442\u043E\u043B\u043E\u0433\u0456\u044F.',
+      'features.badger_desc': '\u041A\u043E\u043D\u0442\u0435\u043A\u0441\u0442\u043D\u043E-\u0437\u0430\u043B\u0435\u0436\u043D\u0435 \u0441\u0445\u043E\u0432\u0438\u0449\u0435 \u0432 \u043F\u0430\u043C\u2019\u044F\u0442\u0456 \u0437 ACID-\u0442\u0440\u0430\u043D\u0437\u0430\u043A\u0446\u0456\u044F\u043C\u0438. \u041F\u043E\u0432\u043D\u0430 \u0456\u0437\u043E\u043B\u044F\u0446\u0456\u044F \u0433\u0440\u0430\u0444\u0456\u0432.',
+      'features.trig': '\u041F\u0435\u0440\u0441\u0438\u0441\u0442\u0435\u043D\u0446\u0456\u044F TriG',
+      'features.trig_desc': '\u0410\u0432\u0442\u043E-\u0437\u0430\u0432\u0430\u043D\u0442\u0430\u0436\u0435\u043D\u043D\u044F \u043F\u0440\u0438 \u0441\u0442\u0430\u0440\u0442\u0456, \u0430\u0432\u0442\u043E-\u0437\u0431\u0435\u0440\u0435\u0436\u0435\u043D\u043D\u044F \u043F\u0440\u0438 \u0437\u0443\u043F\u0438\u043D\u0446\u0456. TriG \u0437\u0431\u0435\u0440\u0456\u0433\u0430\u0454 \u043C\u0435\u0436\u0456 \u0433\u0440\u0430\u0444\u0456\u0432.',
+      'features.sparql_desc': 'W3C-\u0441\u0443\u043C\u0456\u0441\u043D\u0438\u0439 \u0440\u0443\u0448\u0456\u0439 \u0437\u0430\u043F\u0438\u0442\u0456\u0432. SELECT, ASK, CONSTRUCT \u0442\u0430 \u0432\u0441\u0456 \u043E\u043F\u0435\u0440\u0430\u0446\u0456\u0457 UPDATE.',
+      'features.ontology': '\u0412\u0456\u0434\u043A\u0440\u0438\u0442\u0430 \u043E\u043D\u0442\u043E\u043B\u043E\u0433\u0456\u044F',
+      'features.ontology_desc': '\u0411\u0430\u0437\u043E\u0432\u0438\u0439 + \u043A\u043E\u0434\u043E\u0432\u0438\u0439 \u0448\u0430\u0440\u0438. \u0420\u043E\u0437\u0448\u0438\u0440\u044E\u0439\u0442\u0435 \u0432\u043B\u0430\u0441\u043D\u0438\u043C\u0438 \u043A\u043B\u0430\u0441\u0430\u043C\u0438 \u2014 RDF \u0454 \u0432\u0456\u0434\u043A\u0440\u0438\u0442\u0438\u043C.',
+    },
+    fr: {
+      'nav.tools': 'Outils',
+      'nav.examples': 'Exemples',
+      'nav.install': 'Installer',
+      'hero.eyebrow': 'Serveur MCP pour Claude Code',
+      'hero.title': 'Votre IA se souvient<br>de tout sur<br>votre projet',
+      'hero.sub': "Hippocamp donne \u00e0 Claude une m\u00e9moire persistante qui survit entre les sessions. Il lit vos fichiers, construit un graphe de connaissances structur\u00e9 et r\u00e9pond aux questions \u2014 m\u00eame dans une nouvelle session sans contexte.",
+      'hero.auto': "deux commandes pour installer \u2014 z\u00e9ro configuration",
+      'domains.title': "Fonctionne pour n'importe quel domaine",
+      'domains.construction': 'Construction',
+      'domains.construction_ex': 'phases, mat\u00e9riaux, inspections',
+      'domains.gardening': 'Jardinage',
+      'domains.gardening_ex': 'plantes, calendriers, donn\u00e9es du sol',
+      'domains.sales': 'Ventes',
+      'domains.sales_ex': 'prospects, pipelines, pr\u00e9visions',
+      'domains.accounting': 'Comptabilit\u00e9',
+      'domains.accounting_ex': 'journaux, rapports, audits',
+      'domains.recipes': 'Recettes',
+      'domains.recipes_ex': 'ingr\u00e9dients, m\u00e9thodes, accords',
+      'demo.title': 'Voyez-le en action',
+      'demo.tab.construction': 'Construction',
+      'demo.tab.garden': 'Jardin',
+      'demo.tab.research': 'Recherche',
+      'demo.tab.learning': 'Apprentissage',
+      'proof.title': 'Une nouvelle session Claude a r\u00e9pondu 5/5 correctement',
+      'proof.desc1': "Nous avons construit un graphe de connaissances pour un projet de r\u00e9novation (185 triplets, 42 ressources). Puis nous avons lanc\u00e9 une <strong>nouvelle session Claude</strong> sans contexte \u2014 seul acc\u00e8s au graphe. Pas de fichiers, pas d'historique.",
+      'proof.desc2': "Toutes les r\u00e9ponses \u00e9taient correctes : dimensions des pi\u00e8ces, devis des artisans, budget total, phases du projet et d\u00e9cisions en attente.",
+      'proof.badge': '5/5 r\u00e9ponses correctes depuis le graphe seul',
+      'proof.q1': "Surface du salon + nombre de pi\u00e8ces",
+      'proof.q2': 'Fournisseur de parquet + prix',
+      'proof.q3': 'D\u00e9cisions prises vs en attente',
+      'proof.a3': '5 prises + 2 en attente',
+      'proof.q4': 'D\u00e9penses totales',
+      'proof.q5': 'Date de fin + phases restantes',
+      'proof.a5': 'Oct 2026, 3 phases restantes',
+      'tools.title': 'Cinq outils',
+      'tools.triple': "CRUD sur les triplets. URIs, lit\u00e9raux, n\u0153uds anonymes. Correspondance par motifs. Tags de langue et types XSD.",
+      'tools.sparql': 'Moteur SPARQL 1.1 complet. Requ\u00eates expressives, correspondance de motifs, agr\u00e9gations. Mises \u00e0 jour auto-d\u00e9tect\u00e9es.',
+      'tools.graph': "Cycle de vie des graphes nomm\u00e9s. Persistance TriG. Pr\u00e9fixes d'espaces de noms. Statistiques.",
+      'tools.search': "Recherche par mots-cl\u00e9s : labels, r\u00e9sum\u00e9s, contenu. Filtre par type RDF ou graphe nomm\u00e9. R\u00e9sultats class\u00e9s avec parcours du graphe.",
+      'tools.validate': "V\u00e9rification de conformit\u00e9 du graphe. Types, labels, justifications. D\u00e9tection pr\u00e9coce des probl\u00e8mes.",
+      'examples.title': 'Exemples',
+      'ontology.title': 'Ontologie int\u00e9gr\u00e9e',
+      'ontology.base': 'Couche de base \u2014 tout domaine',
+      'ontology.code': 'Couche code \u2014 projets logiciels',
+      'ontology.topic': 'th\u00e9matiques, sujets',
+      'ontology.entity': 'personnes, organisations, produits',
+      'ontology.note': 'observations libres',
+      'ontology.source': 'articles, publications, URLs, livres',
+      'ontology.decision': 'd\u00e9cisions avec justification',
+      'ontology.question': 'questions ouvertes',
+      'ontology.tag': '\u00e9tiquettes l\u00e9g\u00e8res',
+      'ontology.project': 'projet principal',
+      'ontology.module': 'paquet / module',
+      'ontology.file': 'fichier source',
+      'ontology.function': 'fonction / m\u00e9thode',
+      'ontology.struct': 'structure / type',
+      'ontology.interface': "d\u00e9finition d'interface",
+      'ontology.dependency': 'dep\u00e9ndance externe',
+      'install.title': 'D\u00e9marrer',
+      'install.brew': 'Homebrew (recommand\u00e9)',
+      'install.step1': 'Installer',
+      'install.step2': 'Ajouter \u00e0 Claude Code',
+      'install.step3': "Termin\u00e9 \u2014 les hooks s'installent automatiquement au premier lancement",
+      'install.direct': 'T\u00e9l\u00e9chargement direct',
+      'features.title': 'Sous le capot',
+      'features.autosetup': 'Auto-configuration',
+      'features.autosetup_desc': "Hooks et comp\u00e9tences s'installent dans <code>.claude/</code> au premier lancement. Mis \u00e0 jour uniquement quand le binaire est plus r\u00e9cent.",
+      'features.namedgraphs': 'Graphes nomm\u00e9s',
+      'features.namedgraphs_desc': 'Plusieurs graphes isol\u00e9s dans un seul magasin. Un graphe par projet, ontologie partag\u00e9e.',
+      'features.badger_desc': "Magasin en m\u00e9moire avec transactions ACID. Isolation compl\u00e8te des graphes.",
+      'features.trig': 'Persistance TriG',
+      'features.trig_desc': 'Chargement automatique au d\u00e9marrage, sauvegarde \u00e0 l\'arr\u00eat. TriG pr\u00e9serve les limites des graphes.',
+      'features.sparql_desc': "Moteur de requ\u00eates conforme W3C. SELECT, ASK, CONSTRUCT et toutes les op\u00e9rations UPDATE.",
+      'features.ontology': 'Ontologie ouverte',
+      'features.ontology_desc': "Couches base + code. \u00c9tendez avec vos propres classes \u2014 RDF est un monde ouvert.",
+    },
+    es: {
+      'nav.tools': 'Herramientas',
+      'nav.examples': 'Ejemplos',
+      'nav.install': 'Instalar',
+      'hero.eyebrow': 'Servidor MCP para Claude Code',
+      'hero.title': 'Tu IA recuerda<br>todo sobre<br>tu proyecto',
+      'hero.sub': 'Hippocamp le da a Claude una memoria persistente que sobrevive entre sesiones. Lee tus archivos, construye un grafo de conocimiento estructurado y responde preguntas \u2014 incluso en una sesi\u00f3n nueva sin contexto.',
+      'hero.auto': 'dos comandos para instalar \u2014 cero configuraci\u00f3n',
+      'domains.title': 'Funciona para cualquier dominio',
+      'domains.construction': 'Construcci\u00f3n',
+      'domains.construction_ex': 'fases, materiales, inspecciones',
+      'domains.gardening': 'Jardiner\u00eda',
+      'domains.gardening_ex': 'plantas, calendarios, datos del suelo',
+      'domains.sales': 'Ventas',
+      'domains.sales_ex': 'prospectos, pipelines, pron\u00f3sticos',
+      'domains.accounting': 'Contabilidad',
+      'domains.accounting_ex': 'libros, informes, auditor\u00edas',
+      'domains.recipes': 'Recetas',
+      'domains.recipes_ex': 'ingredientes, m\u00e9todos, maridajes',
+      'demo.title': 'V\u00e9alo en acci\u00f3n',
+      'demo.tab.construction': 'Construcci\u00f3n',
+      'demo.tab.garden': 'Jard\u00edn',
+      'demo.tab.research': 'Investigaci\u00f3n',
+      'demo.tab.learning': 'Aprendizaje',
+      'proof.title': 'Una nueva sesi\u00f3n de Claude respondi\u00f3 5/5 correctamente',
+      'proof.desc1': 'Construimos un grafo de conocimiento para un proyecto de renovaci\u00f3n (185 tripletas, 42 recursos). Luego iniciamos una <strong>nueva sesi\u00f3n de Claude</strong> sin contexto \u2014 solo acceso al grafo. Sin archivos, sin historial.',
+      'proof.desc2': 'Respondi\u00f3 correctamente: dimensiones de habitaciones, presupuestos de contratistas, gastos totales, fases del proyecto y decisiones pendientes.',
+      'proof.badge': '5/5 respuestas correctas solo del grafo',
+      'proof.q1': '\u00c1rea del sal\u00f3n + n\u00fam. de habitaciones',
+      'proof.q2': 'Proveedor de pisos + precio',
+      'proof.q3': 'Decisiones tomadas vs pendientes',
+      'proof.a3': '5 tomadas + 2 pendientes',
+      'proof.q4': 'Gastos totales a la fecha',
+      'proof.q5': 'Fecha de finalizaci\u00f3n + fases restantes',
+      'proof.a5': 'Oct 2026, 3 fases restantes',
+      'tools.title': 'Cinco herramientas',
+      'tools.triple': 'CRUD para tripletas individuales. URIs, literales, nodos en blanco. Coincidencia por patrones. Etiquetas de idioma y tipos XSD.',
+      'tools.sparql': 'Motor SPARQL 1.1 completo. Consultas expresivas, coincidencia de patrones, agregaciones. Actualizaciones auto-detectadas.',
+      'tools.graph': 'Ciclo de vida de grafos nombrados. Persistencia TriG. Prefijos de espacios de nombres. Estad\u00edsticas.',
+      'tools.search': 'B\u00fasqueda por palabras clave: etiquetas, res\u00famenes, contenido. Filtro por tipo RDF o grafo nombrado. Resultados clasificados con recorrido del grafo.',
+      'tools.validate': 'Verificaci\u00f3n de conformidad del grafo. Tipos, etiquetas, justificaciones. Detecci\u00f3n temprana de problemas.',
+      'examples.title': 'Ejemplos',
+      'ontology.title': 'Ontolog\u00eda integrada',
+      'ontology.base': 'Capa base \u2014 cualquier dominio',
+      'ontology.code': 'Capa de c\u00f3digo \u2014 proyectos de software',
+      'ontology.topic': 'tem\u00e1ticas, \u00e1reas',
+      'ontology.entity': 'personas, organizaciones, productos',
+      'ontology.note': 'observaciones libres',
+      'ontology.source': 'art\u00edculos, publicaciones, URLs, libros',
+      'ontology.decision': 'decisiones con justificaci\u00f3n',
+      'ontology.question': 'preguntas abiertas',
+      'ontology.tag': 'etiquetas ligeras',
+      'ontology.project': 'proyecto principal',
+      'ontology.module': 'paquete / m\u00f3dulo',
+      'ontology.file': 'archivo fuente',
+      'ontology.function': 'funci\u00f3n / m\u00e9todo',
+      'ontology.struct': 'estructura / tipo',
+      'ontology.interface': 'definici\u00f3n de interfaz',
+      'ontology.dependency': 'dependencia externa',
+      'install.title': 'Comenzar',
+      'install.brew': 'Homebrew (recomendado)',
+      'install.step1': 'Instalar',
+      'install.step2': 'Agregar a Claude Code',
+      'install.step3': 'Listo \u2014 los hooks se instalan autom\u00e1ticamente en el primer inicio',
+      'install.direct': 'Descarga directa',
+      'features.title': 'Bajo el cap\u00f3',
+      'features.autosetup': 'Auto-configuraci\u00f3n',
+      'features.autosetup_desc': 'Hooks y habilidades se instalan en <code>.claude/</code> en el primer inicio. Se actualizan solo cuando el binario es m\u00e1s reciente.',
+      'features.namedgraphs': 'Grafos nombrados',
+      'features.namedgraphs_desc': 'M\u00faltiples grafos aislados en un solo almac\u00e9n. Un grafo por proyecto, ontolog\u00eda compartida.',
+      'features.badger_desc': 'Almac\u00e9n en memoria con transacciones ACID. Aislamiento completo de grafos.',
+      'features.trig': 'Persistencia TriG',
+      'features.trig_desc': 'Carga autom\u00e1tica al iniciar, guardado al cerrar. TriG preserva los l\u00edmites de los grafos.',
+      'features.sparql_desc': 'Motor de consultas conforme a W3C. SELECT, ASK, CONSTRUCT y todas las operaciones UPDATE.',
+      'features.ontology': 'Ontolog\u00eda abierta',
+      'features.ontology_desc': 'Capas base + c\u00f3digo. Extienda con sus propias clases \u2014 RDF es un mundo abierto.',
+    },
+  };
+
+  let currentLang = 'en';
+
+  function setLang(lang) {
+    currentLang = lang;
+    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector('.lang-btn[onclick*="' + lang + '"]').classList.add('active');
+    document.documentElement.lang = lang === 'uk' ? 'uk' : lang;
+
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      const val = T[lang] && T[lang][key];
+      if (val) el.innerHTML = val;
+    });
+  }
+
+  // ── TABS ──
   function switchTab(name) {
     document.querySelectorAll('.code-panel').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -1365,6 +1682,7 @@
     setTimeout(() => { btn.textContent = '\u2398'; btn.classList.remove('copied'); }, 1800);
   }
 
+  // ── REVEAL ──
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(e => {
       if (e.isIntersecting) {
@@ -1376,43 +1694,119 @@
 
   document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-  // Demo terminal animation
-  const demoLines = [
-    { type: 'prompt', text: '> analyze this project and build a knowledge graph' },
-    { type: 'dim', text: '' },
-    { type: 'tool', text: '\u25CF Reading project files... (12 files, 4,200 words)' },
-    { type: 'tool', text: '\u25CF graph import \u2014 227 triples loaded' },
-    { type: 'tool', text: '\u25CF validate \u2014 49 resources, all valid' },
-    { type: 'success', text: '\u2713 Knowledge graph built: 7 topics, 8 suppliers, 4 decisions, 10 rooms' },
-    { type: 'dim', text: '' },
-    { type: 'dim', text: '\u2500\u2500\u2500 new session, zero context \u2500\u2500\u2500' },
-    { type: 'dim', text: '' },
-    { type: 'prompt', text: '> when will we have electricity?' },
-    { type: 'dim', text: '' },
-    { type: 'tool', text: '\u25CF search("electrical connection meter")' },
-    { type: 'result', text: '  Cable SIP-5ng installed Jan 28, panel mounted Jan 30.' },
-    { type: 'result', text: '  Meter: NOT installed. Application #120140/6 filed Mar 13.' },
-    { type: 'success', text: '  \u2192 Physically ready, waiting for meter installation from LOE.' },
-  ];
+  // ── DEMO TERMINAL ──
+  const demoScenarios = {
+    construction: {
+      title: 'claude \u2014 ~/my-renovation',
+      lines: [
+        { type: 'prompt', text: '> analyze the renovation project files' },
+        { type: 'dim', text: '' },
+        { type: 'tool', text: '\u25cf Reading project files... (18 files, 6,100 words)' },
+        { type: 'tool', text: '\u25cf graph import \u2014 185 triples loaded' },
+        { type: 'tool', text: '\u25cf validate \u2014 42 resources, all valid' },
+        { type: 'success', text: '\u2713 Knowledge graph built: 6 phases, 5 contractors, 7 decisions, 8 rooms' },
+        { type: 'dim', text: '' },
+        { type: 'dim', text: '\u2500\u2500\u2500 new session, zero context \u2500\u2500\u2500' },
+        { type: 'dim', text: '' },
+        { type: 'prompt', text: '> when will the kitchen be ready?' },
+        { type: 'dim', text: '' },
+        { type: 'tool', text: '\u25cf search("kitchen renovation timeline")' },
+        { type: 'result', text: '  Cabinets ordered Feb 10, delivery expected Mar 25.' },
+        { type: 'result', text: '  Countertop install: Apr 2\u20134. Plumber booked Apr 6.' },
+        { type: 'success', text: '  \u2192 Kitchen ready by mid-April, pending final inspection.' },
+      ],
+    },
+    garden: {
+      title: 'claude \u2014 ~/backyard-garden',
+      lines: [
+        { type: 'prompt', text: '> analyze my garden planning notes' },
+        { type: 'dim', text: '' },
+        { type: 'tool', text: '\u25cf Reading project files... (9 files, 2,800 words)' },
+        { type: 'tool', text: '\u25cf graph import \u2014 95 triples loaded' },
+        { type: 'tool', text: '\u25cf validate \u2014 28 resources, all valid' },
+        { type: 'success', text: '\u2713 Knowledge graph built: 4 beds, 15 plants, 3 schedules, 6 notes' },
+        { type: 'dim', text: '' },
+        { type: 'dim', text: '\u2500\u2500\u2500 new session, zero context \u2500\u2500\u2500' },
+        { type: 'dim', text: '' },
+        { type: 'prompt', text: '> when should I transplant the tomatoes?' },
+        { type: 'dim', text: '' },
+        { type: 'tool', text: '\u25cf search("tomato transplant schedule")' },
+        { type: 'result', text: '  Brandywine seedlings started Feb 15, 6 weeks indoors.' },
+        { type: 'result', text: '  Bed #3 prepared with compost, pH 6.4.' },
+        { type: 'success', text: '  \u2192 Transplant window: Apr 1\u201315, after last frost.' },
+      ],
+    },
+    research: {
+      title: 'claude \u2014 ~/ml-papers',
+      lines: [
+        { type: 'prompt', text: '> analyze these research papers' },
+        { type: 'dim', text: '' },
+        { type: 'tool', text: '\u25cf Reading project files... (24 files, 15,200 words)' },
+        { type: 'tool', text: '\u25cf graph import \u2014 310 triples loaded' },
+        { type: 'tool', text: '\u25cf validate \u2014 67 resources, all valid' },
+        { type: 'success', text: '\u2713 Knowledge graph built: 12 papers, 8 authors, 15 concepts, 5 findings' },
+        { type: 'dim', text: '' },
+        { type: 'dim', text: '\u2500\u2500\u2500 new session, zero context \u2500\u2500\u2500' },
+        { type: 'dim', text: '' },
+        { type: 'prompt', text: '> what do we know about attention mechanisms?' },
+        { type: 'dim', text: '' },
+        { type: 'tool', text: '\u25cf search("attention mechanism transformer")' },
+        { type: 'result', text: '  Vaswani et al. (2017): self-attention replaces recurrence.' },
+        { type: 'result', text: '  3 papers cite multi-head attention as key innovation.' },
+        { type: 'success', text: '  \u2192 Open question: optimal head count vs model size trade-off.' },
+      ],
+    },
+    learning: {
+      title: 'claude \u2014 ~/study-notes',
+      lines: [
+        { type: 'prompt', text: '> analyze my study notes for the calculus course' },
+        { type: 'dim', text: '' },
+        { type: 'tool', text: '\u25cf Reading project files... (14 files, 8,400 words)' },
+        { type: 'tool', text: '\u25cf graph import \u2014 145 triples loaded' },
+        { type: 'tool', text: '\u25cf validate \u2014 38 resources, all valid' },
+        { type: 'success', text: '\u2713 Knowledge graph built: 5 topics, 20 concepts, 8 exercises, 5 questions' },
+        { type: 'dim', text: '' },
+        { type: 'dim', text: '\u2500\u2500\u2500 new session, zero context \u2500\u2500\u2500' },
+        { type: 'dim', text: '' },
+        { type: 'prompt', text: '> what are the prerequisites for integration?' },
+        { type: 'dim', text: '' },
+        { type: 'tool', text: '\u25cf search("integration prerequisites")' },
+        { type: 'result', text: '  Topic "Integration" requires: limits, derivatives, antiderivatives.' },
+        { type: 'result', text: '  3 exercises completed on limits, 2 pending on derivatives.' },
+        { type: 'success', text: '  \u2192 Finish derivatives exercises before starting integration.' },
+      ],
+    },
+  };
 
-  const demoObs = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        runDemo();
-        demoObs.unobserve(e.target);
-      }
-    });
-  }, { threshold: 0.3 });
-  const demoEl = document.getElementById('demo-terminal');
-  if (demoEl) demoObs.observe(demoEl);
+  let currentDemo = 'construction';
+  let demoTimeout = null;
 
-  function runDemo() {
+  function switchDemo(domain) {
+    currentDemo = domain;
+    document.querySelectorAll('.demo-domain-btn').forEach(b => b.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+
+    const titleEl = document.getElementById('demo-titlebar-text');
+    titleEl.textContent = demoScenarios[domain].title;
+
+    const body = document.getElementById('demo-body');
+    body.innerHTML = '';
+
+    if (demoTimeout) {
+      clearTimeout(demoTimeout);
+      demoTimeout = null;
+    }
+
+    runDemoLines(demoScenarios[domain].lines);
+  }
+
+  function runDemoLines(lines) {
     const body = document.getElementById('demo-body');
     if (!body) return;
     let delay = 0;
-    demoLines.forEach((line, i) => {
+    lines.forEach((line) => {
       delay += line.type === 'dim' && line.text === '' ? 300 : line.type === 'prompt' ? 800 : 400;
-      setTimeout(() => {
+      demoTimeout = setTimeout(() => {
         const div = document.createElement('div');
         div.className = 'demo-line demo-' + line.type;
         div.style.animationDelay = '0s';
@@ -1426,6 +1820,18 @@
       }, delay);
     });
   }
+
+  // Auto-play demo on scroll
+  const demoObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        runDemoLines(demoScenarios[currentDemo].lines);
+        demoObs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.3 });
+  const demoEl = document.getElementById('demo-terminal');
+  if (demoEl) demoObs.observe(demoEl);
 </script>
 </body>
 </html>
