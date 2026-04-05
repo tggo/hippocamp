@@ -21,7 +21,7 @@ builds:
       - -s -w -X main.version={{.Version}} -X main.buildTime={{.Date}}
     hooks:
       post:
-        - cmd: codesign --sign "Developer ID Application: Ruslan Korennoy (4JV3A5SUSZ)" --options runtime --timestamp "{{ .Path }}"
+        - cmd: 'codesign --sign "Developer ID Application: Ruslan Korennoy (4JV3A5SUSZ)" --options runtime --timestamp "{{ .Path }}"'
 
   - id: hippocamp-other
     main: ./cmd/hippocamp
