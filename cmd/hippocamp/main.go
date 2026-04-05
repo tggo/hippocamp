@@ -6,7 +6,9 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"os/exec"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 
 	"github.com/mark3labs/mcp-go/mcp"
@@ -24,6 +26,18 @@ var (
 )
 
 func main() {
+	// Handle subcommands before flag parsing.
+	if len(os.Args) > 1 {
+		switch os.Args[1] {
+		case "install":
+			runInstall()
+			return
+		case "version":
+			fmt.Printf("hippocamp %s\n", version)
+			return
+		}
+	}
+
 	configPath := flag.String("config", "config.yaml", "path to config file")
 	queryStr := flag.String("query", "", "one-shot search: query the persisted graph and exit")
 	queryType := flag.String("type", "", "filter search results by rdf:type URI")
@@ -127,4 +141,55 @@ func main() {
 		fmt.Fprintf(os.Stderr, "hippocamp: server error: %v\n", err)
 		os.Exit(1)
 	}
+}
+
+// runInstall adds hippocamp as an MCP server to Claude Code via `claude mcp add`.
+func runInstall() {
+	// Find hippocamp binary path.
+	binPath, err := os.Executable()
+	if err != nil {
+		binPath = "hippocamp" // fallback to PATH lookup
+	} else {
+		binPath, _ = filepath.EvalSymlinks(binPath)
+	}
+
+	// Check if claude CLI is available.
+	claudePath, err := exec.LookPath("claude")
+	if err != nil {
+		fmt.Println("Claude CLI not found. Add hippocamp manually to your MCP config:")
+		fmt.Println()
+		printManualConfig(binPath)
+		os.Exit(1)
+	}
+
+	// Run: claude mcp add hippocamp <binary-path>
+	cmd := exec.Command(claudePath, "mcp", "add", "hippocamp", binPath)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Stdin = os.Stdin
+
+	fmt.Printf("Adding hippocamp to Claude Code...\n")
+	fmt.Printf("  command: %s\n", binPath)
+	fmt.Println()
+
+	if err := cmd.Run(); err != nil {
+		fmt.Fprintf(os.Stderr, "\nclaude mcp add failed: %v\n", err)
+		fmt.Println("\nAdd manually instead:")
+		printManualConfig(binPath)
+		os.Exit(1)
+	}
+
+	fmt.Println()
+	fmt.Println("Done! Hippocamp is now available in Claude Code.")
+	fmt.Println("Hooks and skills will auto-install on first run.")
+}
+
+func printManualConfig(binPath string) {
+	fmt.Println("Add to ~/.claude/settings.json:")
+	fmt.Println()
+	fmt.Printf("  \"mcpServers\": {\n")
+	fmt.Printf("    \"hippocamp\": {\n")
+	fmt.Printf("      \"command\": %q\n", binPath)
+	fmt.Printf("    }\n")
+	fmt.Printf("  }\n")
 }
