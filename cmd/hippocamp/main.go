@@ -182,13 +182,9 @@ func main() {
 
 // runInstall adds hippocamp as an MCP server to Claude Code via `claude mcp add`.
 func runInstall() {
-	// Find hippocamp binary path.
-	binPath, err := os.Executable()
-	if err != nil {
-		binPath = "hippocamp" // fallback to PATH lookup
-	} else {
-		binPath, _ = filepath.EvalSymlinks(binPath)
-	}
+	// Use just "hippocamp" so it resolves via PATH at runtime.
+	// This avoids hardcoding versioned Caskroom paths that break on brew upgrade.
+	binPath := "hippocamp"
 
 	// Check if claude CLI is available.
 	claudePath, err := exec.LookPath("claude")
