@@ -228,11 +228,11 @@
     .g-node {
       opacity: 0;
     }
-    .g-node.appear-1 { animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards 0.6s; }
-    .g-node.appear-2 { animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards 0.9s; }
-    .g-node.appear-3 { animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards 1.2s; }
-    .g-node.appear-4 { animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards 1.5s; }
-    .g-node.appear-5 { animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards 1.8s; }
+    .g-node.appear-1 { animation: nodeIn 0.5s ease forwards 0.6s; }
+    .g-node.appear-2 { animation: nodeIn 0.5s ease forwards 0.9s; }
+    .g-node.appear-3 { animation: nodeIn 0.5s ease forwards 1.2s; }
+    .g-node.appear-4 { animation: nodeIn 0.5s ease forwards 1.5s; }
+    .g-node.appear-5 { animation: nodeIn 0.5s ease forwards 1.8s; }
 
     .g-label {
       font-family: 'JetBrains Mono', monospace;
@@ -586,9 +586,9 @@
     @keyframes drawEdge {
       to { stroke-dashoffset: 0; }
     }
-    @keyframes popIn {
-      from { opacity: 0; transform: scale(0.6); }
-      to   { opacity: 1; transform: scale(1); }
+    @keyframes nodeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
     }
 
     /* ── SCROLL REVEAL ── */
