@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"os/signal"
 	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 
@@ -17,6 +18,7 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/ruslanmv/hippocamp/internal/analytics"
 	"github.com/ruslanmv/hippocamp/internal/config"
+	"github.com/ruslanmv/hippocamp/internal/healthcheck"
 	"github.com/ruslanmv/hippocamp/internal/rdfstore"
 	"github.com/ruslanmv/hippocamp/internal/setup"
 	"github.com/ruslanmv/hippocamp/internal/tools"
@@ -162,11 +164,20 @@ func main() {
 		os.Exit(0)
 	}()
 
+	// Start background health checker (scans every 30s when graph is dirty).
+	checker := healthcheck.New(store, 30*time.Second)
+
 	// Set up analytics collector for tool call tracking.
 	collector := analytics.New(store)
 	hooks := &server.Hooks{}
 	hooks.AddBeforeCallTool(collector.BeforeCallTool)
-	hooks.AddAfterCallTool(collector.AfterCallTool)
+	hooks.AddAfterCallTool(func(ctx context.Context, id any, req *mcp.CallToolRequest, result any) {
+		collector.AfterCallTool(ctx, id, req, result)
+		// Mark healthcheck dirty after mutations.
+		if isMutatingTool(req) {
+			checker.MarkDirty()
+		}
+	})
 
 	// Create MCP server and register tools.
 	s := server.NewMCPServer(
@@ -177,6 +188,7 @@ func main() {
 		server.WithHooks(hooks),
 	)
 	tools.Register(s, store)
+	tools.SetHealthChecker(checker)
 
 	log.Printf("MCP server starting (version=%s, tools=triple,sparql,graph,search,validate)", version)
 
@@ -289,6 +301,40 @@ func runUninstall() {
 
 	fmt.Println()
 	fmt.Println("Done. To also remove the binary: brew uninstall hippocamp")
+}
+
+// isMutatingTool returns true if the tool call modifies the graph.
+func isMutatingTool(req *mcp.CallToolRequest) bool {
+	args := req.GetArguments()
+	switch req.Params.Name {
+	case "triple":
+		a, _ := args["action"].(string)
+		return a == "add" || a == "remove"
+	case "sparql":
+		q, _ := args["query"].(string)
+		return len(q) > 0 && isUpdateKeyword(q)
+	case "graph":
+		a, _ := args["action"].(string)
+		return a == "create" || a == "delete" || a == "clear" || a == "load" || a == "import"
+	}
+	return false
+}
+
+func isUpdateKeyword(q string) bool {
+	upper := strings.ToUpper(strings.TrimSpace(q))
+	for strings.HasPrefix(upper, "PREFIX") || strings.HasPrefix(upper, "BASE") {
+		idx := strings.Index(upper, "\n")
+		if idx < 0 {
+			return false
+		}
+		upper = strings.TrimSpace(upper[idx+1:])
+	}
+	for _, kw := range []string{"INSERT", "DELETE", "LOAD", "CLEAR", "DROP", "CREATE", "COPY", "MOVE", "ADD"} {
+		if strings.HasPrefix(upper, kw) {
+			return true
+		}
+	}
+	return false
 }
 
 func printManualConfig(binPath string) {

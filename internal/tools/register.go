@@ -7,8 +7,17 @@ import (
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
+	"github.com/ruslanmv/hippocamp/internal/healthcheck"
 	"github.com/ruslanmv/hippocamp/internal/rdfstore"
 )
+
+// globalChecker is set by main.go after the healthcheck.Checker is created.
+var globalChecker *healthcheck.Checker
+
+// SetHealthChecker sets the background health checker for the validate tool.
+func SetHealthChecker(c *healthcheck.Checker) {
+	globalChecker = c
+}
 
 type handlerFunc = func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error)
 

@@ -182,5 +182,6 @@ Use lowercase kebab-case slugs derived from the label.
 - Keep summaries concise (one sentence)
 - For large projects, prioritize the most important 50-100 entities
 - Use SPARQL INSERT DATA for bulk operations when adding many triples at once
-- After populating the graph, run `validate` to check for non-standard types, missing labels, and decisions without rationale. Fix any warnings before finishing.
+- Run `validate` after: initial graph population, bulk triple additions (10+), removing resources, or when search returns zero results unexpectedly
+- Validate returns pre-computed health data: dangling references (with fix commands), orphan resources, and alias suggestions from failed searches. Apply the suggested fixes.
 - After analysis, report a summary: number of topics, entities, notes, decisions, questions, and sources indexed

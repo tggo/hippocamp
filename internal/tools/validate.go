@@ -35,6 +35,7 @@ type validateOutput struct {
 	Valid    bool     `json:"valid"`
 	Errors   []string `json:"errors"`
 	Warnings []string `json:"warnings"`
+	Fixes    []string `json:"fixes,omitempty"`
 	Stats    struct {
 		Resources   int `json:"resources"`
 		WithType    int `json:"with_type"`
@@ -45,13 +46,17 @@ type validateOutput struct {
 
 func validateTool() mcp.Tool {
 	return mcp.NewTool("validate",
-		mcp.WithDescription(`Validate the knowledge graph for ontology compliance. Checks that all resources use standard hippo: types, have labels, and decisions have rationale.
+		mcp.WithDescription(`Validate the knowledge graph for ontology compliance and health. Checks that all resources use standard hippo: types, have labels, decisions have rationale, and detects dangling references, orphan resources, and failed search queries that suggest missing aliases.
+
+Run after: bulk triple additions, removing resources, or when search returns unexpected zero results.
+
+Results include actionable fixes — e.g. triple remove commands for dangling references, and alias suggestions from zero-result search analytics.
 
 Examples:
   {"scope": "project:house-construction"}
   {}
 
-Returns JSON with valid (bool), warnings (array), and stats.`),
+Returns JSON with valid (bool), warnings (array), fixes (array of suggested commands), and stats.`),
 		mcp.WithString("scope",
 			mcp.Description("Named graph to validate (omit to validate all graphs)"),
 		),
@@ -141,6 +146,30 @@ func validateHandlerFactory(store *rdfstore.Store) handlerFunc {
 		}
 
 		out.Valid = len(out.Errors) == 0
+
+		// Append background health check results if available.
+		if globalChecker != nil {
+			if report := globalChecker.Report(); report != nil {
+				for _, dr := range report.DanglingRefs {
+					shortPred := dr.Predicate
+					if strings.HasPrefix(shortPred, hippoNS) {
+						shortPred = "hippo:" + strings.TrimPrefix(shortPred, hippoNS)
+					}
+					out.Warnings = append(out.Warnings,
+						fmt.Sprintf("dangling reference: <%s> %s <%s> — target does not exist", dr.Subject, shortPred, dr.Object))
+					out.Fixes = append(out.Fixes,
+						fmt.Sprintf(`triple action=remove subject=%s predicate=%s object=%s`, dr.Subject, dr.Predicate, dr.Object))
+				}
+				for _, orphan := range report.OrphanResources {
+					out.Warnings = append(out.Warnings,
+						fmt.Sprintf("orphan resource: <%s> has no incoming or outgoing relationships", orphan))
+				}
+				for _, alias := range report.MissingAliases {
+					out.Warnings = append(out.Warnings,
+						fmt.Sprintf("zero-result search: %q — consider adding hippo:alias to matching resources", alias.Query))
+				}
+			}
+		}
 
 		data, _ := json.Marshal(out)
 		return mcp.NewToolResultText(string(data)), nil

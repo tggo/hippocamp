@@ -31,6 +31,7 @@ go mod tidy
 cmd/hippocamp/main.go            — entry point: config, store, analytics, auto-setup, signal handler, ServeStdio, --query CLI
 internal/analytics/analytics.go  — tool call analytics: logs + stores metrics as RDF triples in urn:hippocamp:analytics
 internal/config/config.go        — YAML + ENV config loading
+internal/healthcheck/healthcheck.go — background graph health scanner: dangling refs, orphans, alias suggestions
 internal/rdfstore/store.go       — Store struct: wraps graph.Dataset (BadgerDB in-memory), dirty tracking
 internal/rdfstore/persistence.go — Save/Load/AutoLoad (TriG format via trig.SerializeDataset/ParseDataset)
 internal/tools/register.go       — MCP tool registration + HandlerFor() test helper
