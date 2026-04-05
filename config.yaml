@@ -1,0 +1,20 @@
+store:
+  # Path to the default TriG file: loaded on startup, saved on shutdown.
+  default_file: "./data/default.trig"
+  # Set to false to disable auto-load on startup.
+  auto_load: true
+  # Serialization format for the default file.
+  format: "trig"
+
+prefixes:
+  rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  rdfs: "http://www.w3.org/2000/01/rdf-schema#"
+  owl: "http://www.w3.org/2002/07/owl#"
+  xsd: "http://www.w3.org/2001/XMLSchema#"
+  # ex: "http://example.org/"
+  # schema: "http://schema.org/"
+
+# ENV overrides (take precedence over this file):
+#   HIPPOCAMP_STORE_DEFAULT_FILE
+#   HIPPOCAMP_STORE_AUTO_LOAD   (true|false)
+#   HIPPOCAMP_STORE_FORMAT      (trig|turtle|nt|nq)
