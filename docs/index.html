@@ -94,10 +94,7 @@
     .nav-logo span { color: var(--gold); }
     .nav-logo-img {
       width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 1.5px solid var(--rule-light);
+      height: auto;
     }
     .nav-links {
       display: flex;
@@ -144,13 +141,10 @@
       pointer-events: none;
     }
     .hero-logo {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      object-fit: cover;
+      width: 140px;
+      height: auto;
       margin-bottom: 32px;
-      border: 2px solid var(--rule-light);
-      box-shadow: 0 4px 40px rgba(201,169,78,0.18), 0 0 0 10px rgba(201,169,78,0.04);
+      filter: drop-shadow(0 4px 24px rgba(201,169,78,0.2));
       position: relative;
     }
     .hero-eyebrow {
@@ -627,9 +621,8 @@
     }
     .footer-logo span { color: var(--gold-dim); }
     .footer-logo img {
-      width: 20px; height: 20px;
-      border-radius: 50%;
-      object-fit: cover;
+      width: 20px;
+      height: auto;
       opacity: 0.5;
     }
     .footer-links { display: flex; gap: 20px; list-style: none; }
