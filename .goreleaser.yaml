@@ -38,6 +38,22 @@ archives:
 checksum:
   name_template: "checksums.txt"
 
+brews:
+  - name: hippocamp
+    repository:
+      owner: tggo
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    directory: Formula
+    homepage: "https://github.com/tggo/hippocamp"
+    description: "RDF MCP server — expose an in-memory knowledge graph to LLMs via triple/sparql/graph tools"
+    license: "MIT"
+    skip_upload: auto
+    install: |
+      bin.install "hippocamp"
+    test: |
+      assert_predicate bin/"hippocamp", :exist?
+
 changelog:
   sort: asc
   filters:
