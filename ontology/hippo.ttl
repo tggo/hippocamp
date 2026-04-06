@@ -261,3 +261,20 @@ hippo:sourceOf a rdf:Property ;
     rdfs:label "sourceOf" ;
     rdfs:comment "Links a Source to the knowledge it produced." ;
     rdfs:domain hippo:Source .
+
+# ── Provenance & confidence ─────────────────────────────────
+
+hippo:confidence a rdf:Property ;
+    rdfs:label "confidence" ;
+    rdfs:comment "Confidence score for a triple or resource, from 0.0 (uncertain) to 1.0 (certain). Use to distinguish firm facts from inferences." ;
+    rdfs:range xsd:float .
+
+hippo:provenance a rdf:Property ;
+    rdfs:label "provenance" ;
+    rdfs:comment "How a triple was created: 'extracted' (from source material), 'inferred' (by reasoning), or 'ambiguous' (uncertain interpretation)." ;
+    rdfs:range xsd:string .
+
+hippo:source a rdf:Property ;
+    rdfs:label "source" ;
+    rdfs:comment "The agent, tool, or process that produced this resource. Inverse of hippo:sourceOf." ;
+    rdfs:range rdfs:Resource .

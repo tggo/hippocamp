@@ -40,6 +40,7 @@ internal/tools/sparql.go         — sparql tool: SELECT / ASK / UPDATE (auto-de
 internal/tools/graph.go          — graph tool: create/delete/list/stats/clear/dump/load/prefix_*
 internal/tools/search.go         — search tool: keyword search with field boosting, word boundary scoring, graph traversal
 internal/tools/validate.go       — validate tool: checks ontology compliance (types, labels, rationale)
+internal/tools/analyze.go        — analyze tool: god_nodes, components, surprising edges, export_html visualization
 internal/setup/setup.go          — auto-setup: embeds hooks+skills, writes to .claude/ on first launch
 internal/setup/embedded/         — canonical copies of hooks and skills (embedded in binary)
 ontology/hippo.ttl               — hippo: ontology (base layer + code layer)
@@ -69,6 +70,20 @@ TriG extends Turtle with named graph blocks. It's the only text format that pres
 - **`triple`** and **`sparql`** are separate tools (frequent use, rich descriptions with examples)
 - **`graph`** groups infrequent operations: graph lifecycle, persistence, and prefix management
 - **`search`** is a standalone tool for keyword search across the graph (matches labels, summaries, file paths, signatures, content, URLs)
+- **`analyze`** is a read-only analysis tool: god_nodes (most-connected resources), components (BFS clusters), surprising (cross-topic/cross-graph edges), export_html (vis.js visualization served on localhost)
+
+### Analyze tool
+`analyze` in `analyze.go` provides graph structure analysis via four actions:
+- **`god_nodes`**: counts in/out degree per resource (excluding metadata predicates), filters out hub types (Topic, Tag, Project), returns top N by total degree
+- **`components`**: builds undirected URI adjacency from relationship triples, runs BFS to find connected components, returns with member URIs, labels, and topic breakdown
+- **`surprising`**: finds edges where subject and object have different `hippo:hasTopic` values (cross-topic) or live in different named graphs (cross-graph). Skips metadata predicates.
+- **`export_html`**: returns the URL of the built-in visualization server (auto-started on port 39322+ at MCP boot). The page dynamically renders the current graph state. Returns `{"url":"http://localhost:39322"}`.
+
+### Ontology provenance predicates
+Three properties for tracking triple quality and origin:
+- **`hippo:confidence`**: float 0.0–1.0, distinguishes firm facts from inferences
+- **`hippo:provenance`**: string "extracted" / "inferred" / "ambiguous" — how a triple was created
+- **`hippo:source`**: URI pointing to the agent/tool/process that produced the resource (inverse of `hippo:sourceOf`)
 
 ### Search tool implementation
 `search` in `search.go` does text matching in Go (not SPARQL FILTER/REGEX) for reliability:

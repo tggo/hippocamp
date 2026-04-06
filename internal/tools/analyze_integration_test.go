@@ -248,6 +248,83 @@ func TestAnalyzeHouseConstruction(t *testing.T) {
 		text := ResultText(res)
 		t.Logf("Validate result: %s", text)
 	})
+
+	// Step 7: Analyze — god_nodes, components, surprising on real data.
+	// Start visualization server for export_html tests.
+	if _, vizErr := StartVisualizationServer(store); vizErr != nil {
+		t.Logf("viz server start: %v (export_html test may fail)", vizErr)
+	}
+	analyzeHandler := HandlerFor(store, "analyze")
+
+	t.Run("analyze/god_nodes", func(t *testing.T) {
+		text := callToolGetText(t, analyzeHandler, map[string]any{"action": "god_nodes", "limit": float64(5)})
+		t.Logf("god_nodes: %s", text)
+
+		var nodes []struct {
+			URI    string `json:"uri"`
+			Label  string `json:"label"`
+			Degree int    `json:"degree"`
+		}
+		json.Unmarshal([]byte(text), &nodes)
+
+		if len(nodes) == 0 {
+			t.Error("expected at least 1 god node in house-construction graph")
+		}
+		// The project entity should be among top nodes (many things reference topics)
+		t.Logf("top god node: %s (degree %d)", nodes[0].Label, nodes[0].Degree)
+	})
+
+	t.Run("analyze/components", func(t *testing.T) {
+		text := callToolGetText(t, analyzeHandler, map[string]any{"action": "components"})
+		t.Logf("components: %s", text)
+
+		var comps []struct {
+			Size   int      `json:"size"`
+			Topics []string `json:"topics"`
+		}
+		json.Unmarshal([]byte(text), &comps)
+
+		if len(comps) == 0 {
+			t.Error("expected at least 1 component")
+		}
+		// House-construction entities connect to topics via hasTopic, forming topic-based clusters.
+		// Count total nodes across all components.
+		total := 0
+		for _, c := range comps {
+			total += c.Size
+		}
+		t.Logf("found %d components, %d total nodes", len(comps), total)
+		if total < 20 {
+			t.Errorf("expected >=20 total nodes across components, got %d", total)
+		}
+	})
+
+	t.Run("analyze/surprising", func(t *testing.T) {
+		text := callToolGetText(t, analyzeHandler, map[string]any{"action": "surprising"})
+		t.Logf("surprising: %s", text)
+
+		var edges []struct {
+			Reason string `json:"reason"`
+		}
+		json.Unmarshal([]byte(text), &edges)
+		// Some entities reference resources in different topic areas
+		t.Logf("found %d surprising edges", len(edges))
+	})
+
+	t.Run("analyze/export_html", func(t *testing.T) {
+		text := callToolGetText(t, analyzeHandler, map[string]any{"action": "export_html"})
+		t.Logf("export_html: %s", text)
+
+		var resp struct {
+			URL    string `json:"url"`
+			Status string `json:"status"`
+		}
+		json.Unmarshal([]byte(text), &resp)
+
+		if resp.URL == "" {
+			t.Error("expected URL for visualization server")
+		}
+	})
 }
 
 // ── helpers ──

@@ -189,7 +189,14 @@ func main() {
 	tools.Register(s, store)
 	tools.SetHealthChecker(checker)
 
-	log.Printf("MCP server starting (version=%s, tools=triple,sparql,graph,search,validate)", version)
+	// Start visualization server (serves live graph on localhost).
+	if vizPort, vizErr := tools.StartVisualizationServer(store); vizErr != nil {
+		log.Printf("visualization server error: %v", vizErr)
+	} else {
+		log.Printf("visualization server at http://localhost:%d", vizPort)
+	}
+
+	log.Printf("MCP server starting (version=%s, tools=triple,sparql,graph,search,validate,analyze)", version)
 
 	// Serve over stdio (compatible with Claude Code, Desktop, IDE extensions).
 	if err := server.ServeStdio(s); err != nil {
