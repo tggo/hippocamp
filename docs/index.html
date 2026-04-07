@@ -535,7 +535,7 @@
     #tools { background: var(--bg); }
     .tools-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: 16px;
     }
     .tool-card {
@@ -1092,7 +1092,7 @@
   <div class="container">
     <div class="section-rule reveal">
       <span class="section-num">02</span>
-      <h2 class="section-title" data-i18n="tools.title">Five tools</h2>
+      <h2 class="section-title" data-i18n="tools.title">Six tools</h2>
     </div>
 
     <div class="tools-grid">
@@ -1134,10 +1134,11 @@
         <div class="tool-name">search</div>
         <div class="tool-actions">
           <span class="tool-action">keyword</span>
-          <span class="tool-action">type filter</span>
-          <span class="tool-action">scope</span>
+          <span class="tool-action">temporal</span>
+          <span class="tool-action">confidence</span>
+          <span class="tool-action">explain</span>
         </div>
-        <p class="tool-desc" data-i18n="tools.search">Keyword search across labels, summaries, content. Filter by RDF type or named graph. Ranked results with graph traversal.</p>
+        <p class="tool-desc" data-i18n="tools.search">Keyword + temporal search with confidence scoring. Ask &ldquo;decisions last week&rdquo; or &ldquo;march 2026 notes&rdquo;. Results ranked 0&ndash;100% with optional per-field explain.</p>
       </div>
 
       <div class="tool-card reveal reveal-delay-4">
@@ -1148,6 +1149,17 @@
           <span class="tool-action">rationale</span>
         </div>
         <p class="tool-desc" data-i18n="tools.validate">Check graph compliance. Verify all resources have proper types and labels. Catch issues before they become problems.</p>
+      </div>
+
+      <div class="tool-card reveal reveal-delay-5">
+        <div class="tool-name">analyze</div>
+        <div class="tool-actions">
+          <span class="tool-action">god_nodes</span>
+          <span class="tool-action">components</span>
+          <span class="tool-action">surprising</span>
+          <span class="tool-action">visualize</span>
+        </div>
+        <p class="tool-desc" data-i18n="tools.analyze">Graph structure analysis. Find hub resources, connected clusters, cross-topic bridges. Live interactive visualization in the browser.</p>
       </div>
     </div>
   </div>
@@ -1249,10 +1261,17 @@
 <pre><span class="cm">// Search any keyword</span>
 { <span class="key">"query"</span>: <span class="str">"irrigation schedule"</span> }
 
-<span class="cm">// Filter by ontology type</span>
+<span class="cm">// Temporal: "last week", "today", "march 2026"</span>
+{ <span class="key">"query"</span>: <span class="str">"decisions last week"</span> }
+
+<span class="cm">// Results with confidence scores (0-100%)</span>
+<span class="cm">// [{"uri":"...","confidence":100.0}, {"uri":"...","confidence":67.4}]</span>
+
+<span class="cm">// Explain mode: per-field score breakdown</span>
 {
   <span class="key">"query"</span>: <span class="str">"budget overrun"</span>,
-  <span class="key">"type"</span>:  <span class="str">"hippo:Decision"</span>
+  <span class="key">"type"</span>:  <span class="str">"hippo:Decision"</span>,
+  <span class="key">"explain"</span>: <span class="val">true</span>
 }
 
 <span class="cm">// Scope to a specific project graph</span>
@@ -1260,10 +1279,7 @@
   <span class="key">"query"</span>: <span class="str">"invoice payment"</span>,
   <span class="key">"scope"</span>: <span class="str">"project:accounting"</span>,
   <span class="key">"limit"</span>: <span class="val">5</span>
-}
-
-<span class="cm">// CLI one-shot (for scripts)</span>
-<span class="cm">// $ hippocamp --query "tomato" --limit 10</span></pre>
+}</pre>
         </div>
       </div>
 
@@ -1439,6 +1455,31 @@
         <div class="feature-name" data-i18n="features.ontology">Open-world ontology</div>
         <p class="feature-desc" data-i18n="features.ontology_desc">Base + code layers. Extend with your own classes and properties &mdash; RDF is open-world.</p>
       </div>
+      <div class="feature-cell">
+        <div class="feature-icon">&#x29D7;</div>
+        <div class="feature-name" data-i18n="features.temporal">Temporal search</div>
+        <p class="feature-desc" data-i18n="features.temporal_desc">&ldquo;last week&rdquo;, &ldquo;yesterday&rdquo;, &ldquo;march 2026&rdquo; &mdash; auto-parsed into date ranges. Smooth proximity scoring boosts recent results.</p>
+      </div>
+      <div class="feature-cell">
+        <div class="feature-icon">&#x25D0;</div>
+        <div class="feature-name" data-i18n="features.confidence">Confidence scoring</div>
+        <p class="feature-desc" data-i18n="features.confidence_desc">Every result ranked 0&ndash;100%. Top hit is 100%, rest proportional. LLMs instantly see which results matter.</p>
+      </div>
+      <div class="feature-cell">
+        <div class="feature-icon">&#x2261;</div>
+        <div class="feature-name" data-i18n="features.explain">Explain mode</div>
+        <p class="feature-desc" data-i18n="features.explain_desc">Set <code>explain: true</code> to see per-field score breakdown. Which fields matched, temporal proximity, graph-traversal path.</p>
+      </div>
+      <div class="feature-cell">
+        <div class="feature-icon">&#x25C6;</div>
+        <div class="feature-name" data-i18n="features.visualization">Live visualization</div>
+        <p class="feature-desc" data-i18n="features.visualization_desc">Interactive force-directed graph in the browser. Nodes colored by type, sized by connections. Refreshes on every load &mdash; always current.</p>
+      </div>
+      <div class="feature-cell">
+        <div class="feature-icon">&#x2726;</div>
+        <div class="feature-name" data-i18n="features.provenance">Provenance tracking</div>
+        <p class="feature-desc" data-i18n="features.provenance_desc"><code>hippo:confidence</code>, <code>hippo:provenance</code>, <code>hippo:source</code> &mdash; track where knowledge came from and how certain it is.</p>
+      </div>
     </div>
   </div>
 </section>
@@ -1499,12 +1540,13 @@
       'proof.q4': 'Total expenses to date',
       'proof.q5': 'Completion date + remaining phases',
       'proof.a5': 'Oct 2026, 3 phases left',
-      'tools.title': 'Five tools',
+      'tools.title': 'Six tools',
       'tools.triple': 'CRUD on individual triples. URIs, literals, blank nodes. Wildcard pattern matching. Language tags and XSD datatypes.',
       'tools.sparql': 'Full SPARQL 1.1 engine. Expressive graph queries, pattern matching, aggregations. Updates auto-detected.',
       'tools.graph': 'Named graph lifecycle. TriG persistence. Namespace prefixes. Stats and clear.',
-      'tools.search': 'Keyword search across labels, summaries, content. Filter by RDF type or named graph. Ranked results with graph traversal.',
+      'tools.search': 'Keyword + temporal search with confidence scoring. Ask \u201cdecisions last week\u201d or \u201cmarch 2026 notes\u201d. Results ranked 0\u2013100% with optional per-field explain.',
       'tools.validate': 'Check graph compliance. Verify all resources have proper types and labels. Catch issues before they become problems.',
+      'tools.analyze': 'Graph structure analysis. Find hub resources, connected clusters, cross-topic bridges. Live interactive visualization in the browser.',
       'examples.title': 'Examples',
       'ontology.title': 'Built-in ontology',
       'ontology.base': 'Base layer \u2014 any domain',
@@ -1540,6 +1582,16 @@
       'features.sparql_desc': 'W3C-conformant query engine. SELECT, ASK, CONSTRUCT, and all UPDATE operations.',
       'features.ontology': 'Open-world ontology',
       'features.ontology_desc': 'Base + code layers. Extend with your own classes and properties \u2014 RDF is open-world.',
+      'features.temporal': 'Temporal search',
+      'features.temporal_desc': '\u201clast week\u201d, \u201cyesterday\u201d, \u201cmarch 2026\u201d \u2014 auto-parsed into date ranges. Smooth proximity scoring boosts recent results.',
+      'features.confidence': 'Confidence scoring',
+      'features.confidence_desc': 'Every result ranked 0\u2013100%. Top hit is 100%, rest proportional. LLMs instantly see which results matter.',
+      'features.explain': 'Explain mode',
+      'features.explain_desc': 'Set <code>explain: true</code> to see per-field score breakdown. Which fields matched, temporal proximity, graph-traversal path.',
+      'features.visualization': 'Live visualization',
+      'features.visualization_desc': 'Interactive force-directed graph in the browser. Nodes colored by type, sized by connections. Refreshes on every load \u2014 always current.',
+      'features.provenance': 'Provenance tracking',
+      'features.provenance_desc': '<code>hippo:confidence</code>, <code>hippo:provenance</code>, <code>hippo:source</code> \u2014 track where knowledge came from and how certain it is.',
     },
     uk: {
       'nav.tools': '\u0406\u043D\u0441\u0442\u0440\u0443\u043C\u0435\u043D\u0442\u0438',
@@ -1576,12 +1628,13 @@
       'proof.q4': '\u0417\u0430\u0433\u0430\u043B\u044C\u043D\u0456 \u0432\u0438\u0442\u0440\u0430\u0442\u0438',
       'proof.q5': '\u0414\u0430\u0442\u0430 \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043D\u043D\u044F + \u0437\u0430\u043B\u0438\u0448\u043E\u043A \u0435\u0442\u0430\u043F\u0456\u0432',
       'proof.a5': '\u0416\u043E\u0432\u0442. 2026, 3 \u0435\u0442\u0430\u043F\u0438',
-      'tools.title': "\u041F\u2019\u044F\u0442\u044C \u0456\u043D\u0441\u0442\u0440\u0443\u043C\u0435\u043D\u0442\u0456\u0432",
+      'tools.title': "\u0428\u0456\u0441\u0442\u044C \u0456\u043D\u0441\u0442\u0440\u0443\u043C\u0435\u043D\u0442\u0456\u0432",
       'tools.triple': 'CRUD \u0434\u043B\u044F \u043E\u043A\u0440\u0435\u043C\u0438\u0445 \u0442\u0440\u0456\u043F\u043B\u0456\u0432. URI, \u043B\u0456\u0442\u0435\u0440\u0430\u043B\u0438, blank nodes. \u0428\u0430\u0431\u043B\u043E\u043D\u0438 \u0437 wildcard. \u041C\u043E\u0432\u043D\u0456 \u0442\u0435\u0433\u0438 \u0442\u0430 XSD.',
       'tools.sparql': '\u041F\u043E\u0432\u043D\u0438\u0439 SPARQL 1.1. \u0412\u0438\u0440\u0430\u0437\u043D\u0456 \u0437\u0430\u043F\u0438\u0442\u0438, \u043F\u0430\u0442\u0435\u0440\u043D\u0438, \u0430\u0433\u0440\u0435\u0433\u0430\u0446\u0456\u0457. \u041E\u043D\u043E\u0432\u043B\u0435\u043D\u043D\u044F \u0432\u0438\u0437\u043D\u0430\u0447\u0430\u044E\u0442\u044C\u0441\u044F \u0430\u0432\u0442\u043E\u043C\u0430\u0442\u0438\u0447\u043D\u043E.',
       'tools.graph': '\u0416\u0438\u0442\u0442\u0454\u0432\u0438\u0439 \u0446\u0438\u043A\u043B \u0456\u043C\u0435\u043D\u043E\u0432\u0430\u043D\u0438\u0445 \u0433\u0440\u0430\u0444\u0456\u0432. TriG \u043F\u0435\u0440\u0441\u0438\u0441\u0442\u0435\u043D\u0446\u0456\u044F. \u041F\u0440\u0435\u0444\u0456\u043A\u0441\u0438. \u0421\u0442\u0430\u0442\u0438\u0441\u0442\u0438\u043A\u0430.',
-      'tools.search': '\u041F\u043E\u0448\u0443\u043A \u043F\u043E \u043A\u043B\u044E\u0447\u043E\u0432\u0438\u0445 \u0441\u043B\u043E\u0432\u0430\u0445: \u043D\u0430\u0437\u0432\u0438, \u043E\u043F\u0438\u0441\u0438, \u0432\u043C\u0456\u0441\u0442. \u0424\u0456\u043B\u044C\u0442\u0440 \u0437\u0430 RDF-\u0442\u0438\u043F\u043E\u043C \u0447\u0438 \u0433\u0440\u0430\u0444\u043E\u043C. \u0420\u0430\u043D\u0436\u0443\u0432\u0430\u043D\u043D\u044F \u0437 \u043E\u0431\u0445\u043E\u0434\u043E\u043C \u0433\u0440\u0430\u0444\u0443.',
+      'tools.search': '\u041F\u043E\u0448\u0443\u043A \u0437\u0430 \u043A\u043B\u044E\u0447\u043E\u0432\u0438\u043C\u0438 \u0441\u043B\u043E\u0432\u0430\u043C\u0438 + \u0447\u0430\u0441\u043E\u0432\u0438\u0439 \u043F\u043E\u0448\u0443\u043A \u0437 \u043E\u0446\u0456\u043D\u043A\u043E\u044E \u0432\u043F\u0435\u0432\u043D\u0435\u043D\u043E\u0441\u0442\u0456. \u00AB\u0440\u0456\u0448\u0435\u043D\u043D\u044F \u043C\u0438\u043D\u0443\u043B\u043E\u0433\u043E \u0442\u0438\u0436\u043D\u044F\u00BB, \u00AB\u0431\u0435\u0440\u0435\u0437\u0435\u043D\u044C 2026\u00BB. \u0420\u0435\u0437\u0443\u043B\u044C\u0442\u0430\u0442\u0438 0\u2013100% \u0437 explain-\u0440\u0435\u0436\u0438\u043C\u043E\u043C.',
       'tools.validate': '\u041F\u0435\u0440\u0435\u0432\u0456\u0440\u043A\u0430 \u0432\u0456\u0434\u043F\u043E\u0432\u0456\u0434\u043D\u043E\u0441\u0442\u0456 \u0433\u0440\u0430\u0444\u0443. \u0422\u0438\u043F\u0438, \u043C\u0456\u0442\u043A\u0438, \u043E\u0431\u0491\u0440\u0443\u043D\u0442\u0443\u0432\u0430\u043D\u043D\u044F. \u0412\u0438\u044F\u0432\u043B\u0435\u043D\u043D\u044F \u043F\u0440\u043E\u0431\u043B\u0435\u043C \u0437\u0430\u0432\u0447\u0430\u0441\u043D\u043E.',
+      'tools.analyze': '\u0410\u043D\u0430\u043B\u0456\u0437 \u0441\u0442\u0440\u0443\u043A\u0442\u0443\u0440\u0438 \u0433\u0440\u0430\u0444\u0443. \u0425\u0430\u0431\u0438, \u043A\u043B\u0430\u0441\u0442\u0435\u0440\u0438, \u043C\u0456\u0436\u0442\u0435\u043C\u0430\u0442\u0438\u0447\u043D\u0456 \u043C\u043E\u0441\u0442\u0438. \u0406\u043D\u0442\u0435\u0440\u0430\u043A\u0442\u0438\u0432\u043D\u0430 \u0432\u0456\u0437\u0443\u0430\u043B\u0456\u0437\u0430\u0446\u0456\u044F \u0443 \u0431\u0440\u0430\u0443\u0437\u0435\u0440\u0456.',
       'examples.title': '\u041F\u0440\u0438\u043A\u043B\u0430\u0434\u0438',
       'ontology.title': '\u0412\u0431\u0443\u0434\u043E\u0432\u0430\u043D\u0430 \u043E\u043D\u0442\u043E\u043B\u043E\u0433\u0456\u044F',
       'ontology.base': '\u0411\u0430\u0437\u043E\u0432\u0438\u0439 \u0448\u0430\u0440 \u2014 \u0431\u0443\u0434\u044C-\u044F\u043A\u0430 \u0441\u0444\u0435\u0440\u0430',
@@ -1617,6 +1670,16 @@
       'features.sparql_desc': 'W3C-\u0441\u0443\u043C\u0456\u0441\u043D\u0438\u0439 \u0440\u0443\u0448\u0456\u0439 \u0437\u0430\u043F\u0438\u0442\u0456\u0432. SELECT, ASK, CONSTRUCT \u0442\u0430 \u0432\u0441\u0456 \u043E\u043F\u0435\u0440\u0430\u0446\u0456\u0457 UPDATE.',
       'features.ontology': '\u0412\u0456\u0434\u043A\u0440\u0438\u0442\u0430 \u043E\u043D\u0442\u043E\u043B\u043E\u0433\u0456\u044F',
       'features.ontology_desc': '\u0411\u0430\u0437\u043E\u0432\u0438\u0439 + \u043A\u043E\u0434\u043E\u0432\u0438\u0439 \u0448\u0430\u0440\u0438. \u0420\u043E\u0437\u0448\u0438\u0440\u044E\u0439\u0442\u0435 \u0432\u043B\u0430\u0441\u043D\u0438\u043C\u0438 \u043A\u043B\u0430\u0441\u0430\u043C\u0438 \u2014 RDF \u0454 \u0432\u0456\u0434\u043A\u0440\u0438\u0442\u0438\u043C.',
+      'features.temporal': '\u0427\u0430\u0441\u043E\u0432\u0438\u0439 \u043F\u043E\u0448\u0443\u043A',
+      'features.temporal_desc': '\u00AB\u043C\u0438\u043D\u0443\u043B\u043E\u0433\u043E \u0442\u0438\u0436\u043D\u044F\u00BB, \u00AB\u0432\u0447\u043E\u0440\u0430\u00BB, \u00AB\u0431\u0435\u0440\u0435\u0437\u0435\u043D\u044C 2026\u00BB \u2014 \u0430\u0432\u0442\u043E\u043C\u0430\u0442\u0438\u0447\u043D\u0438\u0439 \u0440\u043E\u0437\u0431\u0456\u0440 \u0434\u0430\u0442. \u041F\u043B\u0430\u0432\u043D\u0435 \u043E\u0446\u0456\u043D\u044E\u0432\u0430\u043D\u043D\u044F \u0431\u043B\u0438\u0437\u044C\u043A\u043E\u0441\u0442\u0456 \u043F\u0456\u0434\u0432\u0438\u0449\u0443\u0454 \u0441\u0432\u0456\u0436\u0456 \u0440\u0435\u0437\u0443\u043B\u044C\u0442\u0430\u0442\u0438.',
+      'features.confidence': '\u041E\u0446\u0456\u043D\u043A\u0430 \u0432\u043F\u0435\u0432\u043D\u0435\u043D\u043E\u0441\u0442\u0456',
+      'features.confidence_desc': '\u041A\u043E\u0436\u0435\u043D \u0440\u0435\u0437\u0443\u043B\u044C\u0442\u0430\u0442 \u043E\u0446\u0456\u043D\u0435\u043D\u043E 0\u2013100%. \u041F\u0435\u0440\u0448\u0438\u0439 = 100%, \u0440\u0435\u0448\u0442\u0430 \u043F\u0440\u043E\u043F\u043E\u0440\u0446\u0456\u0439\u043D\u043E. LLM \u043E\u0434\u0440\u0430\u0437\u0443 \u0431\u0430\u0447\u0438\u0442\u044C \u0449\u043E \u0432\u0430\u0436\u043B\u0438\u0432\u043E.',
+      'features.explain': '\u0420\u0435\u0436\u0438\u043C explain',
+      'features.explain_desc': '<code>explain: true</code> \u043F\u043E\u043A\u0430\u0437\u0443\u0454 \u0440\u043E\u0437\u043A\u043B\u0430\u0434\u043A\u0443 \u0431\u0430\u043B\u0456\u0432 \u043F\u043E \u043F\u043E\u043B\u044F\u0445. \u042F\u043A\u0456 \u043F\u043E\u043B\u044F \u0441\u043F\u0440\u0430\u0446\u044E\u0432\u0430\u043B\u0438, \u0447\u0430\u0441\u043E\u0432\u0430 \u0431\u043B\u0438\u0437\u044C\u043A\u0456\u0441\u0442\u044C, \u0448\u043B\u044F\u0445 \u043E\u0431\u0445\u043E\u0434\u0443 \u0433\u0440\u0430\u0444\u0443.',
+      'features.visualization': '\u0416\u0438\u0432\u0430 \u0432\u0456\u0437\u0443\u0430\u043B\u0456\u0437\u0430\u0446\u0456\u044F',
+      'features.visualization_desc': '\u0406\u043D\u0442\u0435\u0440\u0430\u043A\u0442\u0438\u0432\u043D\u0438\u0439 \u0433\u0440\u0430\u0444 \u0443 \u0431\u0440\u0430\u0443\u0437\u0435\u0440\u0456. \u0412\u0443\u0437\u043B\u0438 \u043F\u043E\u0444\u0430\u0440\u0431\u043E\u0432\u0430\u043D\u0456 \u0437\u0430 \u0442\u0438\u043F\u043E\u043C, \u0440\u043E\u0437\u043C\u0456\u0440 \u0437\u0430 \u043A\u0456\u043B\u044C\u043A\u0456\u0441\u0442\u044E \u0437\u0432\u2019\u044F\u0437\u043A\u0456\u0432. \u041E\u043D\u043E\u0432\u043B\u044E\u0454\u0442\u044C\u0441\u044F \u043F\u0440\u0438 \u043A\u043E\u0436\u043D\u043E\u043C\u0443 \u0437\u0430\u0432\u0430\u043D\u0442\u0430\u0436\u0435\u043D\u043D\u0456.',
+      'features.provenance': '\u0412\u0456\u0434\u0441\u0442\u0435\u0436\u0435\u043D\u043D\u044F \u043F\u043E\u0445\u043E\u0434\u0436\u0435\u043D\u043D\u044F',
+      'features.provenance_desc': '<code>hippo:confidence</code>, <code>hippo:provenance</code>, <code>hippo:source</code> \u2014 \u0437\u0432\u0456\u0434\u043A\u0438 \u043F\u0440\u0438\u0439\u0448\u043B\u0438 \u0437\u043D\u0430\u043D\u043D\u044F \u0456 \u043D\u0430\u0441\u043A\u0456\u043B\u044C\u043A\u0438 \u0432\u043E\u043D\u0438 \u043F\u0435\u0432\u043D\u0456.',
     },
     fr: {
       'nav.tools': 'Outils',
@@ -1653,12 +1716,13 @@
       'proof.q4': 'D\u00e9penses totales',
       'proof.q5': 'Date de fin + phases restantes',
       'proof.a5': 'Oct 2026, 3 phases restantes',
-      'tools.title': 'Cinq outils',
+      'tools.title': 'Six outils',
       'tools.triple': "CRUD sur les triplets. URIs, lit\u00e9raux, n\u0153uds anonymes. Correspondance par motifs. Tags de langue et types XSD.",
       'tools.sparql': 'Moteur SPARQL 1.1 complet. Requ\u00eates expressives, correspondance de motifs, agr\u00e9gations. Mises \u00e0 jour auto-d\u00e9tect\u00e9es.',
       'tools.graph': "Cycle de vie des graphes nomm\u00e9s. Persistance TriG. Pr\u00e9fixes d'espaces de noms. Statistiques.",
-      'tools.search': "Recherche par mots-cl\u00e9s : labels, r\u00e9sum\u00e9s, contenu. Filtre par type RDF ou graphe nomm\u00e9. R\u00e9sultats class\u00e9s avec parcours du graphe.",
+      'tools.search': "Recherche par mots-cl\u00e9s + temporelle avec score de confiance. \u00abD\u00e9cisions la semaine derni\u00e8re\u00bb, \u00abmars 2026\u00bb. R\u00e9sultats 0\u2013100% avec mode explain optionnel.",
       'tools.validate': "V\u00e9rification de conformit\u00e9 du graphe. Types, labels, justifications. D\u00e9tection pr\u00e9coce des probl\u00e8mes.",
+      'tools.analyze': "Analyse de structure du graphe. N\u0153uds centraux, clusters connect\u00e9s, ponts inter-th\u00e9matiques. Visualisation interactive en direct dans le navigateur.",
       'examples.title': 'Exemples',
       'ontology.title': 'Ontologie int\u00e9gr\u00e9e',
       'ontology.base': 'Couche de base \u2014 tout domaine',
@@ -1694,6 +1758,16 @@
       'features.sparql_desc': "Moteur de requ\u00eates conforme W3C. SELECT, ASK, CONSTRUCT et toutes les op\u00e9rations UPDATE.",
       'features.ontology': 'Ontologie ouverte',
       'features.ontology_desc': "Couches base + code. \u00c9tendez avec vos propres classes \u2014 RDF est un monde ouvert.",
+      'features.temporal': 'Recherche temporelle',
+      'features.temporal_desc': "\u00abla semaine derni\u00e8re\u00bb, \u00abhier\u00bb, \u00abmars 2026\u00bb \u2014 analyse automatique des dates. Score de proximit\u00e9 fluide favorise les r\u00e9sultats r\u00e9cents.",
+      'features.confidence': 'Score de confiance',
+      'features.confidence_desc': "Chaque r\u00e9sultat not\u00e9 0\u2013100%. Le premier = 100%, le reste proportionnel. Les LLMs voient instantan\u00e9ment ce qui compte.",
+      'features.explain': 'Mode explain',
+      'features.explain_desc': "<code>explain: true</code> pour voir le d\u00e9tail des scores par champ. Quels champs ont match\u00e9, proximit\u00e9 temporelle, chemin de parcours du graphe.",
+      'features.visualization': 'Visualisation en direct',
+      'features.visualization_desc': "Graphe interactif force-directed dans le navigateur. N\u0153uds color\u00e9s par type, dimensionn\u00e9s par connexions. Actualis\u00e9 \u00e0 chaque chargement.",
+      'features.provenance': 'Tra\u00e7abilit\u00e9',
+      'features.provenance_desc': "<code>hippo:confidence</code>, <code>hippo:provenance</code>, <code>hippo:source</code> \u2014 d'o\u00f9 viennent les connaissances et leur degr\u00e9 de certitude.",
     },
     es: {
       'nav.tools': 'Herramientas',
@@ -1730,12 +1804,13 @@
       'proof.q4': 'Gastos totales a la fecha',
       'proof.q5': 'Fecha de finalizaci\u00f3n + fases restantes',
       'proof.a5': 'Oct 2026, 3 fases restantes',
-      'tools.title': 'Cinco herramientas',
+      'tools.title': 'Seis herramientas',
       'tools.triple': 'CRUD para tripletas individuales. URIs, literales, nodos en blanco. Coincidencia por patrones. Etiquetas de idioma y tipos XSD.',
       'tools.sparql': 'Motor SPARQL 1.1 completo. Consultas expresivas, coincidencia de patrones, agregaciones. Actualizaciones auto-detectadas.',
       'tools.graph': 'Ciclo de vida de grafos nombrados. Persistencia TriG. Prefijos de espacios de nombres. Estad\u00edsticas.',
-      'tools.search': 'B\u00fasqueda por palabras clave: etiquetas, res\u00famenes, contenido. Filtro por tipo RDF o grafo nombrado. Resultados clasificados con recorrido del grafo.',
+      'tools.search': 'B\u00fasqueda por palabras clave + temporal con puntuaci\u00f3n de confianza. \u00abDecisiones la semana pasada\u00bb, \u00abmarzo 2026\u00bb. Resultados 0\u2013100% con modo explain opcional.',
       'tools.validate': 'Verificaci\u00f3n de conformidad del grafo. Tipos, etiquetas, justificaciones. Detecci\u00f3n temprana de problemas.',
+      'tools.analyze': 'An\u00e1lisis de estructura del grafo. Nodos centrales, clusters conectados, puentes inter-tem\u00e1ticos. Visualizaci\u00f3n interactiva en vivo en el navegador.',
       'examples.title': 'Ejemplos',
       'ontology.title': 'Ontolog\u00eda integrada',
       'ontology.base': 'Capa base \u2014 cualquier dominio',
@@ -1771,6 +1846,16 @@
       'features.sparql_desc': 'Motor de consultas conforme a W3C. SELECT, ASK, CONSTRUCT y todas las operaciones UPDATE.',
       'features.ontology': 'Ontolog\u00eda abierta',
       'features.ontology_desc': 'Capas base + c\u00f3digo. Extienda con sus propias clases \u2014 RDF es un mundo abierto.',
+      'features.temporal': 'B\u00fasqueda temporal',
+      'features.temporal_desc': '\u00abla semana pasada\u00bb, \u00abayer\u00bb, \u00abmarzo 2026\u00bb \u2014 an\u00e1lisis autom\u00e1tico de fechas. Puntuaci\u00f3n de proximidad suave favorece resultados recientes.',
+      'features.confidence': 'Puntuaci\u00f3n de confianza',
+      'features.confidence_desc': 'Cada resultado puntuado 0\u2013100%. El primero = 100%, el resto proporcional. Los LLMs ven al instante qu\u00e9 importa.',
+      'features.explain': 'Modo explain',
+      'features.explain_desc': '<code>explain: true</code> para ver el desglose de puntuaciones por campo. Qu\u00e9 campos coincidieron, proximidad temporal, ruta de recorrido del grafo.',
+      'features.visualization': 'Visualizaci\u00f3n en vivo',
+      'features.visualization_desc': 'Grafo interactivo force-directed en el navegador. Nodos coloreados por tipo, dimensionados por conexiones. Se actualiza en cada carga.',
+      'features.provenance': 'Trazabilidad',
+      'features.provenance_desc': '<code>hippo:confidence</code>, <code>hippo:provenance</code>, <code>hippo:source</code> \u2014 de d\u00f3nde proviene el conocimiento y su grado de certeza.',
     },
   };
 

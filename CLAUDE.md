@@ -38,7 +38,7 @@ internal/tools/register.go       — MCP tool registration + HandlerFor() test h
 internal/tools/triple.go         — triple tool: add / remove / list
 internal/tools/sparql.go         — sparql tool: SELECT / ASK / UPDATE (auto-detected)
 internal/tools/graph.go          — graph tool: create/delete/list/stats/clear/dump/load/prefix_*
-internal/tools/search.go         — search tool: keyword search with field boosting, word boundary scoring, graph traversal
+internal/tools/search.go         — search tool: keyword search with field boosting, word boundary scoring, graph traversal, temporal search, confidence normalization, explain mode
 internal/tools/validate.go       — validate tool: checks ontology compliance (types, labels, rationale)
 internal/tools/analyze.go        — analyze tool: god_nodes, components, surprising edges, export_html visualization
 internal/setup/setup.go          — auto-setup: embeds hooks+skills, writes to .claude/ on first launch
@@ -94,6 +94,9 @@ Three properties for tracking triple quality and origin:
 - **Graph-aware**: `related=true` parameter enables 1-hop traversal via `hippo:hasTopic`, `hippo:references`, `hippo:partOf`, `hippo:relatedTo` — finds resources linked to direct matches
 - **Prefix matching**: when exact substring match fails, tries matching words sharing a 4+ character prefix (e.g. `електрика` → `електропостачання` via shared stem `електр`). Scores at half field weight.
 - **Zero-result hints**: when search returns no matches, the response includes a hint with resource count and suggestions for refining the query
+- **Confidence normalization**: results include a `confidence` field (0-100%) where the top result is 100% and others are proportional. Helps LLMs assess relative relevance without understanding raw scores
+- **Temporal search**: queries containing temporal keywords ("today", "yesterday", "last week", "this month", "recent", "March 2026", ISO dates) are parsed into date ranges. Resources with `hippo:createdAt`/`hippo:updatedAt` timestamps near the range get a scoring boost. Pure temporal queries (no text keywords) surface time-matching resources directly
+- **Explain mode**: `explain=true` parameter adds per-field score breakdown to each result — which predicates matched, their individual scores, temporal proximity score, and related-from URI for graph-traversal results
 
 ### Validate tool
 `validate` in `validate.go` checks graph compliance:

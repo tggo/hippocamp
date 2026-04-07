@@ -150,6 +150,15 @@ func houseProject() testProject {
 	triples = append(triples, triplePartOf(entityHillCountry, entityProject))
 	triples = append(triples, triplePartOf(entityComfortAir, entityProject))
 
+	// Timestamps — simulate a project timeline
+	triples = append(triples, tripleCreatedAt(decisionRoof, "2026-04-05T10:00:00"))        // yesterday
+	triples = append(triples, tripleCreatedAt(decisionInsulation, "2026-03-15T09:00:00"))   // March
+	triples = append(triples, tripleCreatedAt(decisionWaterHeater, "2026-04-06T08:30:00"))  // today
+	triples = append(triples, tripleCreatedAt(noteFoundation, "2026-02-10T11:00:00"))       // February
+	triples = append(triples, tripleCreatedAt(noteLumber, "2026-04-01T14:00:00"))           // this week
+	triples = append(triples, tripleCreatedAt(notePlumbing, "2025-12-20T09:00:00"))         // old
+	triples = append(triples, tripleUpdatedAt(noteFoundation, "2026-04-04T16:00:00"))       // updated recently
+
 	return testProject{
 		Name:    "HouseConstruction",
 		Graph:   g,
@@ -292,6 +301,25 @@ func houseProject() testProject {
 				Args:       map[string]any{"query": "Sarah Kim"},
 				MinResults: 1,
 				MustFind:   []string{entityComfortAir},
+			},
+			// --- Temporal queries ---
+			{
+				Name:       "temporal_decision_today",
+				Args:       map[string]any{"query": "decision today"},
+				MinResults: 1,
+				MustFind:   []string{decisionWaterHeater},
+			},
+			{
+				Name:       "temporal_march_insulation",
+				Args:       map[string]any{"query": "insulation march 2026"},
+				MinResults: 1,
+				MustFind:   []string{decisionInsulation},
+			},
+			{
+				Name:       "temporal_april_lumber",
+				Args:       map[string]any{"query": "lumber april 2026"},
+				MinResults: 1,
+				MustFind:   []string{noteLumber},
 			},
 		},
 	}

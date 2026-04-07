@@ -104,6 +104,14 @@ func tripleTag(subj, tagURI string) testTriple {
 	return testTriple{subj, testHippoHasTag, tagURI, "uri"}
 }
 
+func tripleCreatedAt(subj, iso8601 string) testTriple {
+	return testTriple{subj, testHippoNS + "createdAt", iso8601, "literal"}
+}
+
+func tripleUpdatedAt(subj, iso8601 string) testTriple {
+	return testTriple{subj, testHippoNS + "updatedAt", iso8601, "literal"}
+}
+
 // entity returns a set of triples for an Entity resource.
 func entity(uri, label, summary string) []testTriple {
 	return []testTriple{
