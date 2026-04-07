@@ -315,3 +315,96 @@ func TestAnalyze_ExportHTML(t *testing.T) {
 		t.Error("HTML should contain node data")
 	}
 }
+
+// ── consolidate ─────────────────────────────────────────────
+
+func TestAnalyze_Consolidate_MissingSummary(t *testing.T) {
+	s := rdfstore.NewStore()
+	defer s.Close()
+
+	// Entity with NO summary
+	s.AddTriple("", "https://ex.org/svc", "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", "https://hippocamp.dev/ontology#Entity", "uri", "", "")
+	s.AddTriple("", "https://ex.org/svc", "http://www.w3.org/2000/01/rdf-schema#label", "My Service", "literal", "", "")
+	// Entity WITH summary (should not appear)
+	s.AddTriple("", "https://ex.org/db", "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", "https://hippocamp.dev/ontology#Entity", "uri", "", "")
+	s.AddTriple("", "https://ex.org/db", "http://www.w3.org/2000/01/rdf-schema#label", "Database", "literal", "", "")
+	s.AddTriple("", "https://ex.org/db", "https://hippocamp.dev/ontology#summary", "Main PostgreSQL database for user data", "literal", "", "")
+	s.AddTriple("", "https://ex.org/db", "https://hippocamp.dev/ontology#hasTopic", "https://ex.org/topic/backend", "uri", "", "")
+	// Relationship for context
+	s.AddTriple("", "https://ex.org/svc", "https://hippocamp.dev/ontology#references", "https://ex.org/db", "uri", "", "")
+
+	result := callTool(t, s, "analyze", map[string]any{"action": "consolidate"})
+	text := tools.ResultText(result)
+	t.Logf("consolidate: %s", text)
+
+	var suggestions []struct {
+		URI             string `json:"uri"`
+		Issue           string `json:"issue"`
+		SuggestedPrompt string `json:"suggested_prompt"`
+	}
+	if err := json.Unmarshal([]byte(text), &suggestions); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+
+	// Should find svc (missing summary) but not db (has summary)
+	found := false
+	for _, s := range suggestions {
+		if strings.Contains(s.URI, "svc") {
+			found = true
+			if s.Issue != "missing_summary" {
+				t.Errorf("expected issue=missing_summary, got %s", s.Issue)
+			}
+			if !strings.Contains(s.SuggestedPrompt, "Database") {
+				t.Errorf("expected prompt to mention referenced Database, got: %s", s.SuggestedPrompt)
+			}
+		}
+		if strings.Contains(s.URI, "db") {
+			t.Error("db has a summary, should not appear in consolidate results")
+		}
+	}
+	if !found {
+		t.Error("expected svc in consolidate results (missing summary)")
+	}
+}
+
+func TestAnalyze_Consolidate_SparseSummary(t *testing.T) {
+	s := rdfstore.NewStore()
+	defer s.Close()
+
+	s.AddTriple("", "https://ex.org/x", "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", "https://hippocamp.dev/ontology#Entity", "uri", "", "")
+	s.AddTriple("", "https://ex.org/x", "http://www.w3.org/2000/01/rdf-schema#label", "Widget", "literal", "", "")
+	s.AddTriple("", "https://ex.org/x", "https://hippocamp.dev/ontology#summary", "A thing", "literal", "", "")
+	s.AddTriple("", "https://ex.org/x", "https://hippocamp.dev/ontology#hasTopic", "https://ex.org/topic/main", "uri", "", "")
+
+	result := callTool(t, s, "analyze", map[string]any{"action": "consolidate"})
+	text := tools.ResultText(result)
+
+	var suggestions []struct {
+		Issue string `json:"issue"`
+	}
+	json.Unmarshal([]byte(text), &suggestions)
+
+	found := false
+	for _, s := range suggestions {
+		if s.Issue == "sparse_summary" {
+			found = true
+		}
+	}
+	if !found {
+		t.Error("expected sparse_summary issue for very short summary")
+	}
+}
+
+func TestAnalyze_Consolidate_Empty(t *testing.T) {
+	s := rdfstore.NewStore()
+	defer s.Close()
+
+	result := callTool(t, s, "analyze", map[string]any{"action": "consolidate"})
+	text := tools.ResultText(result)
+
+	var suggestions []json.RawMessage
+	json.Unmarshal([]byte(text), &suggestions)
+	if len(suggestions) != 0 {
+		t.Errorf("expected 0 suggestions on empty graph, got %d", len(suggestions))
+	}
+}

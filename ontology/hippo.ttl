@@ -278,3 +278,8 @@ hippo:source a rdf:Property ;
     rdfs:label "source" ;
     rdfs:comment "The agent, tool, or process that produced this resource. Inverse of hippo:sourceOf." ;
     rdfs:range rdfs:Resource .
+
+hippo:revision a rdf:Property ;
+    rdfs:label "revision" ;
+    rdfs:comment "Revision counter for a resource. Tracks how many times it has been updated. Distinct from hippo:version (dependency version string)." ;
+    rdfs:range xsd:integer .

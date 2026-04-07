@@ -60,19 +60,21 @@ Actions:
   god_nodes   — most-connected resources by degree (excludes Topic/Tag/Project hubs)
   components  — connected components (clusters) via BFS
   surprising  — cross-topic or cross-graph edges (bridges between clusters)
-  export_html — start a local HTTP server with interactive vis.js graph visualization
+  export_html  — start a local HTTP server with interactive vis.js graph visualization
+  consolidate — find resources with missing/sparse summaries and suggest enrichments with graph context
 
 Examples:
   {"action":"god_nodes","limit":5}
   {"action":"components","scope":"urn:hippocamp:default"}
   {"action":"surprising"}
   {"action":"export_html"}
+  {"action":"consolidate","limit":10}
 
 Returns JSON arrays. export_html returns {"url":"http://localhost:PORT"}.`),
 		mcp.WithString("action",
 			mcp.Required(),
 			mcp.Description("Analysis operation"),
-			mcp.Enum("god_nodes", "components", "surprising", "export_html"),
+			mcp.Enum("god_nodes", "components", "surprising", "export_html", "consolidate"),
 		),
 		mcp.WithString("scope",
 			mcp.Description("Named graph URI to analyze (omit for all graphs)"),
@@ -101,6 +103,9 @@ func analyzeHandlerFactory(store *rdfstore.Store) handlerFunc {
 			return handleSurprising(store, scope)
 		case "export_html":
 			return handleExportHTML(store, scope)
+		case "consolidate":
+			limit := int(req.GetFloat("limit", 20))
+			return handleConsolidate(store, scope, limit)
 		default:
 			return mcp.NewToolResultError(fmt.Sprintf("unknown action %q", action)), nil
 		}
@@ -423,6 +428,174 @@ func handleSurprising(store *rdfstore.Store, scope string) (*mcp.CallToolResult,
 	}
 
 	return jsonResult(results)
+}
+
+// ── consolidate ─────────────────────────────────────────────
+
+type ConsolidateSuggestion struct {
+	URI            string            `json:"uri"`
+	Label          string            `json:"label,omitempty"`
+	Type           string            `json:"type,omitempty"`
+	Issue          string            `json:"issue"`
+	Context        map[string][]string `json:"context"`
+	SuggestedPrompt string           `json:"suggested_prompt"`
+}
+
+func handleConsolidate(store *rdfstore.Store, scope string, limit int) (*mcp.CallToolResult, error) {
+	triples, err := collectTriples(store, scope)
+	if err != nil {
+		return mcp.NewToolResultError(err.Error()), nil
+	}
+
+	idx := buildIndex(triples)
+
+	// Also collect summaries and hasTopic per resource.
+	summaries := make(map[string]string)
+	for _, t := range triples {
+		switch t.Predicate {
+		case hippoNS + "summary":
+			summaries[t.Subject] = t.Object
+		}
+	}
+
+	// Build reverse adjacency for "referenced_by".
+	referencedBy := make(map[string][]string) // object → []subject labels
+	references := make(map[string][]string)   // subject → []object labels
+	decisions := make(map[string][]string)     // topic URI → []decision labels
+
+	for _, t := range triples {
+		if metaPredicates[t.Predicate] || t.ObjType != "uri" {
+			continue
+		}
+		sLabel := idx[t.Subject].Label
+		if sLabel == "" {
+			sLabel = localName(t.Subject)
+		}
+		oLabel := ""
+		if on, ok := idx[t.Object]; ok {
+			oLabel = on.Label
+			if oLabel == "" {
+				oLabel = localName(t.Object)
+			}
+		}
+		references[t.Subject] = appendUnique(references[t.Subject], oLabel)
+		referencedBy[t.Object] = appendUnique(referencedBy[t.Object], sLabel)
+	}
+
+	// Collect decisions per topic.
+	for _, t := range triples {
+		if t.Predicate == hippoNS+"hasTopic" {
+			if n, ok := idx[t.Subject]; ok && n.Type == hippoNS+"Decision" {
+				decisions[t.Object] = appendUnique(decisions[t.Object], n.Label)
+			}
+		}
+	}
+
+	var suggestions []ConsolidateSuggestion
+
+	for uri, n := range idx {
+		if n.Type == "" {
+			continue // skip untyped resources
+		}
+
+		var issue string
+		summary := summaries[uri]
+
+		if summary == "" {
+			issue = "missing_summary"
+		} else if len(summary) < 20 {
+			issue = "sparse_summary"
+		} else if len(n.Topics) == 0 && n.Type != hippoNS+"Topic" && n.Type != hippoNS+"Tag" {
+			issue = "no_topic"
+		} else {
+			continue // resource is fine
+		}
+
+		ctx := make(map[string][]string)
+		if refs := references[uri]; len(refs) > 0 {
+			ctx["references"] = refs
+		}
+		if refBy := referencedBy[uri]; len(refBy) > 0 {
+			ctx["referenced_by"] = refBy
+		}
+		if len(n.Topics) > 0 {
+			topicNames := make([]string, len(n.Topics))
+			for i, t := range n.Topics {
+				topicNames[i] = localName(t)
+			}
+			ctx["topics"] = topicNames
+			// Include related decisions.
+			for _, t := range n.Topics {
+				if decs := decisions[t]; len(decs) > 0 {
+					ctx["related_decisions"] = appendUnique(ctx["related_decisions"], decs...)
+				}
+			}
+		}
+
+		// Build suggested prompt.
+		action := "summary"
+		if issue == "no_topic" {
+			action = "hasTopic"
+		}
+		prompt := fmt.Sprintf("Add hippo:%s to %s (type: %s).", action, n.Label, localName(n.Type))
+		if refs := ctx["references"]; len(refs) > 0 {
+			prompt += fmt.Sprintf(" References: %s.", strings.Join(refs, ", "))
+		}
+		if refBy := ctx["referenced_by"]; len(refBy) > 0 {
+			prompt += fmt.Sprintf(" Referenced by: %s.", strings.Join(refBy, ", "))
+		}
+		if topics := ctx["topics"]; len(topics) > 0 {
+			prompt += fmt.Sprintf(" Topics: %s.", strings.Join(topics, ", "))
+		}
+
+		suggestions = append(suggestions, ConsolidateSuggestion{
+			URI:             uri,
+			Label:           n.Label,
+			Type:            localName(n.Type),
+			Issue:           issue,
+			Context:         ctx,
+			SuggestedPrompt: prompt,
+		})
+	}
+
+	// Sort by issue severity: missing_summary first, then sparse, then no_topic.
+	sort.SliceStable(suggestions, func(i, j int) bool {
+		return issueOrder(suggestions[i].Issue) < issueOrder(suggestions[j].Issue)
+	})
+
+	// Apply limit after sorting (so most severe issues always appear first).
+	if len(suggestions) > limit {
+		suggestions = suggestions[:limit]
+	}
+
+	return jsonResult(suggestions)
+}
+
+func issueOrder(issue string) int {
+	switch issue {
+	case "missing_summary":
+		return 0
+	case "sparse_summary":
+		return 1
+	case "no_topic":
+		return 2
+	default:
+		return 3
+	}
+}
+
+func appendUnique(slice []string, items ...string) []string {
+	seen := make(map[string]bool, len(slice))
+	for _, s := range slice {
+		seen[s] = true
+	}
+	for _, item := range items {
+		if !seen[item] {
+			slice = append(slice, item)
+			seen[item] = true
+		}
+	}
+	return slice
 }
 
 // ── export_html ─────────────────────────────────────────────

@@ -70,20 +70,22 @@ TriG extends Turtle with named graph blocks. It's the only text format that pres
 - **`triple`** and **`sparql`** are separate tools (frequent use, rich descriptions with examples)
 - **`graph`** groups infrequent operations: graph lifecycle, persistence, and prefix management
 - **`search`** is a standalone tool for keyword search across the graph (matches labels, summaries, file paths, signatures, content, URLs)
-- **`analyze`** is a read-only analysis tool: god_nodes (most-connected resources), components (BFS clusters), surprising (cross-topic/cross-graph edges), export_html (vis.js visualization served on localhost)
+- **`analyze`** is a read-only analysis tool: god_nodes, components, surprising, export_html, consolidate
 
 ### Analyze tool
-`analyze` in `analyze.go` provides graph structure analysis via four actions:
+`analyze` in `analyze.go` provides graph structure analysis via five actions:
 - **`god_nodes`**: counts in/out degree per resource (excluding metadata predicates), filters out hub types (Topic, Tag, Project), returns top N by total degree
 - **`components`**: builds undirected URI adjacency from relationship triples, runs BFS to find connected components, returns with member URIs, labels, and topic breakdown
 - **`surprising`**: finds edges where subject and object have different `hippo:hasTopic` values (cross-topic) or live in different named graphs (cross-graph). Skips metadata predicates.
-- **`export_html`**: returns the URL of the built-in visualization server (auto-started on port 39322+ at MCP boot). The page dynamically renders the current graph state. Returns `{"url":"http://localhost:39322"}`.
+- **`export_html`**: returns the URL of the built-in visualization server (auto-started on port 39322+ at MCP boot). The page dynamically renders the current graph state. Returns `{"url":"http://localhost:39322"}`
+- **`consolidate`**: finds resources with missing/sparse summaries or no topics. Returns suggestions with graph context (references, referenced_by, topics, related_decisions) and a suggested prompt for the LLM to generate the missing data
 
 ### Ontology provenance predicates
 Three properties for tracking triple quality and origin:
 - **`hippo:confidence`**: float 0.0–1.0, distinguishes firm facts from inferences
 - **`hippo:provenance`**: string "extracted" / "inferred" / "ambiguous" — how a triple was created
 - **`hippo:source`**: URI pointing to the agent/tool/process that produced the resource (inverse of `hippo:sourceOf`)
+- **`hippo:revision`**: integer revision counter tracking how many times a resource has been updated (distinct from `hippo:version` which is a dependency version string)
 
 ### Search tool implementation
 `search` in `search.go` does text matching in Go (not SPARQL FILTER/REGEX) for reliability:
@@ -103,7 +105,8 @@ Three properties for tracking triple quality and origin:
 - All `rdf:type` values must be from the `hippo:` namespace (no custom types)
 - All typed resources must have `rdfs:label`
 - All `hippo:Decision` resources must have `hippo:rationale`
-- Returns JSON with `valid` (bool), `warnings` (array), and `stats`
+- **Fuzzy type matching**: unknown hippo types are compared to all 17 valid types via LCS-based string similarity. If a match >= 50% is found, the warning says "did you mean hippo:X?" and includes fix commands (remove wrong type + add suggested type)
+- Returns JSON with `valid` (bool), `warnings` (array), `fixes` (array), and `stats`
 
 ### CLI query mode
 `--query` flag in `main.go` enables one-shot search: loads the persisted graph, runs a search, prints JSON results, and exits. Used by hooks and scripts.

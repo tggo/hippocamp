@@ -355,7 +355,7 @@ func searchGraph(store *rdfstore.Store, query, typeFilter, scope string, limit i
 			tScore = computeTemporalScore(createdAt, updatedAt, tRange)
 		}
 
-		// Combined score: text score + temporal boost.
+		// Combined score: text score + temporal boost + popularity boost.
 		// Temporal adds up to 50% of max text score as a bonus lane.
 		finalScore := float64(c.score)
 		if tRange != nil && tScore > 0 {
@@ -553,6 +553,7 @@ func searchGraph(store *rdfstore.Store, query, typeFilter, scope string, limit i
 		}
 		out[i] = r.result
 	}
+
 	return out, nil
 }
 

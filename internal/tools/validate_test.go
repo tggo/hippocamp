@@ -3,6 +3,7 @@ package tools
 import (
 	"context"
 	"encoding/json"
+	"strings"
 	"testing"
 
 	"github.com/mark3labs/mcp-go/mcp"
@@ -13,6 +14,7 @@ type validateResult struct {
 	Valid    bool     `json:"valid"`
 	Errors   []string `json:"errors"`
 	Warnings []string `json:"warnings"`
+	Fixes    []string `json:"fixes"`
 	Stats    struct {
 		Resources    int `json:"resources"`
 		WithType     int `json:"with_type"`
@@ -148,5 +150,112 @@ func TestValidate_DecisionWithoutRationale(t *testing.T) {
 	vr := callValidate(t, store, map[string]any{})
 	if vr.Valid {
 		t.Error("expected invalid: Decision without rationale")
+	}
+}
+
+func TestValidate_FuzzyTypeMatch(t *testing.T) {
+	store := rdfstore.NewStore()
+	defer store.Close()
+
+	// hippo:Component should suggest hippo:Concept (high similarity).
+	store.AddTriple("", "http://test.org/a", rdfType, testHippoNS+"Component", "uri", "", "")
+	store.AddTriple("", "http://test.org/a", rdfsLabel, "Auth Module", "literal", "", "")
+
+	vr := callValidate(t, store, map[string]any{})
+
+	if !vr.Valid {
+		t.Error("unknown hippo type should still be valid (warning only)")
+	}
+
+	// Should have a warning with "did you mean"
+	found := false
+	for _, w := range vr.Warnings {
+		if strings.Contains(w, "did you mean") {
+			found = true
+			t.Logf("warning: %s", w)
+		}
+	}
+	if !found {
+		t.Errorf("expected 'did you mean' warning, got: %v", vr.Warnings)
+	}
+
+	// Should have fix suggestions
+	if len(vr.Fixes) < 2 {
+		t.Errorf("expected at least 2 fixes (remove + add), got %d: %v", len(vr.Fixes), vr.Fixes)
+	}
+}
+
+func TestValidate_FuzzyTypeMatch_NoMatch(t *testing.T) {
+	store := rdfstore.NewStore()
+	defer store.Close()
+
+	// hippo:Zzzzz has no close match — should fall back to generic message.
+	store.AddTriple("", "http://test.org/a", rdfType, testHippoNS+"Zzzzz", "uri", "", "")
+	store.AddTriple("", "http://test.org/a", rdfsLabel, "Something", "literal", "", "")
+
+	vr := callValidate(t, store, map[string]any{})
+
+	found := false
+	for _, w := range vr.Warnings {
+		if strings.Contains(w, "consider using hippo:Entity") {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("expected generic fallback warning, got: %v", vr.Warnings)
+	}
+}
+
+func TestSuggestType(t *testing.T) {
+	tests := []struct {
+		input    string
+		wantMatch string
+		wantMin  float64
+	}{
+		{"Component", "Concept", 0.5},
+		{"Enity", "Entity", 0.5},     // typo
+		{"Functon", "Function", 0.5},  // typo
+		{"Strukt", "Struct", 0.5},     // close
+		{"Zzzzzzz", "", 0},            // no match
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			match, score := suggestType(tt.input)
+			if tt.wantMatch == "" {
+				if match != "" {
+					t.Errorf("expected no match, got %q (%.2f)", match, score)
+				}
+			} else {
+				if match != tt.wantMatch {
+					t.Errorf("expected match %q, got %q (%.2f)", tt.wantMatch, match, score)
+				}
+				if score < tt.wantMin {
+					t.Errorf("expected score >= %.2f, got %.2f", tt.wantMin, score)
+				}
+			}
+		})
+	}
+}
+
+func TestStringSimilarity(t *testing.T) {
+	tests := []struct {
+		a, b    string
+		wantMin float64
+	}{
+		{"concept", "concept", 1.0},
+		{"component", "concept", 0.5},
+		{"entity", "enity", 0.8},
+		{"", "abc", 0.0},
+		{"abc", "", 0.0},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.a+"_"+tt.b, func(t *testing.T) {
+			score := stringSimilarity(tt.a, tt.b)
+			if score < tt.wantMin {
+				t.Errorf("stringSimilarity(%q, %q) = %.2f, want >= %.2f", tt.a, tt.b, score, tt.wantMin)
+			}
+		})
 	}
 }

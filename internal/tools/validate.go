@@ -10,6 +10,15 @@ import (
 	"github.com/ruslanmv/hippocamp/internal/rdfstore"
 )
 
+// validHippoTypeNames is the list of local names for fuzzy matching.
+var validHippoTypeNames []string
+
+func init() {
+	for t := range validHippoTypes {
+		validHippoTypeNames = append(validHippoTypeNames, strings.TrimPrefix(t, hippoNS))
+	}
+}
+
 // validHippoTypes are the accepted rdf:type values from the hippo: ontology.
 var validHippoTypes = map[string]bool{
 	hippoNS + "Topic":      true,
@@ -119,10 +128,20 @@ func validateHandlerFactory(store *rdfstore.Store) handlerFunc {
 					out.Stats.NonStandard++
 					shortType := ri.rdfType
 					if strings.HasPrefix(shortType, hippoNS) {
-						shortType = "hippo:" + strings.TrimPrefix(shortType, hippoNS)
-						// Unknown hippo: type — warning only (user may extend the ontology).
-						out.Warnings = append(out.Warnings,
-							fmt.Sprintf("unknown hippo type %s on <%s> — consider using hippo:Entity with hippo:hasTag instead", shortType, uri))
+						localName := strings.TrimPrefix(shortType, hippoNS)
+						shortType = "hippo:" + localName
+						// Unknown hippo: type — suggest closest match via fuzzy matching.
+						if match, score := suggestType(localName); match != "" {
+							out.Warnings = append(out.Warnings,
+								fmt.Sprintf("unknown hippo type %s on <%s> — did you mean hippo:%s? (%.0f%% similar)", shortType, uri, match, score*100))
+							out.Fixes = append(out.Fixes,
+								fmt.Sprintf("triple action=remove subject=%s predicate=%s object=%s", uri, rdfType, ri.rdfType))
+							out.Fixes = append(out.Fixes,
+								fmt.Sprintf("triple action=add subject=%s predicate=%s object=%s%s", uri, rdfType, hippoNS, match))
+						} else {
+							out.Warnings = append(out.Warnings,
+								fmt.Sprintf("unknown hippo type %s on <%s> — consider using hippo:Entity with hippo:hasTag instead", shortType, uri))
+						}
 					} else {
 						// Non-hippo namespace — error.
 						out.Errors = append(out.Errors,
@@ -174,4 +193,58 @@ func validateHandlerFactory(store *rdfstore.Store) handlerFunc {
 		data, _ := json.Marshal(out)
 		return mcp.NewToolResultText(string(data)), nil
 	}
+}
+
+// suggestType finds the closest valid hippo type name using string similarity.
+// Returns the best match and similarity score (0.0–1.0). Returns ("", 0) if no
+// match above the 0.5 threshold.
+func suggestType(unknown string) (string, float64) {
+	unknown = strings.ToLower(unknown)
+	bestMatch := ""
+	bestScore := 0.0
+
+	for _, name := range validHippoTypeNames {
+		score := stringSimilarity(unknown, strings.ToLower(name))
+		if score > bestScore {
+			bestScore = score
+			bestMatch = name
+		}
+	}
+
+	if bestScore < 0.5 {
+		return "", 0
+	}
+	return bestMatch, bestScore
+}
+
+// stringSimilarity computes a similarity ratio between two strings using the
+// longest common subsequence: 2 * LCS / (len(a) + len(b)).
+func stringSimilarity(a, b string) float64 {
+	if a == b {
+		return 1.0
+	}
+	la, lb := len(a), len(b)
+	if la == 0 || lb == 0 {
+		return 0.0
+	}
+
+	// LCS via dynamic programming.
+	dp := make([][]int, la+1)
+	for i := range dp {
+		dp[i] = make([]int, lb+1)
+	}
+	for i := 1; i <= la; i++ {
+		for j := 1; j <= lb; j++ {
+			if a[i-1] == b[j-1] {
+				dp[i][j] = dp[i-1][j-1] + 1
+			} else if dp[i-1][j] > dp[i][j-1] {
+				dp[i][j] = dp[i-1][j]
+			} else {
+				dp[i][j] = dp[i][j-1]
+			}
+		}
+	}
+
+	lcs := dp[la][lb]
+	return 2.0 * float64(lcs) / float64(la+lb)
 }
