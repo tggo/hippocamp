@@ -41,6 +41,16 @@ Use the `hippo:` namespace (`https://hippocamp.dev/ontology#`). Core types:
 - `hippo:createdAt` — ISO 8601 timestamp
 - `hippo:sourceOf` — links a source to produced knowledge
 
+### Provenance properties (use when confidence varies)
+- `hippo:confidence` — float 0.0–1.0. Use 1.0 for facts directly stated in documents, 0.7–0.9 for inferred relationships, 0.3–0.6 for uncertain claims
+- `hippo:provenance` — how the triple was created: `"extracted"` (from source text), `"inferred"` (by reasoning), `"ambiguous"` (uncertain)
+- `hippo:source` — URI of the agent or process that produced this resource (e.g. `hippo:source <https://hippocamp.dev/skill/project-analyze>`)
+
+### Temporal validity (use when facts have a lifespan)
+- `hippo:validFrom` — ISO 8601 timestamp from which the fact is valid
+- `hippo:validTo` — ISO 8601 timestamp until which the fact was valid (non-empty = no longer current)
+- Use `triple action=invalidate subject=<uri>` to mark a resource as expired (sets `validTo=now`, `status=invalidated`). The original triples stay in the graph for history.
+
 ## Procedure
 
 ### Step 1: Setup prefixes and named graph
@@ -56,6 +66,15 @@ Derive the project name from the directory name. Create a named graph:
 ```
 graph action=create name=project:{name}
 ```
+
+### Step 1.5: Check existing graph state and apply migrations
+
+Run `graph action=summary` to see what's already in the graph. This returns a compact overview (~500 tokens): type counts, topics, top entities, recent decisions, invalidation stats. Use this to:
+- Avoid re-creating entities that already exist (duplicate detection will warn you, but checking first is faster)
+- Understand the current topic structure before adding new ones
+- See how many resources have been invalidated
+
+Then run `validate` to check for pending schema migrations. If you see a warning like *"schema update available — run graph action=migrate"*, run `graph action=migrate` before proceeding. This enriches old data with new properties (e.g. adds `hippo:provenance` defaults). **Always do this when starting with an existing graph after updating hippocamp.**
 
 ### Step 2: Check for incremental mode
 
@@ -106,6 +125,12 @@ triple action=add graph=project:{name} subject=https://hippocamp.dev/project/{na
 triple action=add graph=project:{name} subject=https://hippocamp.dev/project/{name}/entity/{entity-slug} predicate=hippo:hasTopic object=https://hippocamp.dev/project/{name}/topic/{relevant-topic}
 ```
 
+For entities inferred (not explicitly stated in source documents), add provenance:
+```
+triple action=add graph=project:{name} subject=.../{entity-slug} predicate=hippo:confidence object="0.7" object_type=literal datatype=http://www.w3.org/2001/XMLSchema#float
+triple action=add graph=project:{name} subject=.../{entity-slug} predicate=hippo:provenance object="inferred" object_type=literal
+```
+
 ### Step 7: Capture notes
 
 For important observations, specifications, instructions, or summaries:
@@ -153,7 +178,24 @@ Connect resources to each other:
 - `hippo:hasTopic` — categorize anything under a topic
 - `hippo:hasTag` — lightweight tagging
 
-### Step 12: Persist
+### Step 12: Validate and fix
+
+Run `validate` to check for issues. The tool now provides:
+- **Fuzzy type suggestions**: if you accidentally used a wrong type (e.g. `hippo:Component`), validate suggests the closest match (e.g. "did you mean hippo:Concept?") with fix commands — apply them.
+- **Dangling references**: links to non-existent resources, with `triple action=remove` fix commands.
+- **Orphan resources**: typed resources with no relationships — add `hippo:hasTopic` or `hippo:references` to connect them.
+- **Missing aliases**: failed search queries that suggest resources need `hippo:alias` — add the suggested aliases.
+
+### Step 13: Consolidate
+
+Run `analyze action=consolidate` to find resources that need enrichment. The tool returns resources with:
+- `missing_summary` — add `hippo:summary` using the provided context (references, topics, related decisions)
+- `sparse_summary` — expand the summary with more detail
+- `no_topic` — add `hippo:hasTopic` to connect the resource to the topic structure
+
+Each suggestion includes a `suggested_prompt` with context. Use it to add the missing data.
+
+### Step 14: Persist
 
 ```
 graph action=dump file=./data/default.trig
@@ -182,6 +224,10 @@ Use lowercase kebab-case slugs derived from the label.
 - Keep summaries concise (one sentence)
 - For large projects, prioritize the most important 50-100 entities
 - Use SPARQL INSERT DATA for bulk operations when adding many triples at once
-- Run `validate` after: initial graph population, bulk triple additions (10+), removing resources, or when search returns zero results unexpectedly
-- Validate returns pre-computed health data: dangling references (with fix commands), orphan resources, and alias suggestions from failed searches. Apply the suggested fixes.
+- Run `validate` after: initial graph population, bulk triple additions (10+), removing resources, or when search returns zero results unexpectedly. Validate now suggests closest type matches for typos (e.g. `hippo:Entiy` → "did you mean hippo:Entity?") — apply the fix commands.
+- Run `analyze action=consolidate` after initial population to find and fill gaps (missing summaries, orphaned resources). Use the suggested prompts.
+- Use `analyze action=export_html` to get a visualization URL — open it in the browser to review the graph visually.
+- Use `analyze action=god_nodes` to identify the most connected resources (hubs) in the graph.
+- Use `analyze action=surprising` to find cross-topic connections that may reveal non-obvious relationships.
+- Add `hippo:confidence` and `hippo:provenance` when the certainty of extracted facts varies — this helps downstream consumers filter by reliability.
 - After analysis, report a summary: number of topics, entities, notes, decisions, questions, and sources indexed

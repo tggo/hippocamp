@@ -6,7 +6,7 @@
 
 # hippocamp
 
-RDF knowledge graph for LLMs — an MCP server that gives any AI agent a structured, queryable memory via five tools: `triple`, `sparql`, `graph`, `search`, `validate`.
+RDF knowledge graph for LLMs — an MCP server that gives any AI agent a structured, queryable memory via six tools: `triple`, `sparql`, `graph`, `search`, `validate`, `analyze`.
 
 Plug it into any project as a persistent brain. Use the built-in ontology for research notes, construction planning, sales pipelines, recipe collections, or any structured knowledge. Auto-installs Claude Code skills and hooks.
 
@@ -122,6 +122,12 @@ Returns JSON bindings for SELECT, `"true"`/`"false"` for ASK, `"ok"` for updates
 {"action":"load","file":"./backup.trig"}
 ```
 
+**Overview and migration:**
+```
+{"action":"summary"}   — compact graph overview (~500 tokens): type counts, top entities, topics, recent decisions
+{"action":"migrate"}   — apply pending schema migrations (e.g. add provenance defaults to old data)
+```
+
 **Namespace prefixes:**
 ```
 {"action":"prefix_add","prefix":"ex","uri":"http://example.org/"}
@@ -146,6 +152,7 @@ Returns JSON bindings for SELECT, `"true"`/`"false"` for ASK, `"ok"` for updates
 | `scope` | Named graph to search in (omit for all graphs) |
 | `limit` | Max results (default: 20) |
 | `related` | Follow `hasTopic`, `references`, `partOf` links to include related resources (default: false) |
+| `explain` | Add per-field score breakdown, temporal proximity, and popularity data (default: false) |
 
 Searches across `rdfs:label`, `hippo:summary`, `hippo:alias`, `hippo:filePath`, `hippo:signature`, `hippo:content`, `hippo:url`, `hippo:rationale`, and subject URIs. Uses field boosting (label matches score highest), word boundary scoring, and score accumulation across predicates.
 
@@ -172,8 +179,36 @@ Checks:
 - All `rdf:type` values are from the `hippo:` namespace
 - All typed resources have `rdfs:label`
 - All Decisions have `hippo:rationale`
+- **Fuzzy type matching**: typos like `hippo:Entiy` get a suggestion — *"did you mean hippo:Entity? (91% similar)"* — with fix commands
+- **Schema migrations**: warns if a newer schema version is available with `graph action=migrate` fix
 
-Returns JSON with `valid` (bool), `warnings` (array), and `stats`.
+Returns JSON with `valid` (bool), `warnings` (array), `fixes` (array of suggested commands), and `stats`.
+
+---
+
+### `analyze` — graph structure analysis
+
+```
+{"action":"god_nodes","limit":5}
+{"action":"components"}
+{"action":"surprising"}
+{"action":"consolidate","limit":10}
+{"action":"export_html"}
+```
+
+| Action | What it does |
+|---|---|
+| `god_nodes` | Most-connected resources by degree, excluding Topic/Tag/Project hubs |
+| `components` | Connected components (clusters) via BFS |
+| `surprising` | Cross-topic or cross-graph edges (bridges between clusters) |
+| `consolidate` | Find resources with missing summaries/topics, suggest enrichments with graph context |
+| `export_html` | Return URL of the live visualization server (auto-started on port 39322) |
+
+| Parameter | Notes |
+|---|---|
+| `action` | required |
+| `scope` | Named graph to analyze (omit for all graphs) |
+| `limit` | Max results for god_nodes (default: 10) and consolidate (default: 20) |
 
 ---
 
@@ -206,7 +241,31 @@ Hippocamp includes a lightweight RDF ontology (`ontology/hippo.ttl`) with two la
 - `hippo:Function`, `hippo:Struct`, `hippo:Interface`, `hippo:Class`
 - `hippo:Dependency`, `hippo:Concept`
 
+**Provenance and quality tracking:**
+- `hippo:confidence` — float 0.0-1.0 (how certain is this fact?)
+- `hippo:provenance` — `"extracted"` / `"inferred"` / `"ambiguous"`
+- `hippo:source` — URI of the agent/tool that produced the resource
+
+**Temporal validity:**
+- `hippo:validFrom` / `hippo:validTo` — mark facts as time-bounded (invalidated facts stay in graph for history)
+
 The ontology is open-world — extend with your own classes and properties.
+
+## Schema migrations
+
+When you upgrade hippocamp, your existing data keeps working (RDF is schema-less). But new features may benefit from enriching old data. The migration system handles this automatically:
+
+1. Run `validate` — if a migration is available, you'll see:
+   ```
+   "schema update available — run graph action=migrate to apply 1 pending migration(s)"
+   ```
+2. Run `graph action=migrate` — applies all pending migrations and reports what changed
+3. The graph's schema version is stored as a triple and checked on each validate
+
+Current migrations:
+- **v2**: Adds `hippo:provenance "extracted"` and `hippo:confidence 1.0` to all typed resources that lack them
+
+Migrations are additive — they never delete data. Resources that already have the properties are skipped.
 
 ## Claude Code integration
 
@@ -286,6 +345,30 @@ All tools accept an optional `graph` parameter (URI string). Omit it to use the 
 {"action":"create","name":"http://ex.org/people"}
 {"action":"delete","name":"http://ex.org/people"}
 ```
+
+## Benchmarks
+
+Memory retrieval benchmarks adapted from [LongMemEval](https://github.com/xiaowu0162/LongMemEval) (ICLR 2025), [ConvoMem](https://github.com/SalesforceAIResearch/ConvoMem) (Salesforce), and [LoCoMo](https://github.com/snap-research/locomo) (Snap Research). Measures R@5 (correct result in top 5) using keyword search only, no embeddings.
+
+| Benchmark | R@5 | Details |
+|---|---|---|
+| **MemEval** (v2) | **100%** | extraction 100%, reasoning 100%, temporal 100% |
+| **ConvoMem** (v2) | **100%** | user facts 100%, preferences 100%, temporal 100%, implicit 100% |
+| **LoCoMo** (v2) | **88.9%** | single-hop 100%, multi-hop 100%, temporal 100%, adversarial 0% |
+
+Known weakness: adversarial/abstention queries (keyword search can't distinguish "no relevant result" from partial keyword matches).
+
+Run benchmarks:
+```bash
+go test ./internal/tools/ -run TestMemoryBenchmark -v
+```
+
+## Visualization
+
+Hippocamp starts an HTTP server on `localhost:39322` alongside the MCP server. Open it in a browser for an interactive graph visualization with:
+- Nodes colored by type, sized by degree
+- Search and type filter
+- Click-to-inspect with full property list and edge details
 
 ## Development
 

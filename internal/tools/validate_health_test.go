@@ -166,6 +166,9 @@ func TestValidateWithoutHealthChecker(t *testing.T) {
 	store.AddTriple("", "http://ex.org/clean", rdfType, testHippoEntity, "uri", "", "")
 	store.AddTriple("", "http://ex.org/clean", rdfsLabel, "Clean Entity", "literal", "", "")
 
+	// Set schema version to current to avoid migration warnings.
+	setSchemaVersion(store, CurrentSchemaVersion)
+
 	vr := callValidateHealth(t, store, map[string]any{})
 
 	if !vr.Valid {

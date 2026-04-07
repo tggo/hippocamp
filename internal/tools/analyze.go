@@ -48,6 +48,8 @@ var metaPredicates = map[string]bool{
 	hippoNS + "confidence": true,
 	hippoNS + "provenance": true,
 	hippoNS + "source":     true,
+	hippoNS + "validFrom": true,
+	hippoNS + "validTo":   true,
 }
 
 // ── tool definition ─────────────────────────────────────────

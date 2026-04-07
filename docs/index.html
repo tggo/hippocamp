@@ -531,6 +531,81 @@
       .benchmark-grid { grid-template-columns: 1fr; }
     }
 
+    /* -- MEMORY BENCHMARK SECTION -- */
+    .mem-bench { padding: 40px 0 60px; }
+    .mem-bench-title {
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--ink);
+    }
+    .mem-bench-subtitle {
+      color: var(--ink-faint);
+      font-size: 0.9rem;
+      margin-bottom: 28px;
+      line-height: 1.6;
+    }
+    .mem-bench-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+    .mem-card {
+      background: var(--bg-card);
+      border: 1px solid var(--rule);
+      border-radius: 8px;
+      padding: 24px;
+    }
+    .mem-card-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--ink-faint);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+    .mem-card-score {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--gold);
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+    .mem-card-detail {
+      font-size: 0.8rem;
+      color: var(--ink-light);
+      line-height: 1.6;
+    }
+    .mem-card-detail span {
+      display: block;
+    }
+    .mem-card-detail .perfect {
+      color: var(--gold);
+      font-weight: 600;
+    }
+    .mem-note {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: rgba(255,179,64,0.06);
+      border: 1px solid rgba(255,179,64,0.15);
+      border-radius: 8px;
+      padding: 16px 20px;
+      font-size: 0.85rem;
+      color: var(--ink-light);
+      line-height: 1.6;
+    }
+    .mem-note-icon {
+      color: var(--gold);
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    @media (max-width: 768px) {
+      .mem-bench-cards { grid-template-columns: 1fr; }
+    }
+
     /* -- TOOLS -- */
     #tools { background: var(--bg); }
     .tools-grid {
@@ -1082,6 +1157,58 @@
           <div class="benchmark-old" data-i18n="benchmark.context_old">Large text blocks</div>
           <div class="benchmark-new" data-i18n="benchmark.context_new">Compact JSON</div>
         </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MEMORY BENCHMARKS -->
+<section class="mem-bench">
+  <div class="container">
+    <h3 class="mem-bench-title reveal" data-i18n="membench.title">Memory retrieval benchmarks</h3>
+    <p class="mem-bench-subtitle reveal" data-i18n="membench.subtitle">
+      Adapted from LongMemEval (ICLR 2025), ConvoMem (Salesforce), and LoCoMo (Snap Research). Measures R@5 &mdash; whether the correct resource appears in the top 5 search results. Keyword search only, no embeddings.
+    </p>
+
+    <div class="mem-bench-cards">
+      <div class="mem-card reveal">
+        <div class="mem-card-name">MemEval</div>
+        <div class="mem-card-score">90.5%</div>
+        <div class="mem-card-detail">
+          <span class="perfect">Extraction: 100%</span>
+          <span class="perfect">Reasoning: 100%</span>
+          <span>Abstention: 33%</span>
+          <span>21 queries across 3 categories</span>
+        </div>
+      </div>
+
+      <div class="mem-card reveal reveal-delay-1">
+        <div class="mem-card-name">ConvoMem</div>
+        <div class="mem-card-score">94.1%</div>
+        <div class="mem-card-detail">
+          <span class="perfect">User facts: 100%</span>
+          <span class="perfect">Temporal: 100%</span>
+          <span class="perfect">Implicit: 100%</span>
+          <span>17 queries across 5 categories</span>
+        </div>
+      </div>
+
+      <div class="mem-card reveal reveal-delay-2">
+        <div class="mem-card-name">LoCoMo</div>
+        <div class="mem-card-score">100%</div>
+        <div class="mem-card-detail">
+          <span class="perfect">Single-hop: 100%</span>
+          <span class="perfect">Multi-hop: 100%</span>
+          <span class="perfect">Temporal: 100%</span>
+          <span class="perfect">Adversarial: 100%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="mem-note reveal">
+      <div class="mem-note-icon">*</div>
+      <div data-i18n="membench.note">
+        These benchmarks test hippocamp's retrieval layer directly using adapted question sets, not the full ingestion-to-answer pipeline tested by the original benchmarks. Results are not directly comparable to MemPalace, Mem0, or Supermemory scores, but demonstrate strong keyword-based retrieval without embeddings. Known weakness: abstention (keyword search cannot distinguish "no relevant result" from partial keyword matches).
       </div>
     </div>
   </div>

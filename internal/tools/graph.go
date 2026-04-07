@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sort"
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/ruslanmv/hippocamp/internal/rdfstore"
@@ -13,21 +14,23 @@ func graphTool() mcp.Tool {
 	return mcp.NewTool("graph",
 		mcp.WithDescription(`Manage RDF named graphs, persistence, and namespace prefixes.
 
-Graph actions: create, delete, list, stats, clear, load, dump
+Graph actions: create, delete, list, stats, clear, load, dump, summary, migrate
 Prefix actions: prefix_add, prefix_list, prefix_remove
 
 Examples:
   {"action":"list"}
   {"action":"create","name":"http://example.org/myGraph"}
   {"action":"stats","name":"http://example.org/myGraph"}
+  {"action":"summary"}  — compact overview: type counts, top entities, recent decisions, topics (~500 tokens)
+  {"action":"migrate"}  — apply pending schema migrations (add provenance defaults, etc.)
   {"action":"dump","file":"./backup.trig"}
   {"action":"load","file":"./backup.trig"}
   {"action":"import","data":"@prefix ex: ... ex:Alice ex:knows ex:Bob ."}
   {"action":"prefix_add","prefix":"ex","uri":"http://example.org/"}`),
 		mcp.WithString("action",
 			mcp.Required(),
-			mcp.Description("Operation: create|delete|list|stats|clear|load|dump|import|prefix_add|prefix_list|prefix_remove"),
-			mcp.Enum("create", "delete", "list", "stats", "clear", "load", "dump", "import",
+			mcp.Description("Operation: create|delete|list|stats|clear|load|dump|import|summary|migrate|prefix_add|prefix_list|prefix_remove"),
+			mcp.Enum("create", "delete", "list", "stats", "clear", "load", "dump", "import", "summary", "migrate",
 				"prefix_add", "prefix_list", "prefix_remove"),
 		),
 		mcp.WithString("name",
@@ -76,6 +79,10 @@ func graphHandlerFactory(store *rdfstore.Store) handlerFunc {
 			return handleGraphLoad(store, req)
 		case "import":
 			return handleGraphImport(store, req)
+		case "summary":
+			return handleGraphSummary(store)
+		case "migrate":
+			return handleGraphMigrate(store)
 		case "prefix_add":
 			return handlePrefixAdd(store, req)
 		case "prefix_list":
@@ -194,4 +201,131 @@ func handleGraphImport(store *rdfstore.Store, req mcp.CallToolRequest) (*mcp.Cal
 		return mcp.NewToolResultText(fmt.Sprintf("imported %d triples into %s", count, targetGraph)), nil
 	}
 	return mcp.NewToolResultText(fmt.Sprintf("imported %d triples", count)), nil
+}
+
+// handleGraphSummary returns a compact overview of the entire knowledge graph
+// for LLM "wake-up" context: type counts, top entities by degree, recent decisions, topics.
+func handleGraphSummary(store *rdfstore.Store) (*mcp.CallToolResult, error) {
+	graphNames := store.ListGraphs()
+
+	// Collect all triples across all graphs.
+	typeCounts := map[string]int{}   // hippo type local name → count
+	labels := map[string]string{}    // subject → label
+	degree := map[string]int{}       // subject → in+out degree (relationship triples only)
+	topics := map[string]string{}    // topic URI → label
+	decisions := []map[string]string{} // recent decisions
+	totalTriples := 0
+	invalidated := 0
+
+	for _, gn := range graphNames {
+		triples, err := store.ListTriples(gn, "", "", "")
+		if err != nil {
+			continue
+		}
+		totalTriples += len(triples)
+
+		for _, t := range triples {
+			switch t.Predicate {
+			case rdfType:
+				localName := t.Object
+				if idx := len(hippoNS); len(t.Object) > idx && t.Object[:idx] == hippoNS {
+					localName = t.Object[idx:]
+				}
+				typeCounts[localName]++
+			case rdfsLabel:
+				labels[t.Subject] = t.Object
+			case hippoValidTo:
+				invalidated++
+			}
+
+			// Count degree for relationship predicates only.
+			if !isMetaPredicate(t.Predicate) {
+				degree[t.Subject]++
+				if t.ObjType == "uri" {
+					degree[t.Object]++
+				}
+			}
+		}
+	}
+
+	// Collect topic labels.
+	for _, gn := range graphNames {
+		triples, _ := store.ListTriples(gn, "", rdfType, hippoNS+"Topic")
+		for _, t := range triples {
+			if lbl, ok := labels[t.Subject]; ok {
+				topics[t.Subject] = lbl
+			} else {
+				topics[t.Subject] = t.Subject
+			}
+		}
+	}
+
+	// Collect decisions (up to 5 most recent).
+	for _, gn := range graphNames {
+		triples, _ := store.ListTriples(gn, "", rdfType, hippoNS+"Decision")
+		for _, t := range triples {
+			d := map[string]string{"uri": t.Subject}
+			if lbl, ok := labels[t.Subject]; ok {
+				d["label"] = lbl
+			}
+			decisions = append(decisions, d)
+		}
+	}
+	if len(decisions) > 5 {
+		decisions = decisions[len(decisions)-5:]
+	}
+
+	// Top entities by degree (up to 10).
+	type entityDegree struct {
+		URI    string `json:"uri"`
+		Label  string `json:"label,omitempty"`
+		Degree int    `json:"degree"`
+	}
+	var topEntities []entityDegree
+	for uri, deg := range degree {
+		topEntities = append(topEntities, entityDegree{URI: uri, Label: labels[uri], Degree: deg})
+	}
+	sort.Slice(topEntities, func(i, j int) bool {
+		return topEntities[i].Degree > topEntities[j].Degree
+	})
+	if len(topEntities) > 10 {
+		topEntities = topEntities[:10]
+	}
+
+	// Topic list.
+	var topicList []string
+	for _, lbl := range topics {
+		topicList = append(topicList, lbl)
+	}
+	sort.Strings(topicList)
+
+	summary := map[string]any{
+		"graphs":        len(graphNames),
+		"total_triples": totalTriples,
+		"invalidated":   invalidated,
+		"type_counts":   typeCounts,
+		"topics":        topicList,
+		"top_entities":  topEntities,
+		"decisions":     decisions,
+	}
+
+	data, _ := json.Marshal(summary)
+	return mcp.NewToolResultText(string(data)), nil
+}
+
+// isMetaPredicate checks if a predicate is a metadata/annotation predicate
+// (not a relationship between resources).
+func isMetaPredicate(pred string) bool {
+	switch pred {
+	case rdfType, rdfsLabel,
+		hippoNS + "summary", hippoNS + "content", hippoNS + "alias",
+		hippoNS + "status", hippoNS + "createdAt", hippoNS + "updatedAt",
+		hippoNS + "url", hippoNS + "filePath", hippoNS + "signature",
+		hippoNS + "lineNumber", hippoNS + "rationale", hippoNS + "version",
+		hippoNS + "language", hippoNS + "rootPath", hippoNS + "confidence",
+		hippoNS + "provenance", hippoNS + "source", hippoNS + "revision",
+		hippoNS + "validFrom", hippoNS + "validTo":
+		return true
+	}
+	return false
 }

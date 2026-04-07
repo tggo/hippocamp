@@ -166,6 +166,14 @@ func validateHandlerFactory(store *rdfstore.Store) handlerFunc {
 
 		out.Valid = len(out.Errors) == 0
 
+		// Check schema version — warn if migration is available.
+		if pending := PendingMigrations(store); len(pending) > 0 {
+			out.Warnings = append(out.Warnings,
+				fmt.Sprintf("schema update available — run graph action=migrate to apply %d pending migration(s): %s",
+					len(pending), strings.Join(pending, "; ")))
+			out.Fixes = append(out.Fixes, `graph action=migrate`)
+		}
+
 		// Append background health check results if available.
 		if globalChecker != nil {
 			if report := globalChecker.Report(); report != nil {

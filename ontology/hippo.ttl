@@ -283,3 +283,15 @@ hippo:revision a rdf:Property ;
     rdfs:label "revision" ;
     rdfs:comment "Revision counter for a resource. Tracks how many times it has been updated. Distinct from hippo:version (dependency version string)." ;
     rdfs:range xsd:integer .
+
+# ── Temporal validity ──────────────────────────────────────
+
+hippo:validFrom a rdf:Property ;
+    rdfs:label "validFrom" ;
+    rdfs:comment "ISO 8601 timestamp from which this fact is valid. Use to mark when a statement became true." ;
+    rdfs:range xsd:dateTime .
+
+hippo:validTo a rdf:Property ;
+    rdfs:label "validTo" ;
+    rdfs:comment "ISO 8601 timestamp until which this fact was valid. A non-empty validTo means the fact is no longer current. Use triple action=invalidate to close a fact." ;
+    rdfs:range xsd:dateTime .

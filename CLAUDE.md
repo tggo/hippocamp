@@ -87,6 +87,26 @@ Three properties for tracking triple quality and origin:
 - **`hippo:source`**: URI pointing to the agent/tool/process that produced the resource (inverse of `hippo:sourceOf`)
 - **`hippo:revision`**: integer revision counter tracking how many times a resource has been updated (distinct from `hippo:version` which is a dependency version string)
 
+### Temporal validity
+Two properties for marking facts as time-bounded:
+- **`hippo:validFrom`**: ISO 8601 timestamp from which a fact is valid
+- **`hippo:validTo`**: ISO 8601 timestamp until which a fact was valid (non-empty = no longer current)
+- The `triple invalidate` action sets `hippo:validTo=now` and `hippo:status=invalidated` on a subject. The original triples are preserved for historical queries — nothing is deleted.
+- Use case: "Alice works at OldCo" → invalidate when she leaves → fact stays in graph but is marked as expired
+
+### Duplicate detection in triple add
+When `triple add` is called, the handler checks if an identical S/P/O triple already exists in the target graph. If so, it returns `"duplicate: triple already exists"` instead of silently adding a second copy. Different objects on the same S/P are allowed (multi-valued properties).
+
+### Graph summary action
+`graph summary` returns a compact JSON overview of the entire knowledge graph (~500 tokens), designed for LLM "wake-up" context:
+- `graphs`: number of named graphs
+- `total_triples`: total triple count across all graphs
+- `invalidated`: count of resources with `hippo:validTo` (no longer current)
+- `type_counts`: map of hippo type local names → counts (e.g. `{"Topic":5,"Entity":12}`)
+- `topics`: sorted list of topic labels
+- `top_entities`: top 10 resources by relationship degree (label + degree)
+- `decisions`: up to 5 most recent decisions (URI + label)
+
 ### Search tool implementation
 `search` in `search.go` does text matching in Go (not SPARQL FILTER/REGEX) for reliability:
 - **Field boosting**: `rdfs:label` matches score 4x, `hippo:summary` and `hippo:alias` 3x, `hippo:content` 1x

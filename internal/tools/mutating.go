@@ -12,7 +12,7 @@ func IsMutatingCall(toolName string, args map[string]any) bool {
 		return len(q) > 0 && isUpdate(q)
 	case "graph":
 		a, _ := args["action"].(string)
-		return a == "create" || a == "delete" || a == "clear" || a == "load" || a == "import"
+		return a == "create" || a == "delete" || a == "clear" || a == "load" || a == "import" || a == "migrate"
 	}
 	return false
 }
