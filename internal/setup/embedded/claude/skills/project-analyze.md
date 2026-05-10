@@ -59,13 +59,16 @@ Use the `hippo:` namespace (`https://hippocamp.dev/ontology#`). Core types:
 graph action=prefix_add prefix=hippo uri=https://hippocamp.dev/ontology#
 graph action=prefix_add prefix=rdfs uri=http://www.w3.org/2000/01/rdf-schema#
 graph action=prefix_add prefix=rdf uri=http://www.w3.org/1999/02/22-rdf-syntax-ns#
-graph action=prefix_add prefix=proj uri=https://hippocamp.dev/project/
 ```
 
 Derive the project name from the directory name. Create a named graph:
 ```
 graph action=create name=project:{name}
 ```
+
+**Do NOT register a `proj:` prefix mapping `https://hippocamp.dev/project/`.** Slashes are not valid in the local part of a TriG/Turtle prefixed name, so `proj:topic/foo` will fail to parse with `expected ':' in prefixed name`. Always write the full URI: `<https://hippocamp.dev/project/{name}/topic/foo>`. The only safe shortcuts are predicates whose local part has no slash (e.g. `hippo:summary`, `rdfs:label`).
+
+Note: `graph action=import` ignores the named-graph parameter and writes to the default graph. To target a named graph, use `triple action=add graph=project:{name}` or `sparql query="INSERT DATA { ... }" graph=project:{name}`.
 
 ### Step 1.5: Check existing graph state and apply migrations
 
@@ -88,15 +91,29 @@ Check if `.claude/.hippocamp-stale` exists. If it does:
 
 If `.claude/.hippocamp-stale` does NOT exist, proceed with full analysis below.
 
-### Step 3: Scan the project
+### Step 3: Scan the project — DEEP, not shallow
 
-Read the directory structure and key files (README, any `.md`, `.txt`, `.csv`, `.json`, `.yaml` files). Identify:
-- What is this project about?
-- What are the major topic areas? (folders, document sections)
-- Who are the key people, organizations, entities?
-- What decisions have been made?
-- What questions are open?
-- What reference materials exist?
+A folder name (`contacts/`, `контакти/`, `suppliers/`, `materials/`, `матеріали/`, `decisions/`, `meetings/`) is **a hint about content, not the content itself**. You MUST open the files inside before claiming the project is indexed. Reading only the root README and listing immediate subfolders is the most common reason a graph comes out impoverished.
+
+**Procedure:**
+
+1. **List recursively** to depth 3–4: `find . -maxdepth 4 -type f \( -name "*.md" -o -name "*.txt" -o -name "*.csv" -o -name "*.json" -o -name "*.yaml" -o -name "*.html" \) | head -200`. Note total count.
+2. **Identify content-bearing subfolders.** Any subfolder with ≥1 `.md`/`.txt` is a candidate. Almost always rich in extractable entities: `contacts/`, `контакти/`, `suppliers/`, `постачальники/`, `materials/`, `матеріали/`, `vendors/`, `people/`, `decisions/`, `etapy/`, `етапи/`, `meetings/`, `quotes/`, `bom/`, `quotes/`.
+3. **Read every leaf file** in those subfolders (not just folder-level README). For projects with >50 files, prioritize: per-folder README → files referenced from README → remaining files in batches.
+4. **Extract structured signals from each file body** — see Step 6 patterns table.
+5. **Re-read the top-level README/index at the end** so cross-links to extracted entities aren't missed.
+
+A skip is only acceptable for: binary/image folders (`фото/`, `attachment/`, `*.png|jpg|stl|f3d|pdf`), archive folders (`archive/`), generated content (`node_modules/`, `dist/`, `target/`), and per-day journals (index by month, not per file).
+
+**Sanity check before moving on:** count extracted entities. If a project has rich subfolders (e.g. `contacts/` with 7 files) but you ended up with <5 entities, you scanned too shallow — go back. A typical content-bearing folder yields ≥1 entity per file.
+
+Capture per project:
+- What is this project about? (root README, Home.md, top file)
+- Major topic areas? (folders + document sections inside files)
+- Key people/organizations/products/places? (extract from contact files, vendor lists, comparison tables)
+- Decisions with rationale? (look for `Decision:`, `Вибрано:`, `Рішення:`, ✅, winner rows in comparison tables)
+- Open questions? (`TODO`, `Питання:`, `?`, `Потрібно з'ясувати`)
+- Reference materials? (URLs, PDFs, external standards, datasheets)
 
 ### Step 4: Create the project entity
 
@@ -116,6 +133,22 @@ triple action=add graph=project:{name} subject=https://hippocamp.dev/project/{na
 ```
 
 ### Step 6: Extract entities
+
+#### Extraction patterns (apply per file body)
+
+| Signal in file body | Extract as |
+|---|---|
+| `Телефон:` / `Phone:` / `Tel:` / `+380...` | `hippo:Entity` (contact); include phone in `hippo:summary` |
+| `Сайт:` / `Site:` / `Web:` / bare URL | `hippo:url` on the entity |
+| `#contractor`, `#supplier`, `#vendor`, `#постачальник`, `#підрядник` | `hippo:hasTag` to corresponding tag resource |
+| `tags: [...]` in YAML frontmatter | One `hippo:hasTag` per tag |
+| H1 of a contact/supplier file | The entity name (use original-language label, ASCII slug) |
+| Address / `Адреса:` / `вул.` / street | Include in `hippo:summary` |
+| Comparison table (companies × criteria, "Порівняння", "vs") | One `hippo:Entity` per row + one `hippo:Decision` if a winner is marked (✅, **bold**, "Вибрано", "Decided") with `hippo:references` to all candidates |
+| Price / `Ціна:` / `грн` / `UAH` / `USD` in a quote context | Include the figure in `hippo:summary` of the quoting entity |
+| `Рішення:` / `Decision:` / "Вибрано X тому що Y" | `hippo:Decision` with `hippo:rationale=Y` and `hippo:references` to entities involved |
+| Bullet starting with `?`, `TODO`, `Питання:` | `hippo:Question` with `hippo:status="open"` |
+| Inline `[[wiki-link]]` to another note in the project | `hippo:references` from this resource to the linked resource |
 
 For each person, organization, product, place, account, or identifiable thing:
 ```
