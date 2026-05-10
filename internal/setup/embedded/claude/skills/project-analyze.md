@@ -98,7 +98,7 @@ A folder name (`contacts/`, `контакти/`, `suppliers/`, `materials/`, `м
 **Procedure:**
 
 1. **List recursively** to depth 3–4: `find . -maxdepth 4 -type f \( -name "*.md" -o -name "*.txt" -o -name "*.csv" -o -name "*.json" -o -name "*.yaml" -o -name "*.html" \) | head -200`. Note total count.
-2. **Identify content-bearing subfolders.** Any subfolder with ≥1 `.md`/`.txt` is a candidate. Almost always rich in extractable entities: `contacts/`, `контакти/`, `suppliers/`, `постачальники/`, `materials/`, `матеріали/`, `vendors/`, `people/`, `decisions/`, `etapy/`, `етапи/`, `meetings/`, `quotes/`, `bom/`, `quotes/`.
+2. **Identify content-bearing subfolders.** Any subfolder with ≥1 `.md`/`.txt` is a candidate. Almost always rich in extractable entities: `contacts/`, `контакти/`, `suppliers/`, `постачальники/`, `materials/`, `матеріали/`, `vendors/`, `people/`, `decisions/`, `etapy/`, `етапи/`, `meetings/`, `quotes/`, `bom/`.
 3. **Read every leaf file** in those subfolders (not just folder-level README). For projects with >50 files, prioritize: per-folder README → files referenced from README → remaining files in batches.
 4. **Extract structured signals from each file body** — see Step 6 patterns table.
 5. **Re-read the top-level README/index at the end** so cross-links to extracted entities aren't missed.
